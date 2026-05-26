@@ -1,16 +1,11 @@
-[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3 uid="uid://b63mdo4bqnq7b"]
 
-[ext_resource type="Script" uid="uid://c3v0p5q2x8f7m" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="Script" uid="uid://d1nwwgcrner8b" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class_display_descriptor.gd" id="1_866pu"]
+[ext_resource type="Script" uid="uid://cxsqwtsqd8w33" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
 
 [resource]
 script = ExtResource("1_point")
+apply_scale_on_map_build = false
 classname = "info_enemy_spawn"
 description = "Enemy spawn point. Use the 'enemy_type' property to choose what spawns here."
-spawn_type = 2
-origin_type = 0
 node_class = "Marker3D"
-apply_rotation_on_map_build = true
-apply_scale_on_map_build = false
-properties = {
-"enemy_type": "skeleton"
-}

@@ -1,0 +1,4 @@
+WARNING: res://trenchbroom/entities/info_player_start.tres:3 - ext_resource, invalid UID: uid://c3v0p5q2x8f7m - using text path instead: res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://trenchbroom/entities/info_enemy_spawn.tres:3 - ext_resource, invalid UID: uid://c3v0p5q2x8f7m - using text path instead: res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd
+   at: load (scene/resources/resource_format_text.cpp:500)

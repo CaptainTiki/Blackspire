@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://iq3c2ri4omc2"]
+
+[ext_resource type="Script" uid="uid://d3dmvhm8yx8gs" path="res://world/base_level.gd" id="1_base"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.05, 0.05, 0.07, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.15, 0.15, 0.18, 1)
+tonemap_mode = 2
+ssao_enabled = true
+ssil_enabled = true
+glow_enabled = true
+
+[node name="BaseLevel" type="Node3D" unique_id=1437395639]
+script = ExtResource("1_base")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=953951274]
+environment = SubResource("Environment_1")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="." unique_id=1565377698]
+transform = Transform3D(0.88690066, -0.3159792, 0.33699307, 0.113285795, 0.8559752, 0.5044529, -0.44785437, -0.40922308, 0.794961, 0, 0, 0)
+light_color = Color(0.98, 0.95, 0.88, 1)
+light_energy = 0.8
+shadow_bias = 0.05
+
+[node name="RimLight" type="DirectionalLight3D" parent="." unique_id=898186964]
+transform = Transform3D(0.8517226, 0.17776823, -0.49291706, -0.113285914, -0.85597533, -0.5044528, -0.5116004, 0.48549426, -0.70891476, 0, 0, 0)
+light_color = Color(0.98, 0.95, 0.88, 1)
+light_energy = 0.42
+shadow_bias = 0.05

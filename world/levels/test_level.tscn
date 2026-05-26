@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cais4mlwkm3x3"]
+
+[ext_resource type="PackedScene" uid="uid://iq3c2ri4omc2" path="res://world/base_level.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://clr8qsn3uaru5" path="res://world/rooms/test/test_room_01.tscn" id="2_test_room"]
+
+[node name="TestLevel" unique_id=1280833031 instance=ExtResource("1_base")]
+level_name = "Test Level"
+
+[node name="DirectionalLight3D" parent="." index="1"]
+transform = Transform3D(0.8703031, -0.3751585, 0.31910598, 0.16076691, 0.82881165, 0.5359342, -0.46553898, -0.41512343, 0.78163034, 0, 1.6453671, 0)
+light_energy = 0.8
+shadow_enabled = false
+
+[node name="TestRoom01" parent="." index="2" unique_id=480146083 instance=ExtResource("2_test_room")]
+unique_name_in_owner = true
