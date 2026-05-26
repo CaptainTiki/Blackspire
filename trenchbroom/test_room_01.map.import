@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://bvhokmm66nl3n"
+path="res://.godot/imported/test_room_01.map-72b108a3ad7bab975f30b00377c11600.tres"
+
+[deps]
+
+source_file="res://trenchbroom/test_room_01.map"
+dest_files=["res://.godot/imported/test_room_01.map-72b108a3ad7bab975f30b00377c11600.tres"]
+
+[params]
+

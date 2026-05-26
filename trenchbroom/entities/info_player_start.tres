@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://c3v0p5q2x8f7m" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+
+[resource]
+script = ExtResource("1_point")
+classname = "info_player_start"
+description = "Main player spawn location. One per room or area is typical."
+spawn_type = 2
+origin_type = 0
+node_class = "Marker3D"
+apply_rotation_on_map_build = true
+apply_scale_on_map_build = false

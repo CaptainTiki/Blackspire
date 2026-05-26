@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://test_room_01"]
+
+[ext_resource type="Script" uid="uid://cwu5cf7a0awcd" path="res://addons/func_godot/src/map/func_godot_map.gd" id="1_map"]
+[ext_resource type="Resource" path="res://trenchbroom/blackspire_map_settings.tres" id="2_settings"]
+
+[node name="TestRoom01" type="Node3D"]
+
+[node name="FuncGodotMap" type="Node3D" parent="."]
+script = ExtResource("1_map")
+map_file = ""
+map_settings = ExtResource("2_settings")
+build_flags = 0
+
+# Instructions:
+# 1. Create a simple room in TrenchBroom (Blackspire game).
+# 2. Export it as .map next to this scene or in a maps/ subfolder.
+# 3. Set the "map_file" property above to the relative path of your .map (e.g. "maps/test_room_01.map").
+# 4. In the editor, select this FuncGodotMap node and press "Build" in the inspector.
+#
+# For the absolute first test you can leave map_file empty and just use the default
+# or point it at a very simple box map.
