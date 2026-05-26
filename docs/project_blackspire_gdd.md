@@ -1,5 +1,9 @@
 # Project Blackspire — Game Design Document
 
+## North Star
+
+**Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.** It recreates the feeling of early MMO raiding before every answer was known: your team enters an unfamiliar dungeon, figures out its routes and puzzles under pressure, gathers as much loot as you dare, and must survive the return trip to keep it.
+
 ## 1. High-Level Pitch
 
 **Project Blackspire** is a first-person cooperative dungeon-crawling roguelite where players descend into dangerous, modular fantasy dungeons, battle monsters, collect loot, equip gear, and push deeper toward the mysteries of the Blackspire.

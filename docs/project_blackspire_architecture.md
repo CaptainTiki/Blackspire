@@ -1,5 +1,11 @@
 # Project Blackspire — Architecture Document
 
+## Guiding Vision
+
+**Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.** It recreates the feeling of early MMO raiding before every answer was known: your team enters an unfamiliar dungeon, figures out its routes and puzzles under pressure, gathers as much loot as you dare, and must survive the return trip to keep it.
+
+All architectural decisions should ultimately serve this experience.
+
 ## 1. Architecture Purpose
 
 This document defines the technical and structural direction for Project Blackspire.

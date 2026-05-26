@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3 uid="uid://dnfxi4x1y5r8n"]
+
+[ext_resource type="Script" uid="uid://d1nwwgcrner8b" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class_display_descriptor.gd" id="1_83vi3"]
+[ext_resource type="Script" uid="uid://cxsqwtsqd8w33" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="PackedScene" path="res://world/props/breakable_urn.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_point")
+scene_file = ExtResource("2_scene")
+apply_scale_on_map_build = false
+classname = "prop_urn"
+description = "Breakable urn. Place in the level for players to interact with and destroy."

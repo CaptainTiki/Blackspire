@@ -15,7 +15,7 @@ class_name PlayerController
 @export var eye_height: float = 1.30
 
 # --- Camera ---
-@onready var camera: Camera3D = $Camera3D
+@onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 # --- Internal ---

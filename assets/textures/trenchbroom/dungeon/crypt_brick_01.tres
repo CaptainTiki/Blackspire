@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://catbtpgdbcvoe"]
+
+[ext_resource type="Texture2D" uid="uid://b1tu4mcf2d3oo" path="res://assets/textures/trenchbroom/dungeon/crypt_brick_01.png" id="1_jme1l"]
+
+[resource]
+albedo_texture = ExtResource("1_jme1l")
+metallic_specular = 0.0
+texture_filter = 2

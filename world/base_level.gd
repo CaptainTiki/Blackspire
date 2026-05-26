@@ -15,7 +15,17 @@ func _ready() -> void:
 	call_deferred("_emit_level_ready")
 
 func _emit_level_ready() -> void:
+	_ensure_junk_container()
 	level_ready.emit()
+
+
+## Ensures a "Junk" container node exists in the level for temporary debris and effects.
+func _ensure_junk_container() -> void:
+	if not has_node("Junk"):
+		var junk := Node3D.new()
+		junk.name = "Junk"
+		add_child(junk)
+
 
 ## Helper to find player spawn points.
 ## Looks for Marker3D nodes that came from TrenchBroom `info_player_start`.
