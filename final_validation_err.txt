@@ -1,2 +1,0 @@
-WARNING: Node './DirectionalLight3D' was modified from inside an instance, but it has vanished.
-   at: instantiate (scene/resources/packed_scene.cpp:310)

@@ -1,3 +1,0 @@
-ERROR: This project doesn't have an `export_presets.cfg` file at its root.
-Create an export preset from the "Project > Export" dialog and try again.
-   at: _fs_changed (editor/editor_node.cpp:1348)

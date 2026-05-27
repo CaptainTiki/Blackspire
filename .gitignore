@@ -11,3 +11,5 @@ addons/godot_state_charts/
 trenchbroom/autosave/
 
 .build/
+
+.tests/
