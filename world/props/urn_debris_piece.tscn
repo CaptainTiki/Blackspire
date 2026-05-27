@@ -1,4 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dw6bqksljns3p"]
+
+[ext_resource type="Script" uid="uid://0xuok3wl58gq" path="res://world/entities/urn/urn_debris_piece.gd" id="1_ryj6d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1"]
 size = Vector3(0.25, 0.25, 0.25)
@@ -6,10 +8,50 @@ size = Vector3(0.25, 0.25, 0.25)
 [sub_resource type="BoxMesh" id="BoxMesh_1"]
 size = Vector3(0.25, 0.25, 0.25)
 
-[node name="UrnDebris" type="RigidBody3D"]
+[sub_resource type="Animation" id="Animation_cv0sf"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[sub_resource type="Animation" id="Animation_ryj6d"]
+resource_name = "shrink"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(0.001, 0.001, 0.001)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1nbv2"]
+_data = {
+&"RESET": SubResource("Animation_cv0sf"),
+&"shrink": SubResource("Animation_ryj6d")
+}
+
+[node name="UrnDebris" type="RigidBody3D" unique_id=986896546]
+script = ExtResource("1_ryj6d")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=587976281]
 shape = SubResource("BoxShape3D_1")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=533521368]
 mesh = SubResource("BoxMesh_1")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=724937553]
+libraries/ = SubResource("AnimationLibrary_1nbv2")

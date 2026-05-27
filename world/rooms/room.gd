@@ -2,18 +2,15 @@ extends Node3D
 class_name Room
 
 ## Base class for all rooms.
-## Handles post-spawn initialization of entities inside the FuncGodotMap.
 
-func _ready() -> void:
-	_initialize_entities()
+## Per-room junk container for temporary debris, particles, etc.
+## Created on demand so we don't force every room to have one in the scene.
+var _junk_container: Node3D = null
 
 
-func _initialize_entities() -> void:
-	var map := $FuncGodotMap
-	if not map:
-		push_warning("Room: No FuncGodotMap child found in %s" % name)
-		return
-
-	for child in map.get_children():
-		if child.has_method("initialize"):
-			child.initialize()
+func get_junk_container() -> Node3D:
+	if not _junk_container:
+		_junk_container = Node3D.new()
+		_junk_container.name = "Junk"
+		add_child(_junk_container)
+	return _junk_container

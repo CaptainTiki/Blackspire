@@ -63,4 +63,3 @@ func spawn_player(player_scene: PackedScene) -> Node3D:
 	print("BaseLevel: Spawned player at ", player.global_position, " using spawn point: ", spawn_point.name)
 	
 	return player
-

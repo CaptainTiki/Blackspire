@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://lis1a2fkqh1g"]
+
+[ext_resource type="Script" uid="uid://bohos1g15f0q" path="res://world/entities/urn/breakable_urn.gd" id="1_entity_script"]
+[ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="2_interactable_script"]
+[ext_resource type="PackedScene" uid="uid://dw6bqksljns3p" path="res://world/props/urn_debris_piece.tscn" id="3_debris"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1"]
+height = 1.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_1"]
+height = 1.2
+
+[node name="BreakableUrn" type="StaticBody3D" unique_id=140254574]
+script = ExtResource("1_entity_script")
+debris_scene = ExtResource("3_debris")
+debris_count = 6
+debris_impulse_strength = 3.5
+debris_lifetime = 15.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1528664205]
+shape = SubResource("CylinderShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=663170058]
+mesh = SubResource("CylinderMesh_1")
+
+[node name="Components" type="Node3D" parent="." unique_id=493762429]
+
+[node name="Interactable" type="Node" parent="Components" unique_id=1112714247]
+script = ExtResource("2_interactable_script")
+prompt = "Smash"
