@@ -5,9 +5,11 @@
 [ext_resource type="Resource" uid="uid://vcrmrw3aatoh" path="res://trenchbroom/entities/info_player_start.tres" id="3_player_start"]
 [ext_resource type="Resource" uid="uid://b63mdo4bqnq7b" path="res://trenchbroom/entities/info_enemy_spawn.tres" id="4_enemy_spawn"]
 [ext_resource type="Resource" uid="uid://dnfxi4x1y5r8n" path="res://trenchbroom/entities/prop_urn.tres" id="5_urn"]
+[ext_resource type="Resource" path="res://trenchbroom/entities/door_swing.tres" id="6_door"]
+[ext_resource type="Resource" path="res://trenchbroom/entities/lever.tres" id="7_lever"]
 
 [resource]
 script = ExtResource("1_fgdfile")
 fgd_name = "Blackspire"
 base_fgd_files = Array[Resource]([ExtResource("2_base_fgd")])
-entity_definitions = Array[Resource]([ExtResource("3_player_start"), ExtResource("4_enemy_spawn"), ExtResource("5_urn")])
+entity_definitions = Array[Resource]([ExtResource("3_player_start"), ExtResource("4_enemy_spawn"), ExtResource("5_urn"), ExtResource("6_door"), ExtResource("7_lever")])

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3]
+
+[ext_resource type="Script" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="PackedScene" path="res://world/entities/lever/lever.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_point")
+scene_file = ExtResource("2_scene")
+apply_scale_on_map_build = false
+classname = "lever"
+description = "A lever that can activate other entities (doors, etc.) by targetname."
+
+# Properties that will appear in TrenchBroom
+entity_properties = [
+	{
+		"name": "targetname",
+		"type": "string",
+		"default": ""
+	},
+	{
+		"name": "targets",
+		"type": "string",
+		"default": ""
+	}
+]
+
+# Note: "targets" should be a space or comma separated list of targetnames in TrenchBroom.
+# Example: "door_hall1 door_hall2"

@@ -4,13 +4,12 @@ class_name Interactable
 ## Thin interaction component.
 ## Add this under an object's "Components" node.
 ##
-## Responsibilities (kept deliberately small per architecture):
+## Responsibilities (kept deliberately small):
 ## - Expose a prompt
-## - Emit signals when focused / interacted
-## - Forward interaction to the owning Entity (preferred) or fall back to legacy _perform_interaction
+## - Emit focus signals
+## - Forward interaction to the owning Entity
 ##
-## Specific behavior (breakable, openable, etc.) should live in an Entity subclass
-## on the root of the placed scene, not by subclassing Interactable.
+## The actual behavior lives in an Entity subclass on the root of the scene.
 
 signal focus_gained
 signal focus_lost
@@ -18,22 +17,20 @@ signal interacted(actor: Node)
 
 @export var prompt: String = "Interact"
 
-## Called by the InteractionScanner when the player presses the interact button.
+
+## Called by the InteractionScanner.
 func interact(actor: Node) -> void:
 	interacted.emit(actor)
 
-	# Preferred path: forward to parent Entity if one exists
-	var parent_entity := _find_parent_entity()
-	if parent_entity:
-		parent_entity._on_interact(self, actor)
-		return
-
-	# Legacy fallback (will be removed as we migrate)
-	_perform_interaction(actor)
+	var entity := _find_parent_entity()
+	if entity:
+		entity._on_interact(self, actor)
+	else:
+		push_error("Interactable %s could not find a parent Entity to forward interaction to." % get_path())
 
 
-## Tries to find an Entity ancestor. This lets the thin Interactable component
-## delegate real work to the root entity script.
+## Walks up the tree to find the owning Entity.
+## This keeps the Interactable component decoupled from exact scene structure.
 func _find_parent_entity() -> Entity:
 	var current := get_parent()
 	while current:
@@ -41,16 +38,3 @@ func _find_parent_entity() -> Entity:
 			return current as Entity
 		current = current.get_parent()
 	return null
-
-
-## Legacy hook for old subclasses. New code should not override this.
-## Will be removed once all interactables are migrated to Entity + thin Interactable.
-func _perform_interaction(_actor: Node) -> void:
-	pass
-
-
-## Initialization is now primarily handled by the owning Entity via Room.initialize().
-## This remains for any component-level setup that doesn't need the full entity context.
-func initialize(room: Room = null) -> void:
-	pass
-

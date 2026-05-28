@@ -60,7 +60,7 @@ func _on_interactable_changed(previous: Interactable, new: Interactable) -> void
 
 func try_interact() -> void:
 	if current_interactable and is_instance_valid(current_interactable):
-		current_interactable.interact(owner)  # Pass the player as the actor
+		current_interactable.interact(player_components.player)  # Pass the player as the actor
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):

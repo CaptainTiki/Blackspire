@@ -21,10 +21,11 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		# Allow escaping the mouse for now during development
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		else:
-			get_tree().quit()
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _load_starting_level() -> void:
 	if not starting_level:

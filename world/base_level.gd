@@ -1,6 +1,8 @@
 extends Node3D
 class_name BaseLevel
 
+const MapEntityRegistryScript := preload("res://world/systems/MapEntityRegistry.gd")
+
 ## Reusable base for all levels / "worlds".
 ## Handles common level concerns (environment, lighting, spawn points, etc.)
 ## Future levels can extend this or use it as a template.
@@ -14,9 +16,25 @@ func _ready() -> void:
 	# Emit after everything in the level has initialized
 	call_deferred("_emit_level_ready")
 
+
 func _emit_level_ready() -> void:
 	_ensure_junk_container()
+	_ensure_map_entity_registry()
 	level_ready.emit()
+
+
+func _ensure_map_entity_registry() -> void:
+	if not has_node("MapEntityRegistry"):
+		var registry := MapEntityRegistryScript.new()
+		registry.name = "MapEntityRegistry"
+		add_child(registry)
+
+
+func get_map_entity_registry() -> MapEntityRegistry:
+	var node := get_node_or_null("MapEntityRegistry")
+	if node:
+		return node as MapEntityRegistry
+	return null
 
 
 ## Ensures a "Junk" container node exists in the level for temporary debris and effects.
@@ -46,12 +64,17 @@ func _find_player_spawns_recursive(node: Node, results: Array[Marker3D]) -> void
 
 
 ## Spawns a player at the first available player spawn point.
-## Returns the spawned player, or null if no spawn point was found.
+## Returns the spawned player.
+## 
+## NOTE: This currently does a recursive search because FuncGodot nests entities.
+## This is acknowledged as a temporary concession. Long-term we should move to
+## explicit registration or groups instead of tree walking.
 func spawn_player(player_scene: PackedScene) -> Node3D:
 	var spawns := get_player_spawns()
 	
 	if spawns.is_empty():
-		push_warning("No player spawn points found in level '%s'. Make sure an info_player_start exists in the TrenchBroom map." % level_name)
+		push_error("No player spawn points found in level '%s'. Make sure an info_player_start exists in the TrenchBroom map." % level_name)
+		# In prototype we still try to continue rather than hard crash the whole level
 		return null
 	
 	var spawn_point := spawns[0]

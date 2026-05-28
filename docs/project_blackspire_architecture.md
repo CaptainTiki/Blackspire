@@ -169,7 +169,21 @@ Not every object is an actor.
 
 A spike trap, door, chest, or pressure plate may be a standalone scene with components instead of inheriting from `Actor`.
 
-## 7. Component Philosophy
+## 7. Entity Initialization & Resource Discovery
+
+When an entity or component needs access to other nodes or resources (a Room, a container, a sibling component, etc.), the following order of preference is preferred:
+
+- **Primary**: Direct references via `@export` (or `@onready` with known scene structure). When the relationship is stable and known at authoring time, we hardcode the connection in the `.tscn` file. Required nodes should be explicit and the scene should fail loudly if they are missing.
+
+- **Secondary**: Pull-based discovery (e.g. `self.owner` or walking up the tree) when the relationship is dynamic or the entity needs to be more self-contained.
+
+In practice this means: use `@export` (or known `@onready` paths) as the default. Reach for `self.owner` only when necessary. Avoid relying on a parent pushing an `initialize()` call unless there is a clear, ongoing need.
+
+The older pattern of a parent (such as `Room`) pushing an `initialize(room)` call down to children is being de-emphasized. Newer entities should prefer to discover what they need on demand rather than relying on a pushed initialization contract.
+
+This approach keeps entities more autonomous and reduces hidden coupling.
+
+## 9. Component Philosophy
 
 Behavior should be composed through focused nodes/components.
 
@@ -210,7 +224,7 @@ if actor.has_node("HealthComponent"):
 
 Use generic checks only when the gameplay truly supports multiple object categories and the dependency is optional.
 
-## 8. Node-First Scene Architecture
+## 10. Node-First Scene Architecture
 
 Godot scenes are the architecture.
 
@@ -268,7 +282,7 @@ Room_CombatSmall.tscn
   DebugRoomLabel
 ```
 
-## 9. Session and Player Slot Architecture
+## 11. Session and Player Slot Architecture
 
 Project Blackspire must support:
 
@@ -314,7 +328,7 @@ Remote players do not need a local input device, local HUD, or local camera on e
 - Bind HUDs to local players.
 - Track active players for enemy targeting and room logic.
 
-## 10. Session Configuration
+## 12. Session Configuration
 
 Main menu play mode selection should create a session configuration before loading the dungeon.
 
@@ -348,7 +362,7 @@ This means:
 
 Initial implementation may prove 1-player and 2-player first, but the architecture should avoid decisions that block 4-player support.
 
-## 11. Split-Screen Architecture
+## 13. Split-Screen Architecture
 
 Because Project Blackspire is first-person with free movement, couch co-op requires split-screen.
 
@@ -372,7 +386,7 @@ Each local player needs:
 - Separate interaction raycast/prompt
 - Separate weapon/action state
 
-## 12. Input Architecture
+## 14. Input Architecture
 
 Input should be separated from actor behavior.
 
@@ -403,7 +417,7 @@ This separation supports:
 
 Avoid burying all raw input checks directly inside `PlayerActor` in a way that makes local and network control hard to separate later.
 
-## 13. Movement Direction
+## 15. Movement Direction
 
 Project Blackspire uses modern free first-person movement, not tile/grid movement.
 
@@ -422,7 +436,7 @@ Movement requirements:
 
 Jumping, crouching, sprinting, and stamina may be added based on combat and room needs, but are not required for the earliest prototype unless the controller feel demands them.
 
-## 14. Player-to-Player Collision
+## 16. Player-to-Player Collision
 
 In co-op, players should not hard-block each other like immovable hallway corks.
 
@@ -442,7 +456,7 @@ Examples:
 
 This can create chaotic co-op moments, but baseline body collision should remain forgiving.
 
-## 15. Camera and Weapon Presentation
+## 17. Camera and Weapon Presentation
 
 The prototype should use a simple first-person weapon object.
 
@@ -461,7 +475,7 @@ Later multiplayer requirement:
 
 The local first-person weapon presentation and remote third-person body presentation may eventually become separate visual layers.
 
-## 16. Combat Architecture
+## 18. Combat Architecture
 
 Combat should be built from explicit actions and damage requests.
 
@@ -503,7 +517,7 @@ A damage result may contain:
 
 This structure keeps combat explicit and eventually network-friendly without needing a global combat manager early.
 
-## 17. Health, Downed, and Death Architecture
+## 19. Health, Downed, and Death Architecture
 
 Health should be component-based.
 
@@ -548,7 +562,7 @@ A future downed system may include:
 
 This should be built after basic health/death works.
 
-## 18. Friendly Fire and Knockback Direction
+## 20. Friendly Fire and Knockback Direction
 
 Baseline damage/friendly-fire rules can be tuned later, but the architecture should support source actor and team/faction checks.
 
@@ -561,7 +575,7 @@ Possible future rules:
 
 The combat system should know who caused damage or knockback so these rules can be implemented without rewriting attacks.
 
-## 19. Equipment and Item Architecture
+## 21. Equipment and Item Architecture
 
 Items should be data-driven where practical.
 
@@ -600,7 +614,7 @@ Trading can be added later if needed.
 
 The prototype should start with direct pickup/equip behavior and avoid a full backpack/grid inventory until the core combat and loot loop is proven.
 
-## 20. Interaction Architecture
+## 22. Interaction Architecture
 
 Each local player needs their own interaction scanner.
 
@@ -612,29 +626,26 @@ Each local player needs their own interaction scanner.
 - Send interact command when player presses interact
 - Emit local focus changed signal for that player's HUD
 
-### Interactable Interface-Style Pattern
+### Thin Interactable Component Pattern
 
-Interactables should expose predictable methods such as:
+Interactables are deliberately thin components.
 
-```gdscript
-func can_interact(actor: Actor) -> bool
-func interact(actor: Actor) -> void
-func get_prompt(actor: Actor) -> String
-```
+The `Interactable` node (usually placed under a `Components` child) is responsible only for:
+- Exposing a prompt
+- Detecting focus
+- Forwarding the interaction call to its owning Entity
 
-Possible interactables:
+The actual behavior lives in an `Entity` subclass on the root of the scene (e.g. `BreakableUrn`, `SwingDoor`, `WoodenDoor`). This keeps the `Interactable` component reusable and the gameplay logic co-located with the object that owns the state.
 
-- Loot pickup
-- Chest
-- Door
-- Revive target
-- Exit portal
-- Shrine, later
-- Shop, later
+The forwarding is usually done by the thin component walking upward to find an `Entity` ancestor and calling `_on_interact(interactable, actor)` on it.
 
-The player controller should not contain custom code for every interactable type.
+This pattern has proven effective for props and doors and is preferred for new interactables.
 
-## 21. Enemy Architecture
+Possible interactables include loot pickups, chests, doors, revive targets, exit portals, etc.
+
+The player controller and `InteractionScanner` should not contain custom code for every interactable type.
+
+## 23. Enemy Architecture
 
 Enemies should be actor-based and component-driven.
 
@@ -669,7 +680,7 @@ Initial enemy behavior should include:
 - Stunned, optional later
 - Dead
 
-## 22. State Chart and State Machine Architecture
+## 24. State Chart and State Machine Architecture
 
 Project Blackspire should use a two-part state architecture:
 
@@ -732,7 +743,7 @@ State charts should own transitions. State machine logic should own behavior.
 
 State logic may request transitions, but the state chart decides whether the transition is valid.
 
-## 23. State Machine Debugging
+## 25. State Machine Debugging
 
 State should be visible during development.
 
@@ -782,7 +793,7 @@ Recommended debug toggles:
 - Damage/combat debug
 - Player slot/input debug
 
-## 24. Room and Dungeon Architecture
+## 26. Room and Dungeon Architecture
 
 Rooms should be authored externally in TrenchBroom and imported through FuncGodot, then wrapped in Godot scenes with gameplay controllers and markers.
 
@@ -831,7 +842,7 @@ Procedural generation is deferred.
 
 However, manual rooms should still use room metadata so future procedural assembly can reuse the same structure.
 
-## 25. Room State Architecture
+## 27. Room State Architecture
 
 Each gameplay room may have its own state chart and state machine.
 
@@ -861,7 +872,7 @@ Example:
 - RoomController tracks remaining enemies.
 - RoomController opens doors when clear.
 
-## 26. Dungeon Run Architecture
+## 28. Dungeon Run Architecture
 
 `DungeonRun` or `DungeonRunManager` owns the current run state.
 
@@ -883,7 +894,7 @@ Prototype run states:
 - RunComplete
 - RunFailed
 
-## 27. Main Menu and Bootstrap Architecture
+## 29. Main Menu and Bootstrap Architecture
 
 The main menu should not directly build gameplay objects.
 
@@ -898,7 +909,7 @@ Preferred flow:
 
 This keeps single-player, couch co-op, and future online modes flowing through the same run architecture.
 
-## 28. UI Architecture
+## 30. UI Architecture
 
 UI should be split into per-player UI and global UI.
 
@@ -931,7 +942,7 @@ Global UI may include:
 
 HUD code should not assume Player 1 is the only meaningful player.
 
-## 29. Data Resource Architecture
+## 31. Data Resource Architecture
 
 Use Godot resources for tunable data.
 
@@ -951,7 +962,7 @@ Example:
 
 A sword's damage, cooldown, model, icon, and stat modifiers belong in data. The weapon swing behavior belongs in weapon/attack components.
 
-## 30. Manager Philosophy
+## 32. Manager Philosophy
 
 Managers are allowed when they own a real domain.
 
@@ -972,7 +983,7 @@ Avoid managers that become vague dumping grounds:
 
 Combat can initially be component-to-component through weapons, hitboxes, hurtboxes, and health components.
 
-## 31. Networking Preparation
+## 33. Networking Preparation
 
 Online multiplayer is not part of the earliest prototype, but the architecture should avoid obvious blockers.
 
@@ -998,7 +1009,7 @@ Future online target:
 - Keep controller/input separate from actor behavior.
 - Keep local first-person visuals separate from remote player body visuals where needed.
 
-## 32. Folder Organization Direction
+## 34. Folder Organization Direction
 
 Folder structure should support clarity without becoming sterile.
 
@@ -1047,7 +1058,7 @@ res://src/data/
 
 Colocation is acceptable when it improves readability. For example, a scene and its script should usually live near each other.
 
-## 33. Early Build Order Supported by Architecture
+## 35. Early Build Order Supported by Architecture
 
 The architecture should support the prototype milestone order.
 
@@ -1105,7 +1116,7 @@ The architecture should support the prototype milestone order.
 - Audit state replication candidates
 - Identify blockers before networking
 
-## 34. Architecture Decision Defaults
+## 36. Architecture Decision Defaults
 
 These are the current project defaults unless later testing proves otherwise.
 
@@ -1128,7 +1139,7 @@ These are the current project defaults unless later testing proves otherwise.
 - State system: state chart plus behavior state machine
 - Debug: visible state labels and overlays from early development
 
-## 35. Final Architecture Summary
+## 37. Final Architecture Summary
 
 Project Blackspire should be built as a focused Godot game, not a generic RPG engine.
 

@@ -50,13 +50,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			camera.rotate_x(-event.relative.y * mouse_sensitivity)
 			camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
 
-	if event.is_action_pressed("ui_cancel"):
-		# Allow escaping the mouse for now during development
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-
 func _physics_process(delta: float) -> void:
 	# Add gravity
 	if not is_on_floor():

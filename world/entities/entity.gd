@@ -9,3 +9,7 @@
 
 extends Node3D
 class_name Entity
+
+
+func on_interacted(_interactable: Interactable, _actor: Node) -> void:
+	pass

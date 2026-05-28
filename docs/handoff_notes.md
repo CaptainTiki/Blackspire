@@ -1,111 +1,95 @@
 # Handoff Notes
 
-**Date:** [Current session]
-
-## Pickup Tomorrow (Starting Point)
-- We finished the Breakable Urn debris system (each piece now manages its own `time_to_live` via Timer + "shrink" animation, then `queue_free()`).
-- The urn + debris are fully decoupled from the old Room `initialize()` pattern and use `self.owner` for resource discovery.
-- The testing process (`.tests/` + headless diagnostics with goal scorecards) is working well.
-- **Next task:** Build a hinged/swing door (`swing_door.gd` base + `wooden_door` concrete implementation). Use the same Entity + thin Interactable pattern. Support open/close via E (90° rotation on an offset hinge). Consider using AnimationPlayer for the rotation.
-
-## Current North Star / Vision
-Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape. It recreates the feeling of early MMO raiding before every answer was known: your team enters an unfamiliar dungeon, figures out its routes and puzzles under pressure, gathers as much loot as you dare, and must survive the return trip to keep it.
-
-## Recent Decisions (Locked or Strongly Leaning)
-
-### Sizing & Modules
-- Base module: **64 units** (2.0m)
-- Subdivision: **16-unit increments**
-- Standard room / hallway height: **64 units**
-- Player capsule height: **1.45**
-- Player camera (eye) height: **1.30**
-- Base texture size: **64×64** (power of 2)
-
-### Room & Entity Initialization
-- `Room` base class (`world/rooms/room.gd`)
-- Some entities (notably the Breakable Urn) now self-discover their owning Room via `self.owner` at the moment they need resources (e.g. junk container), rather than relying on a pushed `initialize()` call from the Room.
-- The previous pattern (Room walking FuncGodotMap children and calling `initialize()`) is being de-emphasized for new entities in favor of lighter, pull-based discovery where possible.
-- `initialize()` still exists on the base `Entity` but is currently a no-op for the urn and is no longer required for core functionality.
-
-### Interaction System (In Progress)
-- Player has a `Components` node containing `PlayerComponents` + `InteractionScanner`.
-- `InteractionScanner` uses a persistent `RayCast3D` (currently 2m).
-- Objects use a `Components` node + `Interactable` component.
-- First interactable target: **Breakable Urn**
-  - Placeable via `prop_urn` entity in TrenchBroom.
-  - On interact: spawns physics debris (RigidBody3D) with random upward impulse.
-  - Debris pieces manage their own lifetime via timer + "shrink" animation, then `queue_free()`.
-  - In multiplayer: debris is client-side only (server tells clients the urn was destroyed).
-
-### Philosophy
-- Assume correct authoring for now ("fail loudly" instead of lots of defensive fallbacks).
-- Keep things naive until real pain forces complexity.
-- Prefer composition via Components nodes.
-- Use lightweight, goal-oriented diagnostics (`.tests/`) + headless runs for verification before full runtime testing.
-
-## Session Wrap-up (End of Day)
-- Completed debris lifetime behavior for the Breakable Urn using AnimationPlayer ("shrink" animation) + self-managed timer on the debris pieces.
-- Fully removed dependence on the old Room `initialize()` pattern for the urn.
-- Validated that the `self.owner` + on-demand resource discovery pattern works cleanly.
-- Established a working lightweight diagnostic testing process (`.tests/` + goal-oriented headless runs).
-- Codebase is in a clean, slim state. Ready to pick up with the door next session.
-
-## What Was Worked On This Session
-
-- Refined Interaction System architecture (raycast always on, component-based on both player and objects).
-- Started `InteractionScanner` + base `Interactable` component.
-- Began work on first concrete interactable (`BreakableUrn`).
-- Major iteration on Breakable Urn + entity initialization model: moved to self.owner discovery for resources, removed dependence on Room-pushed `initialize()`.
-- Established lightweight goal-oriented testing process using `.tests/` directory + headless Godot runs for surgical verification before runtime testing.
-- Locked player height + 64-unit standard for testing.
-- Created initial biome docs for Crypt + first-pass texture plan.
-- Updated `sizing.md` and `texture_guidelines.md` with current standards.
-
-## Open / Next Steps
-
-### High Priority (Next Coding Focus)
-- Finish the Breakable Urn as a working interactable (including debris spawning + lifetime).
-- Wire the `InteractionScanner` fully to the player (input handling, finding interactables, calling `interact()`).
-- (Done) Remove dependence on Room `initialize()` for the urn; switched to self.owner pattern.
-- Make the urn placeable and functional in the test level.
-
-### Art / Content
-- Create first-pass crypt textures (base brick, cracked brick, mossy variant, concrete floor, wooden beams, pillar textures, single + double tomb walls).
-- Author a 64×128 (or similar) wall texture variant to reduce repetition on 64-unit walls.
-- Update the current test room geometry to use the new 64-unit standard height + 48-high doorways.
-- Create proper 3D models for the urn + debris (currently using placeholders).
-
-### Architecture / Systems (Future)
-- Continue evaluating when to use Room-pushed initialization vs self-discovery patterns (e.g. .owner) for entities.
-- Begin thinking about room activation / streaming system (only initialize rooms when they become active).
-- Decide on first few additional interactables (lever? door? chest? coffin?).
-- Start basic enemy work (skeleton melee + ranger) once interaction feels solid.
-
-### Open Questions
-- (Open) What is the long-term role of `initialize()` vs self-discovery patterns (e.g. via .owner) for entities?
-- How strict do we want the "no fallbacks" rule to be as the project grows?
-- When do we want to add a proper interaction prompt / UI?
-
-## Useful Files Right Now
-- `docs/sizing.md`
-- `docs/texture_guidelines.md`
-- `docs/biomes/crypt.md`
-- `docs/biomes/crypt_first_pass_textures.md`
-- `docs/biomes/crypt_starter_kit.md`
-- `world/rooms/room.gd`
-- `world/components/player/interaction_scanner.gd`
-- `world/components/interactable/interactable.gd`
-- `world/entities/urn/breakable_urn.gd` + `breakable_urn.tscn` (current, working)
-- `world/entities/urn/urn_debris_piece.gd` (debris now owns its own lifetime + shrink animation)
-- (Next) Door work will likely live under `world/entities/door/` or similar
+**Last Updated:** 2026-05-28
 
 ---
 
-**Next session goal:** 
-Build a hinged door system:
-- `swing_door.gd` as a reusable base.
-- Concrete `wooden_door` (scene + light script) that uses it.
-- Press E to open (rotate 90° on an offset pivot so it swings clear of the wall).
-- Press E again to close.
-- Consider using AnimationPlayer for the rotation (gives editor control over timing/easing).
-- Follow the same Entity + thin `Interactable` pattern we landed on with the urn.
+## Project Memories (Stable Context)
+
+These are durable truths about how we build Blackspire.  
+**At the start of every new session, re-read this entire section + the linked documents.**
+
+### Authoring Pipeline
+- All maps and placed objects are authored in **TrenchBroom**.
+- Everything enters the game through **FuncGodotMap** nodes using our FGD definitions.
+- There are currently no hybrid scenes or exceptions to this rule.
+- **Trigger:** When working with any placeable object (props, doors, enemies, etc.), check the current FGD entities in `trenchbroom/` and how they map to Godot scenes.
+
+### Architectural Principles
+- Short, focused scripts.
+- **Parents own references. Siblings own behavior.**
+- Prefer direct `@export` references and hardcoded knowledge of scene structure over defensive `if has_node()` checks.
+- **Review the Architecture Document** when starting any significant systems work:  
+  `docs/project_blackspire_architecture.md`
+
+### Philosophy — Fail Loudly
+- We want to know *immediately* when something is broken so we can fix it.
+- Almost no fallbacks, safety nets, or defensive checks in prototype/single-player code.
+- Fallbacks are only acceptable for multiplayer timing concerns.
+- If a required node or component is missing, the game should fail hard (not silently continue).
+- **Trigger:** If you see defensive `has_node()` patterns or broad fallback logic appearing in non-multiplayer code, push back.
+
+### Current Milestone
+- Single player **combat slice** (following the Prototype GDD).
+- Target: Several TrenchBroom rooms, interactables, basic combat, enemies, manually connected under a test level.
+- Review current prototype milestones and scope here:  
+  `docs/project_blackspire_prototype_gdd.md`
+
+### How to Work With Me
+- Always start a session by re-reading:
+  1. This handoff (`docs/handoff_notes.md`)
+  2. The Architecture Document
+  3. The Prototype GDD
+- You are encouraged to be **proactive**. If you have solid context on what we're doing and why, push through multiple steps and report back. You do not need to stop after every small task.
+- I am always available for direction or clarification when needed.
+
+---
+
+## Current Session Context
+
+**Last Worked On:**
+- Full swinging door system completed and verified in runtime.
+  - `SwingDoor` base now uses facing-based side detection + stored `_open_side` for consistent "always push to open" behavior from both sides.
+  - Four animations (`open_a/b`, `close_a/b`) + logic to always swing away from the player when opening, and close using the original swing direction.
+  - Proper `Interactable` wired into `wooden_door.tscn` (under `Components`).
+  - Locked state support (`is_locked`, `unlock()`, `lock()`) with explicit testing print.
+  - `MapEntityRegistry` system introduced for clean targetname-based connections (levers → doors, etc.).
+  - Basic `Lever` entity started with `is_active` / `has_been_used` state machine and registry lookup.
+
+**Current State:**
+- Door is fully functional and verified:
+  - Opens away from player from either side (even diagonally / backface).
+  - Closes correctly even after walking through.
+  - Collision blocks when closed.
+  - Lever/door hookup architecture designed and partially implemented via registry + targetnames.
+
+**Next Steps / Pickup Goals (for tomorrow):**
+- Continue lever system: finish `MapEntityRegistry` integration, proper FGD properties for `targetname`/`targets`, one-shot lever variant.
+- Build first locked door + lever example in a TrenchBroom room.
+- Decide on "Iron Door" (non-breakable) vs Wooden Door differentiation.
+- Move deeper into single-player combat slice (basic enemies + combat once the locked door + lever milestone is solid).
+
+---
+
+## North Star (Stable)
+
+Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.  
+It should feel like early MMO raiding before everything was known.
+
+---
+
+## Useful References
+
+**Always re-read at session start:**
+- `docs/project_blackspire_architecture.md`
+- `docs/project_blackspire_prototype_gdd.md`
+- This handoff file
+
+**Key Systems (current focus areas):**
+- `world/components/interactable/interactable.gd`
+- `world/entities/entity.gd`
+- `world/rooms/room.gd`
+- TrenchBroom FGD + entity definitions in `trenchbroom/`
+
+**Recent Major Pattern:**
+- Thin `Interactable` component + Entity owns real behavior (proven with Breakable Urn).

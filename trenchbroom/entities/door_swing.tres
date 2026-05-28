@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3 uid="uid://door_swing_fgd"]
+
+[ext_resource type="Script" uid="uid://cxsqwtsqd8w33" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="PackedScene" path="res://world/entities/door/wooden_door.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_point")
+scene_file = ExtResource("2_scene")
+apply_scale_on_map_build = false
+classname = "door_swing"
+description = "Hinged swinging door. Place in doorways. Players can interact (E) to open and close it. Can be targeted by levers using targetname."
+
+entity_properties = [
+	{
+		"name": "targetname",
+		"type": "string",
+		"default": ""
+	}
+]

@@ -6,6 +6,8 @@
 
 ---
 
+v0.0.0006 : Swinging door system completed and runtime-verified. `SwingDoor` base now delivers consistent push-to-open behavior from both sides using facing-based detection + stored open side for closing. Four animations (open_a/b + close_a/b). Proper `Interactable` wired. Locked door support + explicit testing path. `MapEntityRegistry` introduced for clean targetname-based lever/door (and future) connections. Basic Lever entity with `is_active`/`has_been_used` state machine. Strong "no fallbacks / fail loudly" + short focused scripts philosophy reinforced across the codebase. Lightweight diagnostics continue to be very effective.
+
 v0.0.0005 : Completed Breakable Urn as a working interactable. Debris pieces now own their lifetime via Timer + "shrink" AnimationPlayer, then `queue_free()`. Fully functional using the self.owner pattern (no longer dependent on Room `initialize()`). Continued refinement of lightweight diagnostic testing approach.
 
 v0.0.0004 : Entity self-discovery via `self.owner` (replacing Room-pushed `initialize()` for the Breakable Urn). Removed `initialize()` method from base `Entity` + `BreakableUrnEntity`, and removed the initialization loop from `Room` for urns. Established lightweight goal-oriented diagnostic testing process (`.tests/` directory + headless runs with explicit goal scorecards). Continued Breakable Urn work (thin `Interactable` component + dedicated `BreakableUrnEntity` root). Moved urn to `world/entities/urn/`.
@@ -15,6 +17,3 @@ v0.0.0003 : Interaction system design + component architecture. Room initializat
 v0.0.0002 : project refinement
 
 v0.0.0001 : project setup
-
-
-

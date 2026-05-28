@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://world/entities/lever/lever.gd" id="1_lever"]
+[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="2_interactable"]
+
+[node name="Lever" type="Node3D"]
+script = ExtResource("1_lever")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+
+[node name="Components" type="Node3D" parent="."]
+
+[node name="Interactable" type="Node" parent="Components"]
+script = ExtResource("2_interactable")
+prompt = "Pull Lever"

@@ -12,7 +12,7 @@ var _is_broken: bool = false
 func _get_junk_container() -> Node3D:
 	var room := self.owner as Room
 	if not room:
-		push_error("BreakableUrn %s could not resolve owning Room via .owner" % get_path())
+		push_error("BreakableUrn %s could not resolve owning Room via .owner. This should never happen in a properly set up scene." % get_path())
 		return null
 	return room.get_junk_container()
 
@@ -27,11 +27,14 @@ func _on_interact(_interactable: Interactable, _actor: Node) -> void:
 func _spawn_debris() -> void:
 	var container := _get_junk_container()
 	if not container:
-		push_error("BreakableUrn %s could not find junk container" % get_path())
+		push_error("BreakableUrn %s could not find junk container. Debris will not spawn." % get_path())
+		# Still break the urn so the player gets visual feedback
+		queue_free()
 		return
 
 	for i in range(debris_count):
 		var debris := debris_scene.instantiate() as UrnDebris
+		debris.time_to_live = debris_lifetime
 		container.add_child(debris)
 
 		debris.global_position = global_position + Vector3(
@@ -47,4 +50,3 @@ func _spawn_debris() -> void:
 		).normalized() * debris_impulse_strength
 
 		debris.apply_impulse(impulse)
-		debris.time_to_live = debris_lifetime

@@ -4,7 +4,7 @@ class_name PlayerComponents
 ## Central reference holder for all player components.
 ## Other components can access shared nodes through this.
 
-@export var player: CharacterBody3D
+@export var player: PlayerController
 @export var camerarig: CameraRig
 
 # Add more shared references here as needed (e.g. inventory, state machine, etc.)
@@ -12,6 +12,6 @@ class_name PlayerComponents
 
 func _ready() -> void:
 	if not player:
-		push_warning("PlayerComponents: No player assigned.")
+		push_error("PlayerComponents: No player assigned. This is a required reference.")
 	if not camerarig:
-		push_warning("PlayerComponents: No camerarig assigned.")
+		push_error("PlayerComponents: No camerarig assigned. This is a required reference.")
