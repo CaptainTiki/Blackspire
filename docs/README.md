@@ -6,6 +6,8 @@
 
 ---
 
+v0.0.0007 : Lever-operated door milestone completed and runtime-verified. `BaseLevel` renamed to `Level`, with a single active dungeon context exposed through `Level.current_level`. `Level` now owns an explicit `MapEntityRegistry` child used by TrenchBroom-authored `targetname` / `targets` activation. Door mapper property is now `player_operated`: false blocks direct player operation while still allowing external activators. Lever scene now has collider + placeholder visuals, receives FuncGodot properties via `@tool` scripts, and toggles target doors open/closed. Verified: player cannot operate remote-only doors, lever opens/closes target door, collision blocks while closed, and player can pass while open.
+
 v0.0.0006 : Swinging door system completed and runtime-verified. `SwingDoor` base now delivers consistent push-to-open behavior from both sides using facing-based detection + stored open side for closing. Four animations (open_a/b + close_a/b). Proper `Interactable` wired. Locked door support + explicit testing path. `MapEntityRegistry` introduced for clean targetname-based lever/door (and future) connections. Basic Lever entity with `is_active`/`has_been_used` state machine. Strong "no fallbacks / fail loudly" + short focused scripts philosophy reinforced across the codebase. Lightweight diagnostics continue to be very effective.
 
 v0.0.0005 : Completed Breakable Urn as a working interactable. Debris pieces now own their lifetime via Timer + "shrink" AnimationPlayer, then `queue_free()`. Fully functional using the self.owner pattern (no longer dependent on Room `initialize()`). Continued refinement of lightweight diagnostic testing approach.

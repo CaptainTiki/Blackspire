@@ -10,19 +10,14 @@ apply_scale_on_map_build = false
 classname = "lever"
 description = "A lever that can activate other entities (doors, etc.) by targetname."
 
-# Properties that will appear in TrenchBroom
-entity_properties = [
-	{
-		"name": "targetname",
-		"type": "string",
-		"default": ""
-	},
-	{
-		"name": "targets",
-		"type": "string",
-		"default": ""
-	}
-]
+class_properties = {
+	"targetname": "",
+	"targets": ""
+}
+class_property_descriptions = {
+	"targetname": "Name other entities use to target this lever.",
+	"targets": "Space or comma separated targetnames this lever activates."
+}
 
 # Note: "targets" should be a space or comma separated list of targetnames in TrenchBroom.
 # Example: "door_hall1 door_hall2"

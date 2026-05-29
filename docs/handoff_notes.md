@@ -1,6 +1,6 @@
 # Handoff Notes
 
-**Last Updated:** 2026-05-28
+**Last Updated:** 2026-05-29
 
 ---
 
@@ -19,10 +19,11 @@ These are durable truths about how we build Blackspire.
 - Short, focused scripts.
 - **Parents own references. Siblings own behavior.**
 - Prefer direct `@export` references and hardcoded knowledge of scene structure over defensive `if has_node()` checks.
+- There is exactly one active dungeon `Level` at runtime. Level-global dungeon context is available through `Level.current_level`.
 - **Review the Architecture Document** when starting any significant systems work:  
   `docs/project_blackspire_architecture.md`
 
-### Philosophy — Fail Loudly
+### Philosophy - Fail Loudly
 - We want to know *immediately* when something is broken so we can fix it.
 - Almost no fallbacks, safety nets, or defensive checks in prototype/single-player code.
 - Fallbacks are only acceptable for multiplayer timing concerns.
@@ -48,26 +49,31 @@ These are durable truths about how we build Blackspire.
 ## Current Session Context
 
 **Last Worked On:**
-- Full swinging door system completed and verified in runtime.
-  - `SwingDoor` base now uses facing-based side detection + stored `_open_side` for consistent "always push to open" behavior from both sides.
+- Lever-operated door system completed and verified in runtime.
+  - `SwingDoor` base uses facing-based side detection + stored `_open_side` for consistent "always push to open" behavior from both sides.
   - Four animations (`open_a/b`, `close_a/b`) + logic to always swing away from the player when opening, and close using the original swing direction.
   - Proper `Interactable` wired into `wooden_door.tscn` (under `Components`).
-  - Locked state support (`is_locked`, `unlock()`, `lock()`) with explicit testing print.
-  - `MapEntityRegistry` system introduced for clean targetname-based connections (levers → doors, etc.).
-  - Basic `Lever` entity started with `is_active` / `has_been_used` state machine and registry lookup.
+  - Door mapper property is now `player_operated`: `true` means players can directly open/close; `false` means only external activators can operate it.
+  - `Level` replaced `BaseLevel`; it owns an explicit `MapEntityRegistry` child and exposes `Level.current_level.entity_registry`.
+  - `MapEntityRegistry` targetname lookup is verified for lever -> door connections.
+  - `Lever` entity has collision/visual placeholder mesh, `targetname` / `targets` FGD properties, and `is_active` / `has_been_used` state.
+  - FuncGodot property application is handled with `@tool` entity scripts + `_func_godot_apply_properties()` so TrenchBroom values reach runtime instances.
 
 **Current State:**
-- Door is fully functional and verified:
-  - Opens away from player from either side (even diagonally / backface).
-  - Closes correctly even after walking through.
+- Door + lever path is fully functional and verified:
+  - Player cannot open/close a door when `player_operated = false`.
+  - Lever opens the target door on first pull and closes it on second pull.
+  - Door opens away from the player from either side (even diagonally / backface).
+  - Door closes correctly even after walking through.
   - Collision blocks when closed.
-  - Lever/door hookup architecture designed and partially implemented via registry + targetnames.
+  - Player can pass through when open.
 
 **Next Steps / Pickup Goals (for tomorrow):**
-- Continue lever system: finish `MapEntityRegistry` integration, proper FGD properties for `targetname`/`targets`, one-shot lever variant.
-- Build first locked door + lever example in a TrenchBroom room.
+- Next immediate step: animate the lever so it visibly throws between off/on states when operated.
+- After animation, verify the lever still opens the target door on first pull and closes it on second pull.
+- Optional variant: add one-shot lever behavior if the room design needs it.
 - Decide on "Iron Door" (non-breakable) vs Wooden Door differentiation.
-- Move deeper into single-player combat slice (basic enemies + combat once the locked door + lever milestone is solid).
+- Move deeper into single-player combat slice: basic enemy actor, health/damage, and a minimal player attack.
 
 ---
 
@@ -88,8 +94,12 @@ It should feel like early MMO raiding before everything was known.
 **Key Systems (current focus areas):**
 - `world/components/interactable/interactable.gd`
 - `world/entities/entity.gd`
-- `world/rooms/room.gd`
+- `world/level.gd`
+- `world/systems/MapEntityRegistry.gd`
+- `world/entities/lever/lever.gd`
+- `world/entities/door/swing_door.gd`
 - TrenchBroom FGD + entity definitions in `trenchbroom/`
 
-**Recent Major Pattern:**
+**Recent Major Patterns:**
 - Thin `Interactable` component + Entity owns real behavior (proven with Breakable Urn).
+- TrenchBroom-authored activation uses `targetname` / `targets` and resolves live nodes through the active `Level` registry.

@@ -10,8 +10,9 @@
   - Always pushes open away from the player (from either side, including diagonals/backfaces).
   - Consistent closing using the original swing direction.
   - Proper collision blocking when closed.
-  - Locked state support with explicit testing feedback.
-  - Lever + door connection architecture in progress via `MapEntityRegistry` + targetnames.
+  - `player_operated` support for doors that cannot be opened directly by the player.
+  - Lever + door activation verified via `Level.current_level.entity_registry` + TrenchBroom `targetname` / `targets`.
+- **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
 ## Key Documents
@@ -31,7 +32,7 @@
 
 See [docs/README.md](docs/README.md) for the full version history.
 
-Current focus: Completing the single-player combat slice (interactables, locked doors + levers, basic enemies/combat, multiple connected TrenchBroom rooms).
+Current focus: Completing the single-player combat slice (interactables, lever-operated doors, basic enemies/combat, multiple connected TrenchBroom rooms).
 
 ---
 

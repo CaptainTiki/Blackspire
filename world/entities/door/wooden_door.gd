@@ -1,3 +1,4 @@
+@tool
 extends SwingDoor
 class_name WoodenDoor
 

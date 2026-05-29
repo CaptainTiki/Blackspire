@@ -10,7 +10,7 @@ class_name Main
 @export var starting_level: PackedScene = preload("res://world/levels/test_level.tscn")
 @export var player_scene: PackedScene = preload("res://world/actors/player/Player.tscn")
 
-var current_level: BaseLevel
+var current_level: Level
 var player: PlayerController
 
 func _ready() -> void:
@@ -32,9 +32,9 @@ func _load_starting_level() -> void:
 		push_error("No starting level assigned in Main!")
 		return
 	
-	current_level = starting_level.instantiate() as BaseLevel
+	current_level = starting_level.instantiate() as Level
 	if not current_level:
-		push_error("Starting level is not a BaseLevel!")
+		push_error("Starting level is not a Level!")
 		return
 	
 	add_child(current_level)

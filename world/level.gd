@@ -1,16 +1,27 @@
 extends Node3D
-class_name BaseLevel
+class_name Level
 
-const MapEntityRegistryScript := preload("res://world/systems/MapEntityRegistry.gd")
+static var current_level: Level
 
-## Reusable base for all levels / "worlds".
-## Handles common level concerns (environment, lighting, spawn points, etc.)
-## Future levels can extend this or use it as a template.
+## Reusable base for all dungeon levels.
+## Handles common level concerns (environment, lighting, spawn points, etc.).
 
 @export var level_name: String = "Unnamed Level"
 
+var entity_registry: MapEntityRegistry
+
 # Called when the level is fully ready (after _ready and children are processed)
 signal level_ready
+
+func _enter_tree() -> void:
+	Level.current_level = self
+	entity_registry = $MapEntityRegistry
+
+
+func _exit_tree() -> void:
+	if Level.current_level == self:
+		Level.current_level = null
+
 
 func _ready() -> void:
 	# Emit after everything in the level has initialized
@@ -19,22 +30,11 @@ func _ready() -> void:
 
 func _emit_level_ready() -> void:
 	_ensure_junk_container()
-	_ensure_map_entity_registry()
 	level_ready.emit()
 
 
-func _ensure_map_entity_registry() -> void:
-	if not has_node("MapEntityRegistry"):
-		var registry := MapEntityRegistryScript.new()
-		registry.name = "MapEntityRegistry"
-		add_child(registry)
-
-
 func get_map_entity_registry() -> MapEntityRegistry:
-	var node := get_node_or_null("MapEntityRegistry")
-	if node:
-		return node as MapEntityRegistry
-	return null
+	return entity_registry
 
 
 ## Ensures a "Junk" container node exists in the level for temporary debris and effects.
@@ -83,6 +83,6 @@ func spawn_player(player_scene: PackedScene) -> Node3D:
 	add_child(player)
 	player.global_transform = spawn_point.global_transform
 	
-	print("BaseLevel: Spawned player at ", player.global_position, " using spawn point: ", spawn_point.name)
+	print("Level: Spawned player at ", player.global_position, " using spawn point: ", spawn_point.name)
 	
 	return player

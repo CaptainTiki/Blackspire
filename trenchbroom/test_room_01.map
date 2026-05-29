@@ -325,6 +325,7 @@
 "classname" "door_swing"
 "origin" "312 0 8"
 "targetname" "door_crypt_2"
+"player_operated" "0"
 }
 // entity 7
 {
@@ -337,6 +338,7 @@
 "origin" "520 392 8"
 "targetname" ""
 "target" "door_crypt_2"
+"targets" "door_crypt_2"
 }
 // entity 9
 {

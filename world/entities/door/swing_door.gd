@@ -1,3 +1,4 @@
+@tool
 extends Entity
 class_name SwingDoor
 
@@ -11,7 +12,10 @@ signal door_closed
 
 var is_open := false
 var is_animating := false
-var is_locked := false
+
+## Whether the player can directly open/close this door.
+## Levers and other activators can enable this at runtime.
+@export var player_operated := true
 
 ## Name used by mappers in TrenchBroom to target this door from levers etc.
 @export var targetname: StringName = ""
@@ -20,35 +24,54 @@ var is_locked := false
 @export var door_id: StringName = ""
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+
 	if targetname != "" or door_id != "":
 		add_to_group("lever_targets")
 		_register_with_level_registry()
 
 
+func _func_godot_apply_properties(properties: Dictionary) -> void:
+	if properties.has("targetname"):
+		targetname = StringName(properties["targetname"])
+	if properties.has("player_operated"):
+		player_operated = _property_to_bool(properties["player_operated"])
+
+
 func _register_with_level_registry() -> void:
-	var registry: MapEntityRegistry = _find_map_entity_registry()
-	if registry:
-		var name_to_use: StringName = targetname if targetname != "" else door_id
-		if name_to_use != "":
-			registry.register(name_to_use, self)
+	if not Level.current_level:
+		push_error("SwingDoor %s could not register because there is no current Level." % get_path())
+		return
 
+	if not Level.current_level.entity_registry:
+		push_error("SwingDoor %s could not register because the current Level has no entity registry." % get_path())
+		return
 
-func _find_map_entity_registry() -> MapEntityRegistry:
-	var current := get_owner()
-	while current:
-		if current.has_method("get_map_entity_registry"):
-			var reg: MapEntityRegistry = current.get_map_entity_registry()
-			if reg:
-				return reg
-		current = current.get_owner()
-	return null
+	var name_to_use: StringName = targetname if targetname != "" else door_id
+	if name_to_use != "":
+		Level.current_level.entity_registry.register(name_to_use, self)
 
 
 func unlock() -> void:
-	is_locked = false
+	player_operated = true
 
 func lock() -> void:
-	is_locked = true
+	player_operated = false
+
+
+func activate(actor: Node) -> void:
+	_toggle_door(null, actor)
+
+
+func _property_to_bool(value: Variant) -> bool:
+	if value is bool:
+		return value
+	if value is int:
+		return value != 0
+	if value is String:
+		return value == "1" or value.to_lower() == "true" or value.to_lower() == "yes"
+	return false
 
 # Stores which side the door was opened from (+1 or -1).
 # Used so that closing always uses the matching animation.
@@ -57,11 +80,15 @@ var _open_side: int = 0
 
 ## Called by the Interactable component when the player interacts.
 func _on_interact(interactable: Interactable, actor: Node) -> void:
-	if is_animating:
+	if not player_operated:
+		print("This door cannot be operated by the player: ", name)
 		return
 
-	if is_locked:
-		print("This door is locked: ", name)
+	_toggle_door(interactable, actor)
+
+
+func _toggle_door(interactable: Interactable, actor: Node) -> void:
+	if is_animating:
 		return
 
 	is_animating = true
@@ -81,7 +108,8 @@ func _on_interact(interactable: Interactable, actor: Node) -> void:
 	var anim_name: String = _get_animation_name(is_open, side)
 
 	$AnimationPlayer.play(anim_name)
-	interactable.prompt = "Close Door" if is_open else "Open Door"
+	if interactable:
+		interactable.prompt = "Close Door" if is_open else "Open Door"
 
 	$AnimationPlayer.animation_finished.connect(_on_animation_finished, CONNECT_ONE_SHOT)
 

@@ -1,12 +1,39 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://world/entities/lever/lever.gd" id="1_lever"]
 [ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="2_interactable"]
 
-[node name="Lever" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_base"]
+size = Vector3(0.35, 0.18, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_base"]
+albedo_color = Color(0.16, 0.15, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_base"]
+material = SubResource("StandardMaterial3D_base")
+size = Vector3(0.35, 0.18, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_handle"]
+albedo_color = Color(0.38, 0.32, 0.24, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_handle"]
+material = SubResource("StandardMaterial3D_handle")
+size = Vector3(0.08, 0.55, 0.08)
+
+[node name="Lever" type="StaticBody3D"]
 script = ExtResource("1_lever")
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
+shape = SubResource("BoxShape3D_base")
+
+[node name="BaseMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
+mesh = SubResource("BoxMesh_base")
+
+[node name="HandleMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9396926, 0.34202015, 0, -0.34202015, 0.9396926, 0, 0, 0, 1, 0, 0.38, 0)
+mesh = SubResource("BoxMesh_handle")
 
 [node name="Components" type="Node3D" parent="."]
 

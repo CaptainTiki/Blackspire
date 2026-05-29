@@ -7,6 +7,7 @@
 #
 # Actual behavior is preferred via composition (Components nodes).
 
+@tool
 extends Node3D
 class_name Entity
 
