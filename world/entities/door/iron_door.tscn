@@ -1,34 +1,24 @@
-[gd_scene format=3 uid="uid://ctai3ahlatavw"]
+[gd_scene format=3 uid="uid://o73pml7v3in8"]
 
-[ext_resource type="Script" uid="uid://c33m6qko3mnxg" path="res://world/entities/door/wooden_door.gd" id="1_script"]
+[ext_resource type="Script" path="res://world/entities/door/iron_door.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="2_interactable"]
-[ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="3_health"]
-[ext_resource type="Script" path="res://world/components/combat/world_health_bar_3d.gd" id="4_health_bar"]
-[ext_resource type="Script" path="res://world/components/combat/hurtbox_3d.gd" id="5_hurtbox"]
 
 [sub_resource type="BoxShape3D" id="DoorCollisionShape"]
 size = Vector3(1, 1.5, 0.12)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wudfq"]
-albedo_color = Color(0.31, 0.24557166, 0.22010002, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iron"]
+albedo_color = Color(0.73791814, 0.76235104, 0.78285384, 1)
+metallic = 0.65
+roughness = 0.45
 
-[sub_resource type="BoxMesh" id="BoxMesh_wudfq"]
-material = SubResource("StandardMaterial3D_wudfq")
+[sub_resource type="BoxMesh" id="BoxMesh_iron"]
+material = SubResource("StandardMaterial3D_iron")
 size = Vector3(0.9, 1.5, 0.2)
 
 [sub_resource type="BoxMesh" id="FramePillar"]
 size = Vector3(0.1, 1.5, 0.2)
 
-[sub_resource type="QuadMesh" id="HealthBarBackgroundMesh"]
-size = Vector2(0.84, 0.1)
-
-[sub_resource type="QuadMesh" id="HealthBarFillMesh"]
-size = Vector2(0.78, 0.06)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_hurtbox"]
-size = Vector3(1.1, 1.6, 0.35)
-
-[sub_resource type="Animation" id="Animation_wudfq"]
+[sub_resource type="Animation" id="Animation_RESET"]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -55,7 +45,7 @@ tracks/1/keys = {
 "values": [Vector3(0, 0, 0)]
 }
 
-[sub_resource type="Animation" id="Animation_3d83d"]
+[sub_resource type="Animation" id="Animation_close_a"]
 resource_name = "close_a"
 length = 0.5
 tracks/0/type = "value"
@@ -83,7 +73,7 @@ tracks/1/keys = {
 "values": [Vector3(0, -1.5707964, 0), Vector3(0, 0, 0)]
 }
 
-[sub_resource type="Animation" id="Animation_6ay4i"]
+[sub_resource type="Animation" id="Animation_close_b"]
 resource_name = "close_b"
 length = 0.5
 tracks/0/type = "value"
@@ -111,7 +101,7 @@ tracks/1/keys = {
 "values": [Vector3(0, 1.5707964, 0), Vector3(0, 0, 0)]
 }
 
-[sub_resource type="Animation" id="Animation_r8jpk"]
+[sub_resource type="Animation" id="Animation_open_a"]
 resource_name = "open_a"
 length = 0.5
 tracks/0/type = "value"
@@ -139,7 +129,7 @@ tracks/1/keys = {
 "values": [Vector3(0, 0, 0), Vector3(0, -1.5707964, 0)]
 }
 
-[sub_resource type="Animation" id="Animation_0seim"]
+[sub_resource type="Animation" id="Animation_open_b"]
 resource_name = "open_b"
 length = 0.5
 tracks/0/type = "value"
@@ -167,64 +157,39 @@ tracks/1/keys = {
 "values": [Vector3(0, 0, 0), Vector3(0, 1.5707964, 0)]
 }
 
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_0seim"]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_iron"]
 _data = {
-&"RESET": SubResource("Animation_wudfq"),
-&"close_a": SubResource("Animation_3d83d"),
-&"close_b": SubResource("Animation_6ay4i"),
-&"open_a": SubResource("Animation_r8jpk"),
-&"open_b": SubResource("Animation_0seim")
+&"RESET": SubResource("Animation_RESET"),
+&"close_a": SubResource("Animation_close_a"),
+&"close_b": SubResource("Animation_close_b"),
+&"open_a": SubResource("Animation_open_a"),
+&"open_b": SubResource("Animation_open_b")
 }
 
-[node name="WoodenDoor" type="AnimatableBody3D" unique_id=2031978271]
+[node name="IronDoor" type="AnimatableBody3D" unique_id=804088488]
 script = ExtResource("1_script")
 
-[node name="Door_CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1451806732]
+[node name="Door_CollisionShape3D" type="CollisionShape3D" parent="." unique_id=336984258]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("DoorCollisionShape")
 
-[node name="Door_Mesh" type="MeshInstance3D" parent="Door_CollisionShape3D" unique_id=1295327080]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0023680031, -0.0051040053, 0)
-mesh = SubResource("BoxMesh_wudfq")
+[node name="Door_Mesh" type="MeshInstance3D" parent="Door_CollisionShape3D" unique_id=1310355056]
+mesh = SubResource("BoxMesh_iron")
 
-[node name="Frame_R_Mesh" type="MeshInstance3D" parent="." unique_id=1522008808]
+[node name="Frame_R_Mesh" type="MeshInstance3D" parent="." unique_id=564236160]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.75, 0)
 mesh = SubResource("FramePillar")
 
-[node name="Frame#RightPillar2" type="MeshInstance3D" parent="." unique_id=1466679434]
+[node name="Frame#RightPillar2" type="MeshInstance3D" parent="." unique_id=1723227236]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.75, 0)
 mesh = SubResource("FramePillar")
 
-[node name="Components" type="Node3D" parent="." unique_id=1298581269]
+[node name="Components" type="Node3D" parent="." unique_id=243553474]
 
-[node name="Interactable" type="Node" parent="Components" unique_id=1376498715]
+[node name="Interactable" type="Node" parent="Components" unique_id=1530535783]
 script = ExtResource("2_interactable")
 prompt = "Open Door"
 
-[node name="HealthComponent" type="Node" parent="Components" unique_id=1290441604]
-script = ExtResource("3_health")
-
-[node name="Hurtbox" type="Area3D" parent="Components" node_paths=PackedStringArray("damage_target")]
-script = ExtResource("5_hurtbox")
-damage_target = NodePath("../..")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Components/Hurtbox"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
-shape = SubResource("BoxShape3D_hurtbox")
-
-[node name="HealthBar" type="Node3D" parent="." node_paths=PackedStringArray("health_component", "focus_interactable")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.375, -0.18)
-script = ExtResource("4_health_bar")
-health_component = NodePath("../Components/HealthComponent")
-focus_interactable = NodePath("../Components/Interactable")
-
-[node name="Background" type="MeshInstance3D" parent="HealthBar"]
-mesh = SubResource("HealthBarBackgroundMesh")
-
-[node name="Fill" type="MeshInstance3D" parent="HealthBar"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.001)
-mesh = SubResource("HealthBarFillMesh")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=977670227]
-libraries/ = SubResource("AnimationLibrary_0seim")
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=584487909]
+libraries/ = SubResource("AnimationLibrary_iron")
 autoplay = &"RESET"

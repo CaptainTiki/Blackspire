@@ -4,6 +4,9 @@
 [ext_resource type="Script" uid="uid://cylh5wxrawukl" path="res://world/actors/player/camera_rig.gd" id="2_62081"]
 [ext_resource type="Script" uid="uid://b604qikwhqqb4" path="res://world/components/player/player_components.gd" id="2_player_components"]
 [ext_resource type="Script" uid="uid://dftvemuu6jugp" path="res://world/components/player/interaction_scanner.gd" id="3_interaction"]
+[ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="4_health"]
+[ext_resource type="Script" uid="uid://21j40pjto1k4" path="res://world/components/combat/player_melee_attack.gd" id="5_melee_attack"]
+[ext_resource type="Script" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -12,6 +15,86 @@ height = 1.45
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
 radius = 0.4
 height = 1.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword_blade"]
+albedo_color = Color(0.72, 0.76, 0.78, 1)
+metallic = 0.4
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_sword_blade"]
+material = SubResource("StandardMaterial3D_sword_blade")
+size = Vector3(0.08, 0.7, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword_hilt"]
+albedo_color = Color(0.22, 0.15, 0.08, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sword_hilt"]
+material = SubResource("StandardMaterial3D_sword_hilt")
+size = Vector3(0.28, 0.06, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sword_hitbox"]
+size = Vector3(0.9, 0.9, 1.4)
+
+[sub_resource type="Animation" id="Animation_sword_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SwordPivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0.42, -0.36, -0.72)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("SwordPivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-0.55, 0, -0.45)]
+}
+
+[sub_resource type="Animation" id="Animation_sword_attack"]
+resource_name = "attack"
+length = 0.35
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SwordPivot:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.09, 0.2, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0.42, -0.36, -0.72), Vector3(0.3, -0.28, -0.95), Vector3(-0.25, -0.22, -0.95), Vector3(0.42, -0.36, -0.72)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("SwordPivot:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.09, 0.2, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(-0.55, 0, -0.45), Vector3(-0.95, 0.2, -0.75), Vector3(-0.65, -0.25, 0.7), Vector3(-0.55, 0, -0.45)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_sword"]
+_data = {
+&"RESET": SubResource("Animation_sword_reset"),
+&"attack": SubResource("Animation_sword_attack")
+}
 
 [node name="Player" type="CharacterBody3D" unique_id=1035581857]
 script = ExtResource("1_script")
@@ -22,7 +105,6 @@ shape = SubResource("CapsuleShape3D_1")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1553463508]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.725, 0)
-visible = false
 mesh = SubResource("CapsuleMesh_1")
 
 [node name="CameraRig" type="Node3D" parent="." unique_id=346636072]
@@ -38,6 +120,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04797101, 0)
 target_position = Vector3(0, 0, -2)
 collide_with_areas = true
 
+[node name="WeaponRoot" type="Node3D" parent="CameraRig/Camera3D" unique_id=1036805861]
+
+[node name="SwordPivot" type="Node3D" parent="CameraRig/Camera3D/WeaponRoot" unique_id=1670787752]
+transform = Transform3D(0.90044713, 0.43908277, 0, -0.37081876, 0.77491957, 0.51786375, 0.22735094, -0.4751073, 0.8446572, 0.42, -0.36, -0.72)
+
+[node name="Blade" type="MeshInstance3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=1234842442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+mesh = SubResource("BoxMesh_sword_blade")
+
+[node name="Hilt" type="MeshInstance3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=1658998886]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("BoxMesh_sword_hilt")
+
+[node name="SwordHitbox" type="Area3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=456433239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.15, -0.55)
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot/SwordHitbox" unique_id=2110592727]
+shape = SubResource("BoxShape3D_sword_hitbox")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CameraRig/Camera3D/WeaponRoot" unique_id=1178412266]
+libraries/ = SubResource("AnimationLibrary_sword")
+autoplay = &"RESET"
+
 [node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig")]
 script = ExtResource("2_player_components")
 player = NodePath("..")
@@ -46,3 +153,25 @@ camerarig = NodePath("../CameraRig")
 [node name="InteractionScanner" type="Node3D" parent="Components" unique_id=277905915 node_paths=PackedStringArray("player_components")]
 script = ExtResource("3_interaction")
 player_components = NodePath("..")
+
+[node name="PlayerMeleeAttack" type="Node" parent="Components" unique_id=1113097335 node_paths=PackedStringArray("player_components")]
+script = ExtResource("5_melee_attack")
+player_components = NodePath("..")
+
+[node name="HealthComponent" type="Node" parent="Components" unique_id=685829878]
+script = ExtResource("4_health")
+max_health = 100
+current_health = 100
+
+[node name="PlayerHitFeedback" type="CanvasLayer" parent="." node_paths=PackedStringArray("health_component")]
+script = ExtResource("6_hit_feedback")
+health_component = NodePath("../Components/HealthComponent")
+
+[node name="Overlay" type="ColorRect" parent="PlayerHitFeedback"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.85, 0.02, 0.02, 0)

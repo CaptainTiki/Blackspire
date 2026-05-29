@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3]
+
+[ext_resource type="Script" uid="uid://cxsqwtsqd8w33" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="PackedScene" path="res://world/entities/door/iron_door.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_point")
+scene_file = ExtResource("2_scene")
+apply_scale_on_map_build = false
+classname = "door_iron"
+description = "Unbreakable hinged iron door. Can be player-operated or targeted by levers using targetname, but does not take combat damage."
+
+class_properties = {
+	"targetname": "",
+	"player_operated": true
+}
+class_property_descriptions = {
+	"targetname": "Name other entities use to target this door.",
+	"player_operated": "Whether players can directly open and close this door."
+}

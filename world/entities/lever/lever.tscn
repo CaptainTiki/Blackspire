@@ -1,10 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://cte8f7n0thj4u"]
 
-[ext_resource type="Script" path="res://world/entities/lever/lever.gd" id="1_lever"]
-[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="2_interactable"]
+[ext_resource type="Script" uid="uid://lvj2isp58326" path="res://world/entities/lever/lever.gd" id="1_lever"]
+[ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="2_interactable"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_base"]
-size = Vector3(0.35, 0.18, 0.25)
+size = Vector3(0.35, 0.6876563, 0.25)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_base"]
 albedo_color = Color(0.16, 0.15, 0.14, 1)
@@ -20,23 +20,116 @@ albedo_color = Color(0.38, 0.32, 0.24, 1)
 material = SubResource("StandardMaterial3D_handle")
 size = Vector3(0.08, 0.55, 0.08)
 
-[node name="Lever" type="StaticBody3D"]
+[sub_resource type="Animation" id="Animation_8qjel"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HandleMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(-0.099560834, 0.38, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("HandleMesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_r8rqm"]
+resource_name = "activate"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HandleMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(-0.099560834, 0.38, 0), Vector3(0.07658758, 0.26803595, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("HandleMesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0, 0, -0.9809099)]
+}
+
+[sub_resource type="Animation" id="Animation_5pc1i"]
+resource_name = "deactivate"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HandleMesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0.07658758, 0.26803595, 0), Vector3(-0.099560834, 0.38, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("HandleMesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, -0.9809099), Vector3(0, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_8qjel"]
+_data = {
+&"RESET": SubResource("Animation_8qjel"),
+&"activate": SubResource("Animation_r8rqm"),
+&"deactivate": SubResource("Animation_5pc1i")
+}
+
+[node name="Lever" type="StaticBody3D" unique_id=427474557]
 script = ExtResource("1_lever")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1002349890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3438281, 0)
 shape = SubResource("BoxShape3D_base")
 
-[node name="BaseMesh" type="MeshInstance3D" parent="."]
+[node name="BaseMesh" type="MeshInstance3D" parent="." unique_id=4182768]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
 mesh = SubResource("BoxMesh_base")
 
-[node name="HandleMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.9396926, 0.34202015, 0, -0.34202015, 0.9396926, 0, 0, 0, 1, 0, 0.38, 0)
+[node name="HandleMesh" type="MeshInstance3D" parent="." unique_id=1337685611]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.099560834, 0.38, 0)
 mesh = SubResource("BoxMesh_handle")
 
-[node name="Components" type="Node3D" parent="."]
+[node name="Components" type="Node3D" parent="." unique_id=922441481]
 
-[node name="Interactable" type="Node" parent="Components"]
+[node name="Interactable" type="Node" parent="Components" unique_id=477738137]
 script = ExtResource("2_interactable")
 prompt = "Pull Lever"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=172124424]
+libraries/ = SubResource("AnimationLibrary_8qjel")

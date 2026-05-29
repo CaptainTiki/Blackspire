@@ -49,31 +49,45 @@ These are durable truths about how we build Blackspire.
 ## Current Session Context
 
 **Last Worked On:**
-- Lever-operated door system completed and verified in runtime.
-  - `SwingDoor` base uses facing-based side detection + stored `_open_side` for consistent "always push to open" behavior from both sides.
-  - Four animations (`open_a/b`, `close_a/b`) + logic to always swing away from the player when opening, and close using the original swing direction.
-  - Proper `Interactable` wired into `wooden_door.tscn` (under `Components`).
-  - Door mapper property is now `player_operated`: `true` means players can directly open/close; `false` means only external activators can operate it.
-  - `Level` replaced `BaseLevel`; it owns an explicit `MapEntityRegistry` child and exposes `Level.current_level.entity_registry`.
-  - `MapEntityRegistry` targetname lookup is verified for lever -> door connections.
-  - `Lever` entity has collision/visual placeholder mesh, `targetname` / `targets` FGD properties, and `is_active` / `has_been_used` state.
-  - FuncGodot property application is handled with `@tool` entity scripts + `_func_godot_apply_properties()` so TrenchBroom values reach runtime instances.
+- First combat slice reached a playable prototype state.
+  - Lever now has `activate` / `deactivate` animations, locks out repeat interactions during its own animation and while activated targets finish animating.
+  - Door types are now split:
+    - `door_swing` / `WoodenDoor`: breakable by combat, still interactable/lever-operable.
+    - `door_iron` / `IronDoor`: unbreakable by combat, still interactable/lever-operable depending on `player_operated`.
+  - `HealthComponent`, `DamageRequest`, `Hurtbox3D`, `PlayerMeleeAttack`, `FloatingDamageNumber3D`, `WorldHealthBar3D`, and `PlayerHitFeedback` establish the first reusable combat feedback spine.
+  - Player now has a visible first-person sword with a simple attack animation and active-window `Area3D` hitbox.
+  - Wooden doors and urns have hurtboxes; sword hits can break wooden doors and smash urns.
+  - `BasicEnemy` scene exists with `HealthComponent`, `Hurtbox3D`, floating damage feedback, and a dedicated temporary `EnemyBehavior` child.
+  - `EnemyBehavior` currently uses simple enum states (`IDLE`, `CHASE`, `ATTACK`, `DEAD`) so it can later be replaced by a real state chart/state machine without rewriting the `BasicEnemy` combat contract.
+  - `info_enemy_spawn` markers are now consumed by `Level.spawn_enemies()` and spawn `basic_enemy.tscn` from the TrenchBroom-authored marker.
 
 **Current State:**
-- Door + lever path is fully functional and verified:
-  - Player cannot open/close a door when `player_operated = false`.
-  - Lever opens the target door on first pull and closes it on second pull.
-  - Door opens away from the player from either side (even diagonally / backface).
-  - Door closes correctly even after walking through.
-  - Collision blocks when closed.
-  - Player can pass through when open.
+- Door + lever + first combat loop is functional and play-verified:
+  - Player can pull animated levers; lever spam is gated.
+  - Lever opens/closes remote-only iron doors; player cannot directly operate those doors when `player_operated = false`.
+  - Wooden doors can be opened/closed normally and can be broken by sword hits.
+  - Iron doors ignore primary sword attacks and keep blocking until opened by interaction/lever.
+  - Sword hitbox overlaps hurtboxes, not debug raycast damage.
+  - Urns can be smashed by sword hurtbox overlap.
+  - Floating damage numbers are readable, smaller, billboarded, and use `no_depth_test`.
+  - Damaged wooden door health bars show only when aimed at, appear immediately, and fade after focus loss.
+  - Enemy spawns from the TrenchBroom marker, can chase/attack the player, can damage the player, and can be slain by sword hits.
+  - Player hit feedback now flashes red when enemy damage lands.
 
 **Next Steps / Pickup Goals (for tomorrow):**
-- Next immediate step: animate the lever so it visibly throws between off/on states when operated.
-- After animation, verify the lever still opens the target door on first pull and closes it on second pull.
-- Optional variant: add one-shot lever behavior if the room design needs it.
-- Decide on "Iron Door" (non-breakable) vs Wooden Door differentiation.
-- Move deeper into single-player combat slice: basic enemy actor, health/damage, and a minimal player attack.
+- Immediate pickup: polish enemy readability and feel.
+  - Add an obvious enemy attack tell / lunge / animation so the enemy does not look like it is standing still while damaging the player.
+  - Add enemy health bar/focus behavior using the same feedback spine as doors, or decide whether enemies should always show health after damage.
+  - Add enemy hit reaction when the sword connects.
+  - Tune enemy movement, attack range, attack cooldown, and damage.
+  - Consider a simple debug state label over enemy head while behavior remains enum-based.
+- After enemy feel is readable, consider a first cleanup pass:
+  - Review `EnemyBehavior` boundaries so it can later split into state chart + state machine logic.
+  - Review `WorldHealthBar3D` for optional focus-less targets like enemies.
+  - Review player feedback layering if/when proper HUD/split-screen UI starts.
+- Optional gameplay variants:
+  - One-shot lever behavior.
+  - `enemy_type` property on `info_enemy_spawn` to choose enemy variants instead of always spawning `basic_enemy_scene`.
 
 ---
 
@@ -93,13 +107,27 @@ It should feel like early MMO raiding before everything was known.
 
 **Key Systems (current focus areas):**
 - `world/components/interactable/interactable.gd`
+- `world/components/combat/health_component.gd`
+- `world/components/combat/damage_request.gd`
+- `world/components/combat/hurtbox_3d.gd`
+- `world/components/combat/player_melee_attack.gd`
+- `world/components/combat/floating_damage_number_3d.gd`
+- `world/components/combat/world_health_bar_3d.gd`
+- `world/components/combat/player_hit_feedback.gd`
 - `world/entities/entity.gd`
 - `world/level.gd`
 - `world/systems/MapEntityRegistry.gd`
 - `world/entities/lever/lever.gd`
 - `world/entities/door/swing_door.gd`
+- `world/entities/door/wooden_door.gd`
+- `world/entities/door/iron_door.gd`
+- `world/actors/enemies/basic_enemy.gd`
+- `world/actors/enemies/enemy_behavior.gd`
 - TrenchBroom FGD + entity definitions in `trenchbroom/`
 
 **Recent Major Patterns:**
 - Thin `Interactable` component + Entity owns real behavior (proven with Breakable Urn).
 - TrenchBroom-authored activation uses `targetname` / `targets` and resolves live nodes through the active `Level` registry.
+- Combat damage path is now `weapon active hitbox -> Hurtbox3D -> explicit damage_target.apply_damage(DamageRequest) -> HealthComponent`.
+- Feedback is signal-driven off `HealthComponent.damaged` / `HealthComponent.died` where possible.
+- Keep temporary behavior brains (`EnemyBehavior`) as siblings under `Components`, so the actor root stays close to the future state-machine shape.

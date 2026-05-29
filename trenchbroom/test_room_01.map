@@ -322,17 +322,10 @@
 }
 // entity 6
 {
-"classname" "door_swing"
-"origin" "312 0 8"
-"targetname" "door_crypt_2"
-"player_operated" "0"
-}
-// entity 7
-{
 "classname" "prop_urn"
 "origin" "240 192 8"
 }
-// entity 8
+// entity 7
 {
 "classname" "lever"
 "origin" "520 392 8"
@@ -340,11 +333,19 @@
 "target" "door_crypt_2"
 "targets" "door_crypt_2"
 }
-// entity 9
+// entity 8
 {
 "classname" "door_swing"
 "origin" "608 296 8"
 "angle" "270"
 "targetname" "door_crypt_1"
 "target" ""
+}
+// entity 9
+{
+"classname" "door_iron"
+"origin" "312 0 8"
+"target" "door_crypt_1"
+"targetname" "door_crypt_2"
+"player_operated" "0"
 }

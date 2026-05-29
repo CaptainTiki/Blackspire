@@ -22,6 +22,8 @@ class_name PlayerController
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
+	add_to_group("players")
+
 	# Capture the mouse for first-person control
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	

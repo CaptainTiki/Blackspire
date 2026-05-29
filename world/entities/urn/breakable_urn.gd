@@ -18,6 +18,14 @@ func _get_junk_container() -> Node3D:
 
 ## Called by the thin Interactable component when the player interacts.
 func _on_interact(_interactable: Interactable, _actor: Node) -> void:
+	_break()
+
+
+func apply_damage(_damage_request: Variant) -> void:
+	_break()
+
+
+func _break() -> void:
 	if _is_broken:
 		return
 	_is_broken = true

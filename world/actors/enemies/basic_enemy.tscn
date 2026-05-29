@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://world/actors/enemies/basic_enemy.gd" id="1_enemy"]
+[ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="2_health"]
+[ext_resource type="Script" path="res://world/components/combat/hurtbox_3d.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://world/actors/enemies/enemy_behavior.gd" id="4_behavior"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.35
+height = 1.4
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.65
+height = 1.9
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.35
+height = 1.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_enemy"]
+albedo_color = Color(0.42, 0.08, 0.07, 1)
+
+[node name="BasicEnemy" type="CharacterBody3D"]
+script = ExtResource("1_enemy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+material_override = SubResource("StandardMaterial3D_enemy")
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="Components" type="Node3D" parent="."]
+
+[node name="HealthComponent" type="Node" parent="Components"]
+script = ExtResource("2_health")
+max_health = 30
+current_health = 30
+
+[node name="Hurtbox" type="Area3D" parent="Components" node_paths=PackedStringArray("damage_target")]
+script = ExtResource("3_hurtbox")
+damage_target = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Components/Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="EnemyBehavior" type="Node" parent="Components" node_paths=PackedStringArray("enemy")]
+script = ExtResource("4_behavior")
+enemy = NodePath("../..")

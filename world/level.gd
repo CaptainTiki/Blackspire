@@ -7,8 +7,10 @@ static var current_level: Level
 ## Handles common level concerns (environment, lighting, spawn points, etc.).
 
 @export var level_name: String = "Unnamed Level"
+@export var basic_enemy_scene: PackedScene = preload("res://world/actors/enemies/basic_enemy.tscn")
 
 var entity_registry: MapEntityRegistry
+var spawned_enemies: Array[Node3D] = []
 
 # Called when the level is fully ready (after _ready and children are processed)
 signal level_ready
@@ -30,6 +32,7 @@ func _ready() -> void:
 
 func _emit_level_ready() -> void:
 	_ensure_junk_container()
+	spawn_enemies()
 	level_ready.emit()
 
 
@@ -61,6 +64,32 @@ func _find_player_spawns_recursive(node: Node, results: Array[Marker3D]) -> void
 		
 		# Recurse into all children (we don't know how deep FuncGodot nests things)
 		_find_player_spawns_recursive(child, results)
+
+
+func get_enemy_spawns() -> Array[Marker3D]:
+	var spawns: Array[Marker3D] = []
+	_find_enemy_spawns_recursive(self, spawns)
+	return spawns
+
+
+func _find_enemy_spawns_recursive(node: Node, results: Array[Marker3D]) -> void:
+	for child in node.get_children():
+		if child is Marker3D and "enemy_spawn" in child.name.to_lower():
+			results.append(child)
+
+		_find_enemy_spawns_recursive(child, results)
+
+
+func spawn_enemies() -> Array[Node3D]:
+	var spawns := get_enemy_spawns()
+	for spawn_point in spawns:
+		var enemy := basic_enemy_scene.instantiate() as Node3D
+		add_child(enemy)
+		enemy.global_transform = spawn_point.global_transform
+		spawned_enemies.append(enemy)
+		print("Level: Spawned enemy at ", enemy.global_position, " using spawn point: ", spawn_point.name)
+
+	return spawned_enemies
 
 
 ## Spawns a player at the first available player spawn point.
