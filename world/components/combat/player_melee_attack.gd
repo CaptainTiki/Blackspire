@@ -8,6 +8,9 @@ const DamageRequestScript := preload("res://world/components/combat/damage_reque
 @export var active_delay := 0.08
 @export var active_duration := 0.16
 
+const COMBAT_HURTBOX_LAYER := 0b000100
+const WEAPON_HITBOX_LAYER := 0b001000
+
 @onready var camera: Camera3D = player_components.camerarig.ray_cast_3d.get_parent()
 @onready var animation_player: AnimationPlayer = camera.get_node("WeaponRoot/AnimationPlayer")
 @onready var hitbox: Area3D = camera.get_node("WeaponRoot/SwordPivot/SwordHitbox")
@@ -22,6 +25,8 @@ func _ready() -> void:
 
 	hitbox.monitoring = false
 	hitbox.monitorable = false
+	hitbox.collision_layer = WEAPON_HITBOX_LAYER
+	hitbox.collision_mask = COMBAT_HURTBOX_LAYER
 	hitbox.area_entered.connect(_on_hitbox_area_entered)
 
 

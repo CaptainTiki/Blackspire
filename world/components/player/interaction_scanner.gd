@@ -7,6 +7,8 @@ class_name InteractionScanner
 @export var interaction_distance: float = 2.0
 @export var player_components: PlayerComponents
 
+const INTERACTION_RAY_MASK := 0b000011
+
 var raycast: RayCast3D = null
 var current_interactable: Interactable = null
 
@@ -19,6 +21,7 @@ func _ready() -> void:
 	raycast.enabled = true
 	raycast.collide_with_areas = true
 	raycast.collide_with_bodies = true
+	raycast.collision_mask = INTERACTION_RAY_MASK
 
 func _physics_process(_delta: float) -> void:
 	_update_interactable()

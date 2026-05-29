@@ -12,6 +12,8 @@ height = 1.2
 height = 1.2
 
 [node name="BreakableUrn" type="StaticBody3D" unique_id=140254574]
+collision_layer = 3
+collision_mask = 48
 script = ExtResource("1_entity_script")
 debris_scene = ExtResource("3_debris")
 debris_count = 6

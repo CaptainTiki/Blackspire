@@ -97,6 +97,8 @@ _data = {
 }
 
 [node name="Player" type="CharacterBody3D" unique_id=1035581857]
+collision_layer = 16
+collision_mask = 33
 script = ExtResource("1_script")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=158910546]
@@ -118,6 +120,7 @@ far = 400.0
 [node name="RayCast3D" type="RayCast3D" parent="CameraRig/Camera3D" unique_id=93489418]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04797101, 0)
 target_position = Vector3(0, 0, -2)
+collision_mask = 3
 collide_with_areas = true
 
 [node name="WeaponRoot" type="Node3D" parent="CameraRig/Camera3D" unique_id=1036805861]
@@ -135,6 +138,8 @@ mesh = SubResource("BoxMesh_sword_hilt")
 
 [node name="SwordHitbox" type="Area3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=456433239]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.15, -0.55)
+collision_layer = 8
+collision_mask = 4
 monitoring = false
 monitorable = false
 

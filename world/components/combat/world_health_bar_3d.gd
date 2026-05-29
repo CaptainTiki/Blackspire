@@ -2,8 +2,8 @@ extends Node3D
 class_name WorldHealthBar3D
 
 @export var health_component: Node
-@export var focus_interactable: Interactable
-@export var fade_duration := 0.5
+@export var visible_after_damage_duration := 10.0
+@export var fade_duration := 10.0
 @export var camera_offset := 0.08
 
 @onready var background: MeshInstance3D = $Background
@@ -12,8 +12,8 @@ class_name WorldHealthBar3D
 var _background_material := StandardMaterial3D.new()
 var _fill_material := StandardMaterial3D.new()
 var _alpha := 0.0
-var _is_focused := false
 var _is_damaged := false
+var _visible_after_damage_timer := 0.0
 var _base_local_position := Vector3.ZERO
 
 
@@ -24,15 +24,16 @@ func _ready() -> void:
 
 	health_component.damaged.connect(_on_health_damaged)
 	health_component.died.connect(_on_health_died)
-	focus_interactable.focus_gained.connect(_on_focus_gained)
-	focus_interactable.focus_lost.connect(_on_focus_lost)
+
 	_update_fill()
 
 
 func _process(delta: float) -> void:
 	_face_camera()
 
-	var target_alpha := 1.0 if _is_focused and _is_damaged else 0.0
+	_visible_after_damage_timer = maxf(_visible_after_damage_timer - delta, 0.0)
+
+	var target_alpha := 1.0 if _is_damaged and _visible_after_damage_timer > 0.0 else 0.0
 	if target_alpha == 1.0:
 		_set_alpha(1.0)
 	else:
@@ -57,25 +58,15 @@ func _setup_materials() -> void:
 
 func _on_health_damaged(_damage_request: Variant, _remaining_health: int) -> void:
 	_is_damaged = health_component.current_health < health_component.max_health
+	_visible_after_damage_timer = visible_after_damage_duration
 	_update_fill()
-	if _is_focused:
+	if _is_damaged:
 		_set_alpha(1.0)
 
 
 func _on_health_died(_damage_request: Variant) -> void:
 	_is_damaged = false
 	_set_alpha(0.0)
-
-
-func _on_focus_gained() -> void:
-	_is_focused = true
-	_is_damaged = health_component.current_health < health_component.max_health
-	if _is_damaged:
-		_set_alpha(1.0)
-
-
-func _on_focus_lost() -> void:
-	_is_focused = false
 
 
 func _update_fill() -> void:

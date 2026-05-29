@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="2_health"]
 [ext_resource type="Script" path="res://world/components/combat/hurtbox_3d.gd" id="3_hurtbox"]
 [ext_resource type="Script" path="res://world/actors/enemies/enemy_behavior.gd" id="4_behavior"]
+[ext_resource type="Script" path="res://world/components/combat/world_health_bar_3d.gd" id="5_health_bar"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.35
@@ -20,7 +21,29 @@ height = 1.4
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_enemy"]
 albedo_color = Color(0.42, 0.08, 0.07, 1)
 
+[sub_resource type="CylinderShape3D" id="AttackRangeShape"]
+height = 0.04
+
+[sub_resource type="StandardMaterial3D" id="AttackRangeMaterial"]
+transparency = 1
+albedo_color = Color(1, 0.42, 0.08, 0.16)
+shading_mode = 0
+
+[sub_resource type="CylinderMesh" id="AttackRangeMesh"]
+material = SubResource("AttackRangeMaterial")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.02
+
+[sub_resource type="QuadMesh" id="HealthBarBackgroundMesh"]
+size = Vector2(0.84, 0.1)
+
+[sub_resource type="QuadMesh" id="HealthBarFillMesh"]
+size = Vector2(0.78, 0.06)
+
 [node name="BasicEnemy" type="CharacterBody3D"]
+collision_layer = 32
+collision_mask = 17
 script = ExtResource("1_enemy")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -50,3 +73,37 @@ shape = SubResource("CapsuleShape3D_hurtbox")
 [node name="EnemyBehavior" type="Node" parent="Components" node_paths=PackedStringArray("enemy")]
 script = ExtResource("4_behavior")
 enemy = NodePath("../..")
+
+[node name="AttackRangeDebug" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackRangeDebug"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+shape = SubResource("AttackRangeShape")
+
+[node name="AttackRangeMesh" type="MeshInstance3D" parent="AttackRangeDebug"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 0)
+mesh = SubResource("AttackRangeMesh")
+
+[node name="HealthBar" type="Node3D" parent="." node_paths=PackedStringArray("health_component")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+script = ExtResource("5_health_bar")
+health_component = NodePath("../Components/HealthComponent")
+
+[node name="Background" type="MeshInstance3D" parent="HealthBar"]
+mesh = SubResource("HealthBarBackgroundMesh")
+
+[node name="Fill" type="MeshInstance3D" parent="HealthBar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.001)
+mesh = SubResource("HealthBarFillMesh")
+
+[node name="DebugStateLabel" type="Label3D" parent="."]
+transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, 0, 2.08, 0)
+billboard = 1
+no_depth_test = true
+text = "IDLE"
+font_size = 18
+modulate = Color(1, 0.82, 0.36, 1)
