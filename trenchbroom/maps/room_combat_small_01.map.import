@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://diastjmuan33t"
+path="res://.godot/imported/room_combat_small_01.map-55315b189572fac8ab3ba39912a27105.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_combat_small_01.map"
+dest_files=["res://.godot/imported/room_combat_small_01.map-55315b189572fac8ab3ba39912a27105.tres"]
+
+[params]
+

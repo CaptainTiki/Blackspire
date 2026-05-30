@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://dyldkl8qqon7d"
+path="res://.godot/imported/room_boss_01.map-a0403b42774ab7795b5576e9a2f97898.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_boss_01.map"
+dest_files=["res://.godot/imported/room_boss_01.map-a0403b42774ab7795b5576e9a2f97898.tres"]
+
+[params]
+

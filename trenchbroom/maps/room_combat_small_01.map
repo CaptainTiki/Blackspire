@@ -1,0 +1,161 @@
+// Game: Blackspire
+// Format: Valve
+// entity 0
+{
+"mapversion" "220"
+"wad" ""
+"classname" "worldspawn"
+// brush 0
+{
+( -224 208 0 ) ( -224 -208 0 ) ( -224 -208 -16 ) trenchbroom/dungeon/bs_crypt_floor_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -224 -208 0 ) ( 224 -208 0 ) ( 224 -208 -16 ) trenchbroom/dungeon/bs_crypt_floor_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 208 -16 ) ( -224 208 -16 ) ( -224 -208 -16 ) trenchbroom/dungeon/bs_crypt_floor_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -224 208 0 ) ( 224 208 0 ) ( 224 -208 0 ) trenchbroom/dungeon/bs_crypt_floor_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 224 208 -16 ) ( 224 208 0 ) ( -224 208 0 ) trenchbroom/dungeon/bs_crypt_floor_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 -208 0 ) ( 224 208 0 ) ( 224 208 -16 ) trenchbroom/dungeon/bs_crypt_floor_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 1
+{
+( -224 208 112 ) ( -224 -208 112 ) ( -224 -208 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -224 -208 112 ) ( 224 -208 112 ) ( 224 -208 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 208 96 ) ( -224 208 96 ) ( -224 -208 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -224 208 112 ) ( 224 208 112 ) ( 224 -208 112 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 224 208 96 ) ( 224 208 112 ) ( -224 208 112 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 -208 112 ) ( 224 208 112 ) ( 224 208 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 2
+{
+( -224 208 96 ) ( -224 192 96 ) ( -224 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -224 192 96 ) ( -32 192 96 ) ( -32 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 208 0 ) ( -224 208 0 ) ( -224 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -224 208 96 ) ( -32 208 96 ) ( -32 192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 208 0 ) ( -32 208 96 ) ( -224 208 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 192 96 ) ( -32 208 96 ) ( -32 208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 3
+{
+( 32 208 96 ) ( 32 192 96 ) ( 32 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 192 96 ) ( 224 192 96 ) ( 224 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 208 0 ) ( 32 208 0 ) ( 32 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 208 96 ) ( 224 208 96 ) ( 224 192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 224 208 0 ) ( 224 208 96 ) ( 32 208 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 192 96 ) ( 224 208 96 ) ( 224 208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 4
+{
+( -32 208 96 ) ( -32 192 96 ) ( -32 192 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 192 96 ) ( 32 192 96 ) ( 32 192 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 208 64 ) ( -32 208 64 ) ( -32 192 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 208 96 ) ( 32 208 96 ) ( 32 192 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 208 64 ) ( 32 208 96 ) ( -32 208 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 192 96 ) ( 32 208 96 ) ( 32 208 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 5
+{
+( -224 -192 96 ) ( -224 -208 96 ) ( -224 -208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -224 -208 96 ) ( -32 -208 96 ) ( -32 -208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 -192 0 ) ( -224 -192 0 ) ( -224 -208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -224 -192 96 ) ( -32 -192 96 ) ( -32 -208 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 -192 0 ) ( -32 -192 96 ) ( -224 -192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 -208 96 ) ( -32 -192 96 ) ( -32 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 6
+{
+( 32 -192 96 ) ( 32 -208 96 ) ( 32 -208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 -208 96 ) ( 224 -208 96 ) ( 224 -208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 -192 0 ) ( 32 -192 0 ) ( 32 -208 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 -192 96 ) ( 224 -192 96 ) ( 224 -208 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 224 -192 0 ) ( 224 -192 96 ) ( 32 -192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 -208 96 ) ( 224 -192 96 ) ( 224 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 7
+{
+( -32 -192 96 ) ( -32 -208 96 ) ( -32 -208 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 -208 96 ) ( 32 -208 96 ) ( 32 -208 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 -192 64 ) ( -32 -192 64 ) ( -32 -208 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 -192 96 ) ( 32 -192 96 ) ( 32 -208 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 -192 64 ) ( 32 -192 96 ) ( -32 -192 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 -208 96 ) ( 32 -192 96 ) ( 32 -192 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 8
+{
+( -224 192 96 ) ( -224 -192 96 ) ( -224 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -224 -192 96 ) ( -208 -192 96 ) ( -208 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -208 192 0 ) ( -224 192 0 ) ( -224 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -224 192 96 ) ( -208 192 96 ) ( -208 -192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -208 192 0 ) ( -208 192 96 ) ( -224 192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -208 -192 96 ) ( -208 192 96 ) ( -208 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 9
+{
+( 208 192 96 ) ( 208 -192 96 ) ( 208 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 208 -192 96 ) ( 224 -192 96 ) ( 224 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 192 0 ) ( 208 192 0 ) ( 208 -192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 208 192 96 ) ( 224 192 96 ) ( 224 -192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 224 192 0 ) ( 224 192 96 ) ( 208 192 96 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 224 -192 96 ) ( 224 192 96 ) ( 224 192 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 10
+{
+( -24 32 32 ) ( -24 -32 32 ) ( -24 -32 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -24 -32 32 ) ( 24 -32 32 ) ( 24 -32 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 24 32 0 ) ( -24 32 0 ) ( -24 -32 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -24 32 32 ) ( 24 32 32 ) ( 24 -32 32 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 24 32 0 ) ( 24 32 32 ) ( -24 32 32 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 24 -32 32 ) ( 24 32 32 ) ( 24 32 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 11
+{
+( -144 -56 24 ) ( -144 -104 24 ) ( -144 -104 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -144 -104 24 ) ( -96 -104 24 ) ( -96 -104 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -96 -56 0 ) ( -144 -56 0 ) ( -144 -104 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -144 -56 24 ) ( -96 -56 24 ) ( -96 -104 24 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -96 -56 0 ) ( -96 -56 24 ) ( -144 -56 24 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -96 -104 24 ) ( -96 -56 24 ) ( -96 -56 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 12
+{
+( 96 104 24 ) ( 96 56 24 ) ( 96 56 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 96 56 24 ) ( 144 56 24 ) ( 144 56 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 144 104 0 ) ( 96 104 0 ) ( 96 56 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 96 104 24 ) ( 144 104 24 ) ( 144 56 24 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 144 104 0 ) ( 144 104 24 ) ( 96 104 24 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 144 56 24 ) ( 144 104 24 ) ( 144 104 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+}
+// entity 1
+{
+"classname" "room_connector"
+"origin" "0 208 16"
+"angle" "90"
+"connector_id" "entrance"
+"connector_type" "doorway"
+"tags" "crypt standard"
+"door_width_units" "64"
+"door_height_units" "64"
+}
+// entity 2
+{
+"classname" "room_connector"
+"origin" "0 -208 16"
+"angle" "270"
+"connector_id" "exit"
+"connector_type" "doorway"
+"tags" "crypt standard"
+"door_width_units" "64"
+"door_height_units" "64"
+}
+// entity 3
+{
+"classname" "info_enemy_spawn"
+"origin" "-96 0 16"
+"angle" "0"
+"enemy_type" "basic"
+}
+// entity 4
+{
+"classname" "info_enemy_spawn"
+"origin" "112 -56 16"
+"angle" "180"
+"enemy_type" "basic"
+}

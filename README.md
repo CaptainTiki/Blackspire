@@ -2,7 +2,7 @@
 
 **Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.** It recreates the feeling of early MMO raiding before every answer was known.
 
-## Current Status (as of 2026-05-29)
+## Current Status (as of 2026-05-30)
 
 - **Core authoring pipeline**: Fully TrenchBroom + FuncGodot. Everything placeable comes through the FGD.
 - **Interaction system**: Thin `Interactable` component + `Entity` owns real behavior (proven pattern).
@@ -17,8 +17,15 @@
   - Reusable health/damage/hurtbox path.
   - Wooden doors and urns can be damaged/broken by sword hits.
   - Iron doors are combat-immune but can still be lever/interaction controlled.
-  - Floating damage numbers, damaged-target health bars, and player hit flash feedback are working.
-  - Basic enemy spawns from TrenchBroom `info_enemy_spawn`, chases, attacks, damages the player, and can be killed.
+  - Floating damage numbers, timed damaged-target health bars, and player hit flash feedback are working.
+  - Basic enemy spawns from TrenchBroom `info_enemy_spawn`, chases, uses a readable windup + forward cone lunge attack, damages the player, and can be killed.
+- **Collision layers**: First named layer pass is in place for world, interactables, combat hurtboxes, weapon hitboxes, player, and enemy bodies.
+- **Manual room-chain generation**: First deterministic authored dungeon chain is playable and runtime verified.
+  - Rooms are authored as TrenchBroom maps and wrapped by reusable `Room` scenes.
+  - `room_connector` point entities define mapper-facing doorway IDs, tags, dimensions, and outward direction.
+  - `LevelGenerator` aligns rooms by connector transforms and spawns the generated chain before player/enemy setup.
+  - Current test chain uses hallway buffers between rooms: spawn, 4-way combat, treasure side branch, small combat, and larger boss/elite-room shell.
+  - Enemy spawns, player spawns, breakable urns, and traversal all work across generated room transforms.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -39,7 +46,7 @@
 
 See [docs/README.md](docs/README.md) for the full version history.
 
-Current focus: Polishing the single-player combat slice (enemy readability, attack tells/reactions, basic tuning, and multiple connected TrenchBroom rooms).
+Current focus: Turning the larger boss-room shell into an "elite enemy" encounter without jumping all the way to bespoke boss/state-chart design yet.
 
 ---
 

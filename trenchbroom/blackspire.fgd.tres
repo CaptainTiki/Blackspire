@@ -9,9 +9,10 @@
 [ext_resource type="Resource" path="res://trenchbroom/entities/lever.tres" id="7_lever"]
 [ext_resource type="Resource" path="res://trenchbroom/entities/door_iron.tres" id="8_iron_door"]
 [ext_resource type="Resource" path="res://trenchbroom/entities/enemy_basic.tres" id="9_enemy_basic"]
+[ext_resource type="Resource" path="res://trenchbroom/entities/room_connector.tres" id="10_room_connector"]
 
 [resource]
 script = ExtResource("1_fgdfile")
 fgd_name = "Blackspire"
 base_fgd_files = Array[Resource]([ExtResource("2_base_fgd")])
-entity_definitions = Array[Resource]([ExtResource("3_player_start"), ExtResource("4_enemy_spawn"), ExtResource("5_urn"), ExtResource("6_door"), ExtResource("7_lever"), ExtResource("8_iron_door"), ExtResource("9_enemy_basic")])
+entity_definitions = Array[Resource]([ExtResource("3_player_start"), ExtResource("4_enemy_spawn"), ExtResource("5_urn"), ExtResource("6_door"), ExtResource("7_lever"), ExtResource("8_iron_door"), ExtResource("9_enemy_basic"), ExtResource("10_room_connector")])

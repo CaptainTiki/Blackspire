@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_trim_01.png" id="1_tex"]
+
+[resource]
+albedo_texture = ExtResource("1_tex")
+metallic_specular = 0.0
+roughness = 0.82
+texture_filter = 2

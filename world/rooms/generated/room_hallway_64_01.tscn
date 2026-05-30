@@ -1,0 +1,125 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://world/rooms/room.gd" id="1_6kupl"]
+[ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="2_v3exa"]
+[ext_resource type="Resource" path="res://trenchbroom/blackspire_map_settings.tres" id="3_dx6x6"]
+[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_trim_01.tres" id="4_5n10i"]
+[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_wall_01.tres" id="5_0pgny"]
+[ext_resource type="PackedScene" path="res://world/rooms/room_connector.tscn" id="6_dceoi"]
+[ext_resource type="Script" path="res://world/rooms/room_connector.gd" id="7_xgev8"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_06s60"]
+_surfaces = [{
+"aabb": AABB(-1.5, -0.5, -2, 3, 3.5, 4),
+"attribute_data": PackedByteArray("AABAvwAAAAAAAEA/AAAAAAAAQD8AAIA+AABAvwAAgD4AAIA/AACAPgAAgL8AAIA+AACAvwAAAAAAAIA/AAAAAAAAgD8AAEA/AACAPwAAQL8AAIC/AABAvwAAgL8AAEA/AACAPwAAQD8AAIC/AABAPwAAgL8AAEC/AACAPwAAQL8AAIC/AAAAAAAAgD8AAAAAAACAPwAAgD4AAIC/AACAPgAAQD8AAIA+AABAvwAAgD4AAEC/AAAAAAAAQD8AAAAAAABAvwAAwL8AAEA/AADAvwAAQD8AAKC/AABAvwAAoL8AAIA/AACgvwAAgL8AAKC/AACAvwAAwL8AAIA/AADAvwAAgD8AAEA/AACAPwAAQL8AAIC/AABAvwAAgL8AAEA/AACAPwAAQD8AAIC/AABAPwAAgL8AAEC/AACAPwAAQL8AAIC/AADAvwAAgD8AAMC/AACAPwAAoL8AAIC/AACgvwAAQD8AAKC/AABAvwAAoL8AAEC/AADAvwAAQD8AAMC/AABAvwAAoL8AAAC/AACgvwAAAL8AAIC/AABAvwAAgL8AAAA/AACAvwAAAL8AAIC/AAAAvwAAoL8AAAA/AACgvwAAAD8AAAC/AAAAPwAAQL8AAAC/AABAvwAAAL8AAAC/AAAAPwAAAL8AAAC/AAAAvwAAAL8AAEC/AAAAPwAAQL8AAAC/AACgvwAAAD8AAKC/AAAAPwAAgL8AAAC/AACAvwAAQD8AAIC/AAAAPwAAgL8AAAA/AACgvwAAQD8AAKC/AAAAPwAAoL8AAEA/AACgvwAAQD8AAIC/AAAAPwAAgL8AAAA/AACAvwAAAL8AAIC/AAAAvwAAoL8AAAA/AACgvwAAAD8AAEA/AAAAPwAAAD8AAAC/AAAAPwAAAL8AAEA/AAAAPwAAQD8AAAC/AABAPwAAAL8AAAA/AAAAPwAAAD8AAAC/AACgvwAAAD8AAKC/AAAAPwAAgL8AAAC/AACAvwAAAL8AAIC/AABAvwAAgL8AAEC/AACgvwAAAL8AAKC/"),
+"format": 34359742487,
+"index_count": 144,
+"index_data": PackedByteArray("AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcAGAAZABoAGAAaABsAHAAdAB4AHAAeAB8AIAAhACIAIAAiACMAJAAlACYAJAAmACcAKAApACoAKAAqACsALAAtAC4ALAAuAC8AMAAxADIAMAAyADMANAA1ADYANAA2ADcAOAA5ADoAOAA6ADsAPAA9AD4APAA+AD8AQABBAEIAQABCAEMARABFAEYARABGAEcASABJAEoASABKAEsATABNAE4ATABOAE8AUABRAFIAUABSAFMAVABVAFYAVABWAFcAWABZAFoAWABaAFsAXABdAF4AXABeAF8A"),
+"material": ExtResource("4_5n10i"),
+"name": "trenchbroom/dungeon/bs_crypt_trim_01",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 96,
+"vertex_data": PackedByteArray("AADAPwAAAAAAAADAAADAvwAAAAAAAADAAADAvwAAAL8AAADAAADAPwAAAL8AAADAAADAvwAAAL8AAABAAADAvwAAAL8AAADAAADAvwAAAAAAAADAAADAvwAAAAAAAABAAADAvwAAAL8AAABAAADAPwAAAL8AAABAAADAPwAAAL8AAADAAADAvwAAAL8AAADAAADAvwAAAAAAAABAAADAvwAAAAAAAADAAADAPwAAAAAAAADAAADAPwAAAAAAAABAAADAPwAAAAAAAABAAADAPwAAAAAAAADAAADAPwAAAL8AAADAAADAPwAAAL8AAABAAADAPwAAAL8AAABAAADAvwAAAL8AAABAAADAvwAAAAAAAABAAADAPwAAAAAAAABAAADAPwAAQEAAAADAAADAvwAAQEAAAADAAADAvwAAIEAAAADAAADAPwAAIEAAAADAAADAvwAAIEAAAABAAADAvwAAIEAAAADAAADAvwAAQEAAAADAAADAvwAAQEAAAABAAADAvwAAIEAAAABAAADAPwAAIEAAAABAAADAPwAAIEAAAADAAADAvwAAIEAAAADAAADAvwAAQEAAAABAAADAvwAAQEAAAADAAADAPwAAQEAAAADAAADAPwAAQEAAAABAAADAPwAAQEAAAABAAADAPwAAQEAAAADAAADAPwAAIEAAAADAAADAPwAAIEAAAABAAADAPwAAIEAAAABAAADAvwAAIEAAAABAAADAvwAAQEAAAABAAADAPwAAQEAAAABAAADAPwAAIEAAAIC/AACAPwAAIEAAAIC/AACAPwAAAEAAAIC/AADAPwAAAEAAAIC/AACAPwAAAEAAAIA/AACAPwAAAEAAAIC/AACAPwAAIEAAAIC/AACAPwAAIEAAAIA/AACAPwAAAEAAAIA/AADAPwAAAEAAAIA/AADAPwAAAEAAAIC/AACAPwAAAEAAAIC/AACAPwAAIEAAAIA/AACAPwAAIEAAAIC/AADAPwAAIEAAAIC/AADAPwAAIEAAAIA/AADAPwAAIEAAAIA/AADAPwAAIEAAAIC/AADAPwAAAEAAAIC/AADAPwAAAEAAAIA/AADAPwAAAEAAAIA/AACAPwAAAEAAAIA/AACAPwAAIEAAAIA/AADAPwAAIEAAAIA/AACAvwAAIEAAAIC/AADAvwAAIEAAAIC/AADAvwAAAEAAAIC/AACAvwAAAEAAAIC/AADAvwAAAEAAAIA/AADAvwAAAEAAAIC/AADAvwAAIEAAAIC/AADAvwAAIEAAAIA/AADAvwAAAEAAAIA/AACAvwAAAEAAAIA/AACAvwAAAEAAAIC/AADAvwAAAEAAAIC/AADAvwAAIEAAAIA/AADAvwAAIEAAAIC/AACAvwAAIEAAAIC/AACAvwAAIEAAAIA/AACAvwAAIEAAAIA/AACAvwAAIEAAAIC/AACAvwAAAEAAAIC/AACAvwAAAEAAAIA/AACAvwAAAEAAAIA/AADAvwAAAEAAAIA/AADAvwAAIEAAAIA/AACAvwAAIEAAAIA//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+/")
+}, {
+"aabb": AABB(-1.5, 0, -2, 3, 2.5, 4),
+"attribute_data": PackedByteArray("AABAvwAAoL8AAAC/AACgvwAAAL8AAAAAAABAvwAAAAAAAAC/AAAAAAAAgL8AAAAAAACAvwAAoL8AAAC/AACgvwAAAL8AAAC/AAAAvwAAQL8AAIC/AABAvwAAgL8AAAC/AAAAvwAAAL8AAIC/AAAAvwAAgL8AAEC/AAAAvwAAQL8AAAA/AACgvwAAgD8AAKC/AACAPwAAAAAAAAA/AAAAAAAAQD8AAAAAAAAAPwAAAAAAAAA/AACgvwAAQD8AAKC/AABAvwAAoL8AAAC/AACgvwAAAL8AAAAAAABAvwAAAAAAAIA/AAAAAAAAAD8AAAAAAAAAPwAAoL8AAIA/AACgvwAAgD8AAAC/AACAPwAAQL8AAAA/AABAvwAAAD8AAAC/AACAPwAAAL8AAAA/AAAAvwAAAD8AAEC/AACAPwAAQL8AAIC/AACgvwAAAL8AAKC/AAAAvwAAAAAAAIC/AAAAAAAAQD8AAAAAAAAAPwAAAAAAAAA/AACgvwAAQD8AAKC/AAAAPwAAoL8AAEA/AACgvwAAQD8AAAAAAAAAPwAAAAAAAAC/AAAAAAAAgL8AAAAAAACAvwAAoL8AAAC/AACgvwAAAL8AAEA/AAAAvwAAAD8AAIC/AAAAPwAAgL8AAEA/AAAAvwAAQD8AAIC/AABAPwAAgL8AAAA/AAAAvwAAAD8AAAA/AACgvwAAgD8AAKC/AACAPwAAAAAAAAA/AAAAAAAAAL8AAAAAAABAvwAAAAAAAEC/AACgvwAAAL8AAKC/AAAAPwAAoL8AAEA/AACgvwAAQD8AAAAAAAAAPwAAAAAAAIA/AAAAAAAAAD8AAAAAAAAAPwAAoL8AAIA/AACgvwAAgD8AAEA/AACAPwAAAD8AAAA/AAAAPwAAAD8AAEA/AACAPwAAQD8AAAA/AABAPwAAAD8AAAA/AACAPwAAAD8AAIC/AACgvwAAAL8AAKC/AAAAvwAAAAAAAIC/AAAAAAAAAL8AAAAAAABAvwAAAAAAAEC/AACgvwAAAL8AAKC/AAAAvwAAoL8AAAA/AACgvwAAAD8AAAAAAAAAvwAAAAAAAEC/AAAAAAAAgL8AAAAAAACAvwAAoL8AAEC/AACgvwAAQL8AAAA/AABAvwAAAL8AAIC/AAAAvwAAgL8AAAA/AABAvwAAAD8AAIC/AAAAPwAAgL8AAAC/AABAvwAAAL8AAEA/AACgvwAAgD8AAKC/AACAPwAAAAAAAEA/AAAAAAAAAD8AAAAAAAAAvwAAAAAAAAC/AACgvwAAAD8AAKC/AAAAvwAAoL8AAAA/AACgvwAAAD8AAAAAAAAAvwAAAAAAAIA/AAAAAAAAQD8AAAAAAABAPwAAoL8AAIA/AACgvwAAgD8AAAA/AACAPwAAAL8AAEA/AAAAvwAAQD8AAAA/AACAPwAAAD8AAEA/AAAAPwAAQD8AAAC/AACAPwAAAL8AAIC/AACgvwAAQL8AAKC/AABAvwAAAAAAAIC/AAAAAAAAAD8AAAAAAAAAvwAAAAAAAAC/AACgvwAAAD8AAKC/"),
+"format": 34359742487,
+"index_count": 216,
+"index_data": PackedByteArray("AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcAGAAZABoAGAAaABsAHAAdAB4AHAAeAB8AIAAhACIAIAAiACMAJAAlACYAJAAmACcAKAApACoAKAAqACsALAAtAC4ALAAuAC8AMAAxADIAMAAyADMANAA1ADYANAA2ADcAOAA5ADoAOAA6ADsAPAA9AD4APAA+AD8AQABBAEIAQABCAEMARABFAEYARABGAEcASABJAEoASABKAEsATABNAE4ATABOAE8AUABRAFIAUABSAFMAVABVAFYAVABWAFcAWABZAFoAWABaAFsAXABdAF4AXABeAF8AYABhAGIAYABiAGMAZABlAGYAZABmAGcAaABpAGoAaABqAGsAbABtAG4AbABuAG8AcABxAHIAcAByAHMAdAB1AHYAdAB2AHcAeAB5AHoAeAB6AHsAfAB9AH4AfAB+AH8AgACBAIIAgACCAIMAhACFAIYAhACGAIcAiACJAIoAiACKAIsAjACNAI4AjACOAI8A"),
+"material": ExtResource("5_0pgny"),
+"name": "trenchbroom/dungeon/bs_crypt_wall_01",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 144,
+"vertex_data": PackedByteArray("AADAPwAAIEAAAADAAACAPwAAIEAAAADAAACAPwAAAAAAAADAAADAPwAAAAAAAADAAACAPwAAAAAAAIC/AACAPwAAAAAAAADAAACAPwAAIEAAAADAAACAPwAAIEAAAIC/AACAPwAAAAAAAIC/AADAPwAAAAAAAIC/AADAPwAAAAAAAADAAACAPwAAAAAAAADAAACAPwAAIEAAAIC/AACAPwAAIEAAAADAAADAPwAAIEAAAADAAADAPwAAIEAAAIC/AADAPwAAIEAAAIC/AADAPwAAIEAAAADAAADAPwAAAAAAAADAAADAPwAAAAAAAIC/AADAPwAAAAAAAIC/AACAPwAAAAAAAIC/AACAPwAAIEAAAIC/AADAPwAAIEAAAIC/AADAPwAAIEAAAIA/AACAPwAAIEAAAIA/AACAPwAAAAAAAIA/AADAPwAAAAAAAIA/AACAPwAAAAAAAABAAACAPwAAAAAAAIA/AACAPwAAIEAAAIA/AACAPwAAIEAAAABAAACAPwAAAAAAAABAAADAPwAAAAAAAABAAADAPwAAAAAAAIA/AACAPwAAAAAAAIA/AACAPwAAIEAAAABAAACAPwAAIEAAAIA/AADAPwAAIEAAAIA/AADAPwAAIEAAAABAAADAPwAAIEAAAABAAADAPwAAIEAAAIA/AADAPwAAAAAAAIA/AADAPwAAAAAAAABAAADAPwAAAAAAAABAAACAPwAAAAAAAABAAACAPwAAIEAAAABAAADAPwAAIEAAAABAAACAvwAAIEAAAADAAADAvwAAIEAAAADAAADAvwAAAAAAAADAAACAvwAAAAAAAADAAADAvwAAAAAAAIC/AADAvwAAAAAAAADAAADAvwAAIEAAAADAAADAvwAAIEAAAIC/AADAvwAAAAAAAIC/AACAvwAAAAAAAIC/AACAvwAAAAAAAADAAADAvwAAAAAAAADAAADAvwAAIEAAAIC/AADAvwAAIEAAAADAAACAvwAAIEAAAADAAACAvwAAIEAAAIC/AACAvwAAIEAAAIC/AACAvwAAIEAAAADAAACAvwAAAAAAAADAAACAvwAAAAAAAIC/AACAvwAAAAAAAIC/AADAvwAAAAAAAIC/AADAvwAAIEAAAIC/AACAvwAAIEAAAIC/AACAvwAAIEAAAIA/AADAvwAAIEAAAIA/AADAvwAAAAAAAIA/AACAvwAAAAAAAIA/AADAvwAAAAAAAABAAADAvwAAAAAAAIA/AADAvwAAIEAAAIA/AADAvwAAIEAAAABAAADAvwAAAAAAAABAAACAvwAAAAAAAABAAACAvwAAAAAAAIA/AADAvwAAAAAAAIA/AADAvwAAIEAAAABAAADAvwAAIEAAAIA/AACAvwAAIEAAAIA/AACAvwAAIEAAAABAAACAvwAAIEAAAABAAACAvwAAIEAAAIA/AACAvwAAAAAAAIA/AACAvwAAAAAAAABAAACAvwAAAAAAAABAAADAvwAAAAAAAABAAADAvwAAIEAAAABAAACAvwAAIEAAAABAAACAPwAAIEAAAADAAACAvwAAIEAAAADAAACAvwAAAAAAAADAAACAPwAAAAAAAADAAACAvwAAAAAAAMC/AACAvwAAAAAAAADAAACAvwAAIEAAAADAAACAvwAAIEAAAMC/AACAvwAAAAAAAMC/AACAPwAAAAAAAMC/AACAPwAAAAAAAADAAACAvwAAAAAAAADAAACAvwAAIEAAAMC/AACAvwAAIEAAAADAAACAPwAAIEAAAADAAACAPwAAIEAAAMC/AACAPwAAIEAAAMC/AACAPwAAIEAAAADAAACAPwAAAAAAAADAAACAPwAAAAAAAMC/AACAPwAAAAAAAMC/AACAvwAAAAAAAMC/AACAvwAAIEAAAMC/AACAPwAAIEAAAMC/AACAPwAAIEAAAMA/AACAvwAAIEAAAMA/AACAvwAAAAAAAMA/AACAPwAAAAAAAMA/AACAvwAAAAAAAABAAACAvwAAAAAAAMA/AACAvwAAIEAAAMA/AACAvwAAIEAAAABAAACAvwAAAAAAAABAAACAPwAAAAAAAABAAACAPwAAAAAAAMA/AACAvwAAAAAAAMA/AACAvwAAIEAAAABAAACAvwAAIEAAAMA/AACAPwAAIEAAAMA/AACAPwAAIEAAAABAAACAPwAAIEAAAABAAACAPwAAIEAAAMA/AACAPwAAAAAAAMA/AACAPwAAAAAAAABAAACAPwAAAAAAAABAAACAvwAAAAAAAABAAACAvwAAIEAAAABAAACAPwAAIEAAAABA/////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+/")
+}]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_mqk3o"]
+points = PackedVector3Array(1.5, 0, 2, 1.5, -0.5, 2, -1.5, 0, 2, -1.5, -0.5, 2, 1.5, 0, -2, 1.5, -0.5, -2, -1.5, 0, -2, -1.5, -0.5, -2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_b15my"]
+points = PackedVector3Array(1.5, 3, 2, 1.5, 2.5, 2, -1.5, 3, 2, -1.5, 2.5, 2, 1.5, 3, -2, 1.5, 2.5, -2, -1.5, 3, -2, -1.5, 2.5, -2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_cmqpy"]
+points = PackedVector3Array(1.5, 2.5, -1, 1.5, 0, -1, 1, 2.5, -1, 1, 0, -1, 1.5, 2.5, -2, 1.5, 0, -2, 1, 2.5, -2, 1, 0, -2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_x6khj"]
+points = PackedVector3Array(1.5, 2.5, 2, 1.5, 0, 2, 1, 2.5, 2, 1, 0, 2, 1.5, 2.5, 1, 1.5, 0, 1, 1, 2.5, 1, 1, 0, 1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fce8r"]
+points = PackedVector3Array(1.5, 2.5, 1, 1.5, 2, 1, 1, 2.5, 1, 1, 2, 1, 1.5, 2.5, -1, 1.5, 2, -1, 1, 2.5, -1, 1, 2, -1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_d7s5x"]
+points = PackedVector3Array(-1, 2.5, -1, -1, 0, -1, -1.5, 2.5, -1, -1.5, 0, -1, -1, 2.5, -2, -1, 0, -2, -1.5, 2.5, -2, -1.5, 0, -2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_jhqbl"]
+points = PackedVector3Array(-1, 2.5, 2, -1, 0, 2, -1.5, 2.5, 2, -1.5, 0, 2, -1, 2.5, 1, -1, 0, 1, -1.5, 2.5, 1, -1.5, 0, 1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xdb2k"]
+points = PackedVector3Array(-1, 2.5, 1, -1, 2, 1, -1.5, 2.5, 1, -1.5, 2, 1, -1, 2.5, -1, -1, 2, -1, -1.5, 2.5, -1, -1.5, 2, -1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_0dgu4"]
+points = PackedVector3Array(1, 2.5, -1.5, 1, 0, -1.5, -1, 2.5, -1.5, -1, 0, -1.5, 1, 2.5, -2, 1, 0, -2, -1, 2.5, -2, -1, 0, -2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_eqad5"]
+points = PackedVector3Array(1, 2.5, 2, 1, 0, 2, -1, 2.5, 2, -1, 0, 2, 1, 2.5, 1.5, 1, 0, 1.5, -1, 2.5, 1.5, -1, 0, 1.5)
+
+[node name="RoomHallway6401" type="Node3D" unique_id=860289897]
+script = ExtResource("1_6kupl")
+room_id = &"room_hallway_64_01"
+room_type = &"hallway"
+preferred_tags = "crypt hallway"
+
+[node name="FuncGodotMap" type="Node3D" parent="." unique_id=746609611]
+script = ExtResource("2_v3exa")
+local_map_file = "res://trenchbroom/maps/room_hallway_64_01.map"
+map_settings = ExtResource("3_dx6x6")
+
+[node name="entity_0_worldspawn" type="StaticBody3D" parent="FuncGodotMap" unique_id=1777951537]
+collision_mask = 0
+
+[node name="entity_0_mesh_instance" type="MeshInstance3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=230997325]
+mesh = SubResource("ArrayMesh_06s60")
+
+[node name="entity_0_brush_0_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1521309942]
+shape = SubResource("ConvexPolygonShape3D_mqk3o")
+
+[node name="entity_0_brush_1_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1949615681]
+shape = SubResource("ConvexPolygonShape3D_b15my")
+
+[node name="entity_0_brush_2_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=935736410]
+shape = SubResource("ConvexPolygonShape3D_cmqpy")
+
+[node name="entity_0_brush_3_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=162964897]
+shape = SubResource("ConvexPolygonShape3D_x6khj")
+
+[node name="entity_0_brush_4_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=131081545]
+shape = SubResource("ConvexPolygonShape3D_fce8r")
+
+[node name="entity_0_brush_5_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1401500853]
+shape = SubResource("ConvexPolygonShape3D_d7s5x")
+
+[node name="entity_0_brush_6_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=767131417]
+shape = SubResource("ConvexPolygonShape3D_jhqbl")
+
+[node name="entity_0_brush_7_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=468808331]
+shape = SubResource("ConvexPolygonShape3D_xdb2k")
+
+[node name="entity_0_brush_8_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1820535424]
+shape = SubResource("ConvexPolygonShape3D_0dgu4")
+
+[node name="entity_0_brush_9_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=750959947]
+shape = SubResource("ConvexPolygonShape3D_eqad5")
+
+[node name="entity_1_room_connector" type="Node3D" parent="FuncGodotMap" unique_id=453784382 instance=ExtResource("6_dceoi")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 1.5, 0.5, 0)
+script = ExtResource("7_xgev8")
+connector_id = &"entrance"
+tags = "crypt standard hallway"
+
+[node name="entity_2_room_connector" type="Node3D" parent="FuncGodotMap" unique_id=1677027639 instance=ExtResource("6_dceoi")]
+transform = Transform3D(1.3907092e-07, 0, 1, 0, 1, 0, -1, 0, 1.3907092e-07, -1.5, 0.5, 0)
+script = ExtResource("7_xgev8")
+connector_id = &"exit"
+tags = "crypt standard hallway"

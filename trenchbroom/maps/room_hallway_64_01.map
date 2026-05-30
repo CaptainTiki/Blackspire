@@ -1,0 +1,120 @@
+// Game: Blackspire
+// Format: Valve
+// entity 0
+{
+"mapversion" "220"
+"wad" ""
+"classname" "worldspawn"
+// brush 0
+{
+( -64 48 0 ) ( -64 -48 0 ) ( -64 -48 -16 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -64 -48 0 ) ( 64 -48 0 ) ( 64 -48 -16 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 48 -16 ) ( -64 48 -16 ) ( -64 -48 -16 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -64 48 0 ) ( 64 48 0 ) ( 64 -48 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 64 48 -16 ) ( 64 48 0 ) ( -64 48 0 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 -48 0 ) ( 64 48 0 ) ( 64 48 -16 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 1
+{
+( -64 48 96 ) ( -64 -48 96 ) ( -64 -48 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -64 -48 96 ) ( 64 -48 96 ) ( 64 -48 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 48 80 ) ( -64 48 80 ) ( -64 -48 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -64 48 96 ) ( 64 48 96 ) ( 64 -48 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 64 48 80 ) ( 64 48 96 ) ( -64 48 96 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 -48 96 ) ( 64 48 96 ) ( 64 48 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 2
+{
+( -64 48 80 ) ( -64 32 80 ) ( -64 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -64 32 80 ) ( -32 32 80 ) ( -32 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 48 0 ) ( -64 48 0 ) ( -64 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -64 48 80 ) ( -32 48 80 ) ( -32 32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 48 0 ) ( -32 48 80 ) ( -64 48 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 32 80 ) ( -32 48 80 ) ( -32 48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 3
+{
+( 32 48 80 ) ( 32 32 80 ) ( 32 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 32 80 ) ( 64 32 80 ) ( 64 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 48 0 ) ( 32 48 0 ) ( 32 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 48 80 ) ( 64 48 80 ) ( 64 32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 64 48 0 ) ( 64 48 80 ) ( 32 48 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 32 80 ) ( 64 48 80 ) ( 64 48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 4
+{
+( -32 48 80 ) ( -32 32 80 ) ( -32 32 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 32 80 ) ( 32 32 80 ) ( 32 32 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 48 64 ) ( -32 48 64 ) ( -32 32 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 48 80 ) ( 32 48 80 ) ( 32 32 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 48 64 ) ( 32 48 80 ) ( -32 48 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 32 80 ) ( 32 48 80 ) ( 32 48 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 5
+{
+( -64 -32 80 ) ( -64 -48 80 ) ( -64 -48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -64 -48 80 ) ( -32 -48 80 ) ( -32 -48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 -32 0 ) ( -64 -32 0 ) ( -64 -48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -64 -32 80 ) ( -32 -32 80 ) ( -32 -48 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 -32 0 ) ( -32 -32 80 ) ( -64 -32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 -48 80 ) ( -32 -32 80 ) ( -32 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 6
+{
+( 32 -32 80 ) ( 32 -48 80 ) ( 32 -48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 -48 80 ) ( 64 -48 80 ) ( 64 -48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 -32 0 ) ( 32 -32 0 ) ( 32 -48 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 -32 80 ) ( 64 -32 80 ) ( 64 -48 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 64 -32 0 ) ( 64 -32 80 ) ( 32 -32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 -48 80 ) ( 64 -32 80 ) ( 64 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 7
+{
+( -32 -32 80 ) ( -32 -48 80 ) ( -32 -48 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -32 -48 80 ) ( 32 -48 80 ) ( 32 -48 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 -32 64 ) ( -32 -32 64 ) ( -32 -48 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -32 -32 80 ) ( 32 -32 80 ) ( 32 -48 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 32 -32 64 ) ( 32 -32 80 ) ( -32 -32 80 ) trenchbroom/dungeon/bs_crypt_trim_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 32 -48 80 ) ( 32 -32 80 ) ( 32 -32 64 ) trenchbroom/dungeon/bs_crypt_trim_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 8
+{
+( -64 32 80 ) ( -64 -32 80 ) ( -64 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -64 -32 80 ) ( -48 -32 80 ) ( -48 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -48 32 0 ) ( -64 32 0 ) ( -64 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -64 32 80 ) ( -48 32 80 ) ( -48 -32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( -48 32 0 ) ( -48 32 80 ) ( -64 32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( -48 -32 80 ) ( -48 32 80 ) ( -48 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+// brush 9
+{
+( 48 32 80 ) ( 48 -32 80 ) ( 48 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 48 -32 80 ) ( 64 -32 80 ) ( 64 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 32 0 ) ( 48 32 0 ) ( 48 -32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 48 32 80 ) ( 64 32 80 ) ( 64 -32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
+( 64 32 0 ) ( 64 32 80 ) ( 48 32 80 ) trenchbroom/dungeon/bs_crypt_wall_01 [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1
+( 64 -32 80 ) ( 64 32 80 ) ( 64 32 0 ) trenchbroom/dungeon/bs_crypt_wall_01 [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1
+}
+}
+// entity 1
+{
+"classname" "room_connector"
+"origin" "0 48 16"
+"angle" "90"
+"connector_id" "entrance"
+"connector_type" "doorway"
+"tags" "crypt standard hallway"
+"door_width_units" "64"
+"door_height_units" "64"
+}
+// entity 2
+{
+"classname" "room_connector"
+"origin" "0 -48 16"
+"angle" "270"
+"connector_id" "exit"
+"connector_type" "doorway"
+"tags" "crypt standard hallway"
+"door_width_units" "64"
+"door_height_units" "64"
+}

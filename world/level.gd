@@ -12,6 +12,8 @@ static var current_level: Level
 var entity_registry: MapEntityRegistry
 var spawned_enemies: Array[Node3D] = []
 
+@onready var level_generator: LevelGenerator = $LevelGenerator
+
 # Called when the level is fully ready (after _ready and children are processed)
 signal level_ready
 
@@ -32,6 +34,7 @@ func _ready() -> void:
 
 func _emit_level_ready() -> void:
 	_ensure_junk_container()
+	level_generator.generate()
 	spawn_enemies()
 	level_ready.emit()
 

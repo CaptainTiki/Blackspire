@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://bo0a1g8vn6tx5"
+path="res://.godot/imported/room_combat_cross_01.map-e41a60ff7fd5834840684d9d3e645f08.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_combat_cross_01.map"
+dest_files=["res://.godot/imported/room_combat_cross_01.map-e41a60ff7fd5834840684d9d3e645f08.tres"]
+
+[params]
+

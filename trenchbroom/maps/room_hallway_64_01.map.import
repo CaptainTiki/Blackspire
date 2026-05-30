@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://5tsidiug4du3"
+path="res://.godot/imported/room_hallway_64_01.map-3a068ad12db881f3ab0dcc45b50da6de.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_hallway_64_01.map"
+dest_files=["res://.godot/imported/room_hallway_64_01.map-3a068ad12db881f3ab0dcc45b50da6de.tres"]
+
+[params]
+

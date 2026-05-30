@@ -1,10 +1,93 @@
 [gd_scene format=3 uid="uid://cais4mlwkm3x3"]
 
 [ext_resource type="PackedScene" uid="uid://iq3c2ri4omc2" path="res://world/level.tscn" id="1_base"]
-[ext_resource type="PackedScene" uid="uid://clr8qsn3uaru5" path="res://world/rooms/test/test_room_01.tscn" id="2_test_room"]
+[ext_resource type="Script" path="res://world/rooms/room_chain_entry.gd" id="2_entry"]
+[ext_resource type="PackedScene" path="res://world/rooms/generated/room_spawn_01.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://world/rooms/generated/room_combat_small_01.tscn" id="4_combat"]
+[ext_resource type="PackedScene" path="res://world/rooms/generated/room_hallway_64_01.tscn" id="5_hallway"]
+[ext_resource type="PackedScene" path="res://world/rooms/generated/room_combat_cross_01.tscn" id="6_cross"]
+[ext_resource type="PackedScene" path="res://world/rooms/generated/room_treasure_01.tscn" id="7_treasure"]
+[ext_resource type="PackedScene" path="res://world/rooms/generated/room_boss_01.tscn" id="8_boss"]
+
+[sub_resource type="Resource" id="RoomChainEntry_spawn"]
+script = ExtResource("2_entry")
+room_key = &"room_spawn_01"
+room_scene = ExtResource("3_spawn")
+
+[sub_resource type="Resource" id="RoomChainEntry_combat"]
+script = ExtResource("2_entry")
+room_key = &"room_combat_small_01"
+room_scene = ExtResource("4_combat")
+connect_from_room_key = &"room_hallway_cross_combat_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_hallway_spawn_cross"]
+script = ExtResource("2_entry")
+room_key = &"room_hallway_spawn_cross_01"
+room_scene = ExtResource("5_hallway")
+connect_from_room_key = &"room_spawn_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_cross"]
+script = ExtResource("2_entry")
+room_key = &"room_combat_cross_01"
+room_scene = ExtResource("6_cross")
+connect_from_room_key = &"room_hallway_spawn_cross_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_treasure"]
+script = ExtResource("2_entry")
+room_key = &"room_treasure_01"
+room_scene = ExtResource("7_treasure")
+connect_from_room_key = &"room_hallway_cross_treasure_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_hallway_cross_treasure"]
+script = ExtResource("2_entry")
+room_key = &"room_hallway_cross_treasure_01"
+room_scene = ExtResource("5_hallway")
+connect_from_room_key = &"room_combat_cross_01"
+connect_from_connector_id = &"side_east"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_hallway_cross_combat"]
+script = ExtResource("2_entry")
+room_key = &"room_hallway_cross_combat_01"
+room_scene = ExtResource("5_hallway")
+connect_from_room_key = &"room_combat_cross_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_hallway_combat_boss"]
+script = ExtResource("2_entry")
+room_key = &"room_hallway_combat_boss_01"
+room_scene = ExtResource("5_hallway")
+connect_from_room_key = &"room_combat_small_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
+
+[sub_resource type="Resource" id="RoomChainEntry_boss"]
+script = ExtResource("2_entry")
+room_key = &"room_boss_01"
+room_scene = ExtResource("8_boss")
+connect_from_room_key = &"room_hallway_combat_boss_01"
+connect_from_connector_id = &"exit"
+connect_to_connector_id = &"entrance"
+required_tags = "crypt standard"
 
 [node name="TestLevel" unique_id=1280833031 instance=ExtResource("1_base")]
 level_name = "Test Level"
 
-[node name="TestRoom01" parent="." index="2" unique_id=480146083 instance=ExtResource("2_test_room")]
-unique_name_in_owner = true
+[node name="LevelGenerator" parent="." index="1"]
+chain_entries = Array[Resource]([SubResource("RoomChainEntry_spawn"), SubResource("RoomChainEntry_hallway_spawn_cross"), SubResource("RoomChainEntry_cross"), SubResource("RoomChainEntry_hallway_cross_treasure"), SubResource("RoomChainEntry_treasure"), SubResource("RoomChainEntry_hallway_cross_combat"), SubResource("RoomChainEntry_combat"), SubResource("RoomChainEntry_hallway_combat_boss"), SubResource("RoomChainEntry_boss")])

@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://8blk7xa6n71b"
+path="res://.godot/imported/room_treasure_01.map-86aed2cde3dbe79c4d5fee705bda3fea.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_treasure_01.map"
+dest_files=["res://.godot/imported/room_treasure_01.map-86aed2cde3dbe79c4d5fee705bda3fea.tres"]
+
+[params]
+
