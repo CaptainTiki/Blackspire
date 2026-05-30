@@ -1,6 +1,6 @@
 # Handoff Notes
 
-**Last Updated:** 2026-05-29
+**Last Updated:** 2026-05-30
 
 ---
 
@@ -31,8 +31,8 @@ These are durable truths about how we build Blackspire.
 - **Trigger:** If you see defensive `has_node()` patterns or broad fallback logic appearing in non-multiplayer code, push back.
 
 ### Current Milestone
-- Single player **combat slice** (following the Prototype GDD).
-- Target: Several TrenchBroom rooms, interactables, basic combat, enemies, manually connected under a test level.
+- Single player **closed prototype loop** (following the Prototype GDD).
+- Current loop: spawn -> hallway-separated combat rooms -> treasure side branch -> elite room -> exit room / extraction portal.
 - Review current prototype milestones and scope here:  
   `docs/project_blackspire_prototype_gdd.md`
 
@@ -49,45 +49,34 @@ These are durable truths about how we build Blackspire.
 ## Current Session Context
 
 **Last Worked On:**
-- First combat slice reached a playable prototype state.
-  - Lever now has `activate` / `deactivate` animations, locks out repeat interactions during its own animation and while activated targets finish animating.
-  - Door types are now split:
-    - `door_swing` / `WoodenDoor`: breakable by combat, still interactable/lever-operable.
-    - `door_iron` / `IronDoor`: unbreakable by combat, still interactable/lever-operable depending on `player_operated`.
-  - `HealthComponent`, `DamageRequest`, `Hurtbox3D`, `PlayerMeleeAttack`, `FloatingDamageNumber3D`, `WorldHealthBar3D`, and `PlayerHitFeedback` establish the first reusable combat feedback spine.
-  - Player now has a visible first-person sword with a simple attack animation and active-window `Area3D` hitbox.
-  - Wooden doors and urns have hurtboxes; sword hits can break wooden doors and smash urns.
-  - `BasicEnemy` scene exists with `HealthComponent`, `Hurtbox3D`, floating damage feedback, and a dedicated temporary `EnemyBehavior` child.
-  - `EnemyBehavior` currently uses simple enum states (`IDLE`, `CHASE`, `ATTACK`, `DEAD`) so it can later be replaced by a real state chart/state machine without rewriting the `BasicEnemy` combat contract.
-  - `info_enemy_spawn` markers are now consumed by `Level.spawn_enemies()` and spawn `basic_enemy.tscn` from the TrenchBroom-authored marker.
+- Closed the first run loop with a mapper-authored exit room and extraction portal.
+  - `exit_portal` is a scene-backed FGD point entity with mapper-facing prompt, completion message, and `requires_all_enemies_defeated` properties.
+  - `room_exit_01.map` / `room_exit_01.tscn` adds a small crypt exit room with a visible portal plinth/glow/label.
+  - `test_level` now connects elite room -> hallway -> exit room, preserving the current hallway-between-rooms convention.
+  - `Level.complete_run()` emits `run_completed`, shows a temporary run-complete overlay, and pauses the tree.
+  - `Level.has_living_enemies()` lets the portal block extraction until spawned enemies have been cleared.
 
 **Current State:**
-- Door + lever + first combat loop is functional and play-verified:
-  - Player can pull animated levers; lever spam is gated.
-  - Lever opens/closes remote-only iron doors; player cannot directly operate those doors when `player_operated = false`.
-  - Wooden doors can be opened/closed normally and can be broken by sword hits.
-  - Iron doors ignore primary sword attacks and keep blocking until opened by interaction/lever.
-  - Sword hitbox overlaps hurtboxes, not debug raycast damage.
-  - Urns can be smashed by sword hurtbox overlap.
-  - Floating damage numbers are readable, smaller, billboarded, and use `no_depth_test`.
-  - Damaged wooden door health bars show only when aimed at, appear immediately, and fade after focus loss.
-  - Enemy spawns from the TrenchBroom marker, can chase/attack the player, can damage the player, and can be slain by sword hits.
-  - Player hit feedback now flashes red when enemy damage lands.
+- The deterministic generated dungeon now supports the full rough loop:
+  - Player spawns in the authored spawn room.
+  - Combat rooms spawn basic enemies from `info_enemy_spawn`.
+  - Treasure side room contains breakable urns.
+  - Final elite room spawns the elite enemy from the same marker type with `elite = true`.
+  - Exit room contains the extraction portal.
+  - Extraction is smoke-verified to refuse while enemies remain and complete once `Level.spawned_enemies` is clear.
+- Validation completed:
+  - Targeted exit-loop smoke script passed.
+  - Godot check-only exited 0.
+  - Short headless boot exited 0.
+  - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals (for tomorrow):**
-- Immediate pickup: polish enemy readability and feel.
-  - Add an obvious enemy attack tell / lunge / animation so the enemy does not look like it is standing still while damaging the player.
-  - Add enemy health bar/focus behavior using the same feedback spine as doors, or decide whether enemies should always show health after damage.
-  - Add enemy hit reaction when the sword connects.
-  - Tune enemy movement, attack range, attack cooldown, and damage.
-  - Consider a simple debug state label over enemy head while behavior remains enum-based.
-- After enemy feel is readable, consider a first cleanup pass:
-  - Review `EnemyBehavior` boundaries so it can later split into state chart + state machine logic.
-  - Review `WorldHealthBar3D` for optional focus-less targets like enemies.
-  - Review player feedback layering if/when proper HUD/split-screen UI starts.
-- Optional gameplay variants:
-  - One-shot lever behavior.
-  - `enemy_type` property on `info_enemy_spawn` to choose enemy variants instead of always spawning `basic_enemy_scene`.
+- Manual play-test the full chain and confirm the portal room reads well after the elite fight.
+- Decide the next slice:
+  - Real loot pickup / carry / extract storage.
+  - Exit transition target: menu, next biome placeholder, or run summary screen.
+  - Enemy architecture cleanup toward state charts/state machines.
+  - Mapper workflow cleanup for enemy spawn types and room metadata.
 
 ---
 

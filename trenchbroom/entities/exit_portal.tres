@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3]
+
+[ext_resource type="Script" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="PackedScene" path="res://world/entities/exit/exit_portal.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_point")
+scene_file = ExtResource("2_scene")
+apply_scale_on_map_build = false
+classname = "exit_portal"
+description = "Run extraction portal. Interact to complete the prototype run."
+
+class_properties = {
+	"prompt": "Extract",
+	"completion_message": "Run Complete",
+	"requires_all_enemies_defeated": true
+}
+class_property_descriptions = {
+	"prompt": "Interaction prompt shown for this portal.",
+	"completion_message": "Run completion message shown when extraction succeeds.",
+	"requires_all_enemies_defeated": "When true, extraction waits until spawned enemies are gone."
+}

@@ -26,8 +26,11 @@
   - Rooms are authored as TrenchBroom maps and wrapped by reusable `Room` scenes.
   - `room_connector` point entities define mapper-facing doorway IDs, tags, dimensions, and outward direction.
   - `LevelGenerator` aligns rooms by connector transforms and spawns the generated chain before player/enemy setup.
-  - Current test chain uses hallway buffers between rooms: spawn, 4-way combat, treasure side branch, small combat, and larger elite-room shell.
-  - Enemy spawns, player spawns, breakable urns, and traversal all work across generated room transforms.
+  - Current test chain uses hallway buffers between rooms: spawn, 4-way combat, treasure side branch, small combat, elite room, and exit room.
+  - Enemy spawns, player spawns, breakable urns, extraction portal, and traversal all work across generated room transforms.
+- **Prototype loop closure**: `exit_portal` is a TrenchBroom-authored extraction entity.
+  - Extraction waits until spawned enemies are gone.
+  - Successful extraction calls `Level.complete_run()` and shows a temporary run-complete overlay.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -48,7 +51,7 @@
 
 See [docs/README.md](docs/README.md) for the full version history.
 
-Current focus: Adding an exit room / teleporter so the prototype has a full spawn, fight, loot, elite, and exit loop.
+Current focus: Play-test the closed spawn, fight, loot, elite, and extract loop, then choose the next prototype slice.
 
 ---
 

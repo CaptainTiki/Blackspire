@@ -80,3 +80,14 @@
 	door_width_units(integer) : "Door/connector width in TrenchBroom units." : 64
 	door_height_units(integer) : "Door/connector height in TrenchBroom units." : 64
 ]
+
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = exit_portal : "Run extraction portal. Interact to complete the prototype run."
+[
+	prompt(string) : "Interaction prompt shown for this portal." : "Extract"
+	completion_message(string) : "Run completion message shown when extraction succeeds." : "Run Complete"
+	requires_all_enemies_defeated(choices) : "When true, extraction waits until spawned enemies are gone." : 1 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+]

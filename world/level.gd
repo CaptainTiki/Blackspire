@@ -12,11 +12,14 @@ static var current_level: Level
 
 var entity_registry: MapEntityRegistry
 var spawned_enemies: Array[Node3D] = []
+var is_run_completed := false
+var run_complete_message := ""
 
 @onready var level_generator: LevelGenerator = $LevelGenerator
 
 # Called when the level is fully ready (after _ready and children are processed)
 signal level_ready
+signal run_completed(actor: Node)
 
 func _enter_tree() -> void:
 	Level.current_level = self
@@ -97,6 +100,48 @@ func spawn_enemies() -> Array[Node3D]:
 		print("Level: Spawned ", _get_enemy_spawn_label(spawn_point), " enemy at ", enemy.global_position, " using spawn point: ", spawn_point.name)
 
 	return spawned_enemies
+
+
+func has_living_enemies() -> bool:
+	for enemy in spawned_enemies:
+		if is_instance_valid(enemy):
+			return true
+	return false
+
+
+func complete_run(actor: Node, message: String = "Run Complete") -> void:
+	if is_run_completed:
+		return
+
+	is_run_completed = true
+	run_complete_message = message
+	run_completed.emit(actor)
+	print("Level: Run complete - ", message)
+	_show_run_complete_overlay(message)
+	get_tree().paused = true
+
+
+func _show_run_complete_overlay(message: String) -> void:
+	if has_node("RunCompleteOverlay"):
+		get_node("RunCompleteOverlay").queue_free()
+
+	var overlay := CanvasLayer.new()
+	overlay.name = "RunCompleteOverlay"
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(overlay)
+
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0.0, 0.0, 0.0, 0.72)
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(backdrop)
+
+	var label := Label.new()
+	label.text = "%s\nLoot Secured\nPrototype Loop Closed" % message
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.add_theme_font_size_override("font_size", 42)
+	overlay.add_child(label)
 
 
 func _get_enemy_scene_for_spawn(spawn_point: Marker3D) -> PackedScene:
