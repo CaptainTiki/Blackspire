@@ -8,6 +8,7 @@ static var current_level: Level
 
 @export var level_name: String = "Unnamed Level"
 @export var basic_enemy_scene: PackedScene = preload("res://world/actors/enemies/basic_enemy.tscn")
+@export var elite_enemy_scene: PackedScene = preload("res://world/actors/enemies/elite_enemy.tscn")
 
 var entity_registry: MapEntityRegistry
 var spawned_enemies: Array[Node3D] = []
@@ -86,13 +87,30 @@ func _find_enemy_spawns_recursive(node: Node, results: Array[Marker3D]) -> void:
 func spawn_enemies() -> Array[Node3D]:
 	var spawns := get_enemy_spawns()
 	for spawn_point in spawns:
-		var enemy := basic_enemy_scene.instantiate() as Node3D
+		var enemy_scene := _get_enemy_scene_for_spawn(spawn_point)
+		var enemy := enemy_scene.instantiate() as Node3D
+		var authored_scale := enemy.scale
 		add_child(enemy)
 		enemy.global_transform = spawn_point.global_transform
+		enemy.scale = authored_scale
 		spawned_enemies.append(enemy)
-		print("Level: Spawned enemy at ", enemy.global_position, " using spawn point: ", spawn_point.name)
+		print("Level: Spawned ", _get_enemy_spawn_label(spawn_point), " enemy at ", enemy.global_position, " using spawn point: ", spawn_point.name)
 
 	return spawned_enemies
+
+
+func _get_enemy_scene_for_spawn(spawn_point: Marker3D) -> PackedScene:
+	if spawn_point is EnemySpawnMarker and spawn_point.is_elite_spawn():
+		return elite_enemy_scene
+
+	return basic_enemy_scene
+
+
+func _get_enemy_spawn_label(spawn_point: Marker3D) -> String:
+	if spawn_point is EnemySpawnMarker and spawn_point.is_elite_spawn():
+		return "elite"
+
+	return "basic"
 
 
 ## Spawns a player at the first available player spawn point.

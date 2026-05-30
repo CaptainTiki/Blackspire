@@ -107,3 +107,7 @@ no_depth_test = true
 text = "IDLE"
 font_size = 18
 modulate = Color(1, 0.82, 0.36, 1)
+
+[node name="DeathTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true

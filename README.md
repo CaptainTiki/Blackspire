@@ -19,12 +19,14 @@
   - Iron doors are combat-immune but can still be lever/interaction controlled.
   - Floating damage numbers, timed damaged-target health bars, and player hit flash feedback are working.
   - Basic enemy spawns from TrenchBroom `info_enemy_spawn`, chases, uses a readable windup + forward cone lunge attack, damages the player, and can be killed.
+  - Elite enemy variant spawns from the same marker type via an `elite` Yes/No property, using the basic enemy brain with heavier prototype tuning.
+  - Enemy death now has a clear lifecycle: `die()` starts cleanup, then `decompose()` removes the enemy after a short timer.
 - **Collision layers**: First named layer pass is in place for world, interactables, combat hurtboxes, weapon hitboxes, player, and enemy bodies.
 - **Manual room-chain generation**: First deterministic authored dungeon chain is playable and runtime verified.
   - Rooms are authored as TrenchBroom maps and wrapped by reusable `Room` scenes.
   - `room_connector` point entities define mapper-facing doorway IDs, tags, dimensions, and outward direction.
   - `LevelGenerator` aligns rooms by connector transforms and spawns the generated chain before player/enemy setup.
-  - Current test chain uses hallway buffers between rooms: spawn, 4-way combat, treasure side branch, small combat, and larger boss/elite-room shell.
+  - Current test chain uses hallway buffers between rooms: spawn, 4-way combat, treasure side branch, small combat, and larger elite-room shell.
   - Enemy spawns, player spawns, breakable urns, and traversal all work across generated room transforms.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
@@ -46,7 +48,7 @@
 
 See [docs/README.md](docs/README.md) for the full version history.
 
-Current focus: Turning the larger boss-room shell into an "elite enemy" encounter without jumping all the way to bespoke boss/state-chart design yet.
+Current focus: Adding an exit room / teleporter so the prototype has a full spawn, fight, loot, elite, and exit loop.
 
 ---
 

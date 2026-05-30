@@ -192,3 +192,10 @@
 "door_width_units" "64"
 "door_height_units" "72"
 }
+// entity 4
+{
+"classname" "info_enemy_spawn"
+"origin" "0 0 16"
+"angle" "90"
+"elite" "1"
+}

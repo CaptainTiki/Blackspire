@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://world/actors/enemies/basic_enemy.tscn" id="1_basic_enemy"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_elite"]
+albedo_color = Color(0.16, 0.09, 0.42, 1)
+
+[node name="EliteEnemy" instance=ExtResource("1_basic_enemy")]
+scale = Vector3(1.35, 1.35, 1.35)
+move_speed = 1.55
+attack_damage = 18
+attack_range = 3.4
+attack_cooldown = 1.35
+attack_windup = 0.6
+attack_lunge_distance = 4.0
+attack_lunge_duration = 0.5
+attack_lunge_jump_velocity = 2.4
+attack_hit_range = 2.05
+attack_hit_cone_degrees = 85.0
+aggro_range = 10.0
+
+[node name="MeshInstance3D" parent="." index="1"]
+material_override = SubResource("StandardMaterial3D_elite")
+
+[node name="HealthComponent" parent="Components" index="0"]
+max_health = 120
+current_health = 120
+
+[node name="DebugStateLabel" parent="." index="4"]
+text = "ELITE"
+modulate = Color(0.74, 0.58, 1, 1)

@@ -14,20 +14,24 @@ const FloatingDamageNumber := preload("res://world/components/combat/floating_da
 @export var attack_hit_range := 1.65
 @export var attack_hit_cone_degrees := 70.0
 @export var aggro_range := 8.0
+@export var death_cleanup_delay := 0.5
 
 @onready var health: Node = $Components/HealthComponent
 @onready var behavior: Node = $Components/EnemyBehavior
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var hurtbox_collision_shape: CollisionShape3D = $Components/Hurtbox/CollisionShape3D
 @onready var mesh: MeshInstance3D = $MeshInstance3D
 @onready var debug_label: Label3D = $DebugStateLabel
 @onready var attack_range_debug_collision: CollisionShape3D = $AttackRangeDebug/CollisionShape3D
 @onready var attack_range_debug_mesh: MeshInstance3D = $AttackRangeDebug/AttackRangeMesh
+@onready var death_timer: Timer = $DeathTimer
 
 var is_dead := false
 var _feedback_tween: Tween
 var _base_mesh_position := Vector3.ZERO
 var _base_mesh_scale := Vector3.ONE
 var _base_mesh_rotation := Vector3.ZERO
+var _base_albedo_color := Color(0.42, 0.08, 0.07, 1.0)
 var _mesh_material := StandardMaterial3D.new()
 
 
@@ -40,6 +44,7 @@ func _ready() -> void:
 	set_debug_state("IDLE")
 	health.damaged.connect(_on_health_damaged)
 	health.died.connect(_on_health_died)
+	death_timer.timeout.connect(_on_death_timer_timeout)
 
 
 func apply_damage(damage_request: Variant) -> void:
@@ -80,10 +85,18 @@ func die(_damage_request: Variant) -> void:
 		return
 
 	is_dead = true
+	behavior.set_dead()
 	collision_shape.disabled = true
+	hurtbox_collision_shape.disabled = true
 	mesh.visible = false
 	debug_label.visible = false
-	behavior.set_dead()
+	attack_range_debug_collision.disabled = true
+	attack_range_debug_mesh.visible = false
+
+	if _feedback_tween:
+		_feedback_tween.kill()
+
+	death_timer.start(death_cleanup_delay)
 
 
 func _on_health_damaged(damage_request: Variant, _remaining_health: int) -> void:
@@ -104,6 +117,17 @@ func _on_health_died(damage_request: Variant) -> void:
 	die(damage_request)
 
 
+func _on_death_timer_timeout() -> void:
+	decompose()
+
+
+func decompose() -> void:
+	if Level.current_level:
+		Level.current_level.spawned_enemies.erase(self)
+
+	queue_free()
+
+
 func _get_feedback_parent() -> Node:
 	if Level.current_level and Level.current_level.has_node("Junk"):
 		return Level.current_level.get_node("Junk")
@@ -114,6 +138,7 @@ func _get_feedback_parent() -> Node:
 func _setup_material() -> void:
 	var current_material := mesh.material_override as StandardMaterial3D
 	_mesh_material = current_material.duplicate()
+	_base_albedo_color = _mesh_material.albedo_color
 	mesh.material_override = _mesh_material
 
 
@@ -138,6 +163,5 @@ func _restart_feedback_tween() -> void:
 
 
 func _flash_material(color: Color, duration: float) -> void:
-	var base_color := Color(0.42, 0.08, 0.07, 1.0)
 	_mesh_material.albedo_color = color
-	_feedback_tween.parallel().tween_property(_mesh_material, "albedo_color", base_color, duration)
+	_feedback_tween.parallel().tween_property(_mesh_material, "albedo_color", _base_albedo_color, duration)

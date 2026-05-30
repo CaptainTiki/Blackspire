@@ -7,5 +7,12 @@
 script = ExtResource("1_point")
 apply_scale_on_map_build = false
 classname = "info_enemy_spawn"
-description = "Enemy spawn point. Use the 'enemy_type' property to choose what spawns here."
-node_class = "Marker3D"
+description = "Enemy spawn point. Enable elite for the stronger prototype enemy variant."
+node_class = "EnemySpawnMarker"
+
+class_properties = {
+	"elite": false
+}
+class_property_descriptions = {
+	"elite": "When true, spawns the elite enemy variant instead of the basic enemy."
+}
