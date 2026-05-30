@@ -17,6 +17,7 @@ class_name PlayerController
 # --- Camera ---
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var inventory: Node = $Components/PlayerInventory
 
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -44,6 +45,15 @@ func _apply_player_height() -> void:
 	# Update camera height
 	if camera:
 		camera.position.y = eye_height
+
+
+func get_inventory() -> Node:
+	return inventory
+
+
+func get_level_exit_summary() -> String:
+	return inventory.get_level_exit_summary()
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:

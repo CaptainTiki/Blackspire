@@ -13,13 +13,22 @@ static var current_level: Level
 var entity_registry: MapEntityRegistry
 var spawned_enemies: Array[Node3D] = []
 var is_run_completed := false
+var is_extraction_in_progress := false
+var is_extraction_ready := false
 var run_complete_message := ""
+var extracting_player: PlayerController
+var extraction_remaining_seconds := 0.0
+var extraction_duration_seconds := 0.0
+var _extraction_label: Label
 
 @onready var level_generator: LevelGenerator = $LevelGenerator
 
 # Called when the level is fully ready (after _ready and children are processed)
 signal level_ready
+signal extraction_started(player: PlayerController, duration_seconds: float)
+signal extraction_ready(player: PlayerController)
 signal run_completed(actor: Node)
+signal player_exited_level(player: PlayerController)
 
 func _enter_tree() -> void:
 	Level.current_level = self
@@ -34,6 +43,10 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	# Emit after everything in the level has initialized
 	call_deferred("_emit_level_ready")
+
+
+func _process(delta: float) -> void:
+	_process_extraction_countdown(delta)
 
 
 func _emit_level_ready() -> void:
@@ -109,19 +122,67 @@ func has_living_enemies() -> bool:
 	return false
 
 
-func complete_run(actor: Node, message: String = "Run Complete") -> void:
+func interact_with_extraction(player: PlayerController, delay_seconds: float) -> void:
+	if is_run_completed:
+		return
+	if is_extraction_ready:
+		exit_level(player)
+		return
+	if is_extraction_in_progress:
+		print("Level: Extraction charging - %.1f seconds remain." % extraction_remaining_seconds)
+		return
+
+	begin_extraction(player, delay_seconds)
+
+
+func begin_extraction(player: PlayerController, delay_seconds: float) -> void:
+	if is_run_completed:
+		return
+	if is_extraction_in_progress:
+		print("Level: Extraction charging - %.1f seconds remain." % extraction_remaining_seconds)
+		return
+
+	extracting_player = player
+	extraction_duration_seconds = maxf(delay_seconds, 0.0)
+	extraction_remaining_seconds = extraction_duration_seconds
+	is_extraction_in_progress = true
+	is_extraction_ready = false
+
+	_alert_living_enemies_to_player(player)
+	extraction_started.emit(player, extraction_duration_seconds)
+	print("Level: Extraction started - %.1f second delay." % extraction_duration_seconds)
+
+	_show_extraction_countdown_overlay()
+	if extraction_duration_seconds == 0.0:
+		_mark_extraction_ready()
+
+
+func exit_level(player: PlayerController) -> void:
 	if is_run_completed:
 		return
 
 	is_run_completed = true
-	run_complete_message = message
-	run_completed.emit(actor)
-	print("Level: Run complete - ", message)
-	_show_run_complete_overlay(message)
+	is_extraction_in_progress = false
+	is_extraction_ready = false
+	run_complete_message = player.get_level_exit_summary()
+	_remove_extraction_countdown_overlay()
+	player_exited_level.emit(player)
+	run_completed.emit(player)
+	print("Level: Player exited level - ", run_complete_message)
+	_show_run_complete_overlay(run_complete_message)
 	get_tree().paused = true
 
 
-func _show_run_complete_overlay(message: String) -> void:
+func complete_run(actor: Node, _message: String = "Run Complete") -> void:
+	var player := actor as PlayerController
+	if not player:
+		push_error("Level.complete_run now requires a PlayerController actor.")
+		return
+
+	exit_level(player)
+
+
+func _show_run_complete_overlay(exit_summary: String) -> void:
 	if has_node("RunCompleteOverlay"):
 		get_node("RunCompleteOverlay").queue_free()
 
@@ -136,12 +197,80 @@ func _show_run_complete_overlay(message: String) -> void:
 	overlay.add_child(backdrop)
 
 	var label := Label.new()
-	label.text = "%s\nLoot Secured\nPrototype Loop Closed" % message
+	label.text = "Run Complete\n%s\nPrototype Loop Closed" % exit_summary
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	label.add_theme_font_size_override("font_size", 42)
 	overlay.add_child(label)
+
+
+func _process_extraction_countdown(delta: float) -> void:
+	if not is_extraction_in_progress:
+		return
+	if is_run_completed:
+		return
+	if not is_instance_valid(extracting_player):
+		push_error("Level extraction failed because the extracting player no longer exists.")
+		is_extraction_in_progress = false
+		_remove_extraction_countdown_overlay()
+		return
+
+	extraction_remaining_seconds = maxf(extraction_remaining_seconds - delta, 0.0)
+	_update_extraction_countdown_overlay()
+
+	if extraction_remaining_seconds == 0.0 and not is_extraction_ready:
+		_mark_extraction_ready()
+
+
+func _alert_living_enemies_to_player(player: PlayerController) -> void:
+	for enemy in spawned_enemies:
+		if not is_instance_valid(enemy):
+			continue
+
+		enemy.alert_to_player(player)
+
+
+func _show_extraction_countdown_overlay() -> void:
+	_remove_extraction_countdown_overlay()
+
+	var overlay := CanvasLayer.new()
+	overlay.name = "ExtractionCountdownOverlay"
+	add_child(overlay)
+
+	_extraction_label = Label.new()
+	_extraction_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_extraction_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_extraction_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_extraction_label.offset_top = 24.0
+	_extraction_label.offset_bottom = 84.0
+	_extraction_label.add_theme_font_size_override("font_size", 34)
+	overlay.add_child(_extraction_label)
+	_update_extraction_countdown_overlay()
+
+
+func _mark_extraction_ready() -> void:
+	is_extraction_ready = true
+	extraction_ready.emit(extracting_player)
+	print("Level: Extraction ready. Interact with the portal to exit.")
+	_update_extraction_countdown_overlay()
+
+
+func _update_extraction_countdown_overlay() -> void:
+	if not _extraction_label:
+		return
+
+	if is_extraction_ready:
+		_extraction_label.text = "Extraction Ready"
+	else:
+		_extraction_label.text = "Extraction in %d" % ceili(extraction_remaining_seconds)
+
+
+func _remove_extraction_countdown_overlay() -> void:
+	if has_node("ExtractionCountdownOverlay"):
+		get_node("ExtractionCountdownOverlay").queue_free()
+
+	_extraction_label = null
 
 
 func _get_enemy_scene_for_spawn(spawn_point: Marker3D) -> PackedScene:

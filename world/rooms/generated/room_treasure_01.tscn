@@ -1,27 +1,29 @@
 [gd_scene format=4]
 
-[ext_resource type="Script" path="res://world/rooms/room.gd" id="1_sd3gn"]
-[ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="2_jepph"]
-[ext_resource type="Resource" path="res://trenchbroom/blackspire_map_settings.tres" id="3_at0p6"]
-[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_floor_01.tres" id="4_4uqls"]
-[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_trim_01.tres" id="5_kpn70"]
-[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_wall_01.tres" id="6_moo5e"]
-[ext_resource type="PackedScene" path="res://world/rooms/room_connector.tscn" id="7_lh6nd"]
-[ext_resource type="Script" path="res://world/rooms/room_connector.gd" id="8_cn2ey"]
-[ext_resource type="PackedScene" path="res://world/entities/urn/breakable_urn.tscn" id="9_w4hyl"]
-[ext_resource type="Script" path="res://world/entities/urn/breakable_urn.gd" id="10_lipah"]
-[ext_resource type="PackedScene" path="res://world/entities/urn/urn_debris_piece.tscn" id="11_oied4"]
-[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="12_jx2bi"]
-[ext_resource type="Script" path="res://world/components/combat/hurtbox_3d.gd" id="13_gea4w"]
+[ext_resource type="Script" path="res://world/rooms/room.gd" id="1_at0p6"]
+[ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="2_4uqls"]
+[ext_resource type="Resource" path="res://trenchbroom/blackspire_map_settings.tres" id="3_kpn70"]
+[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_floor_01.tres" id="4_moo5e"]
+[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_trim_01.tres" id="5_lh6nd"]
+[ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_wall_01.tres" id="6_cn2ey"]
+[ext_resource type="PackedScene" path="res://world/rooms/room_connector.tscn" id="7_w4hyl"]
+[ext_resource type="Script" path="res://world/rooms/room_connector.gd" id="8_lipah"]
+[ext_resource type="PackedScene" path="res://world/entities/urn/breakable_urn.tscn" id="9_oied4"]
+[ext_resource type="Script" path="res://world/entities/urn/breakable_urn.gd" id="10_jx2bi"]
+[ext_resource type="PackedScene" path="res://world/entities/urn/urn_debris_piece.tscn" id="11_gea4w"]
+[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="12_pkoxy"]
+[ext_resource type="Script" path="res://world/components/combat/hurtbox_3d.gd" id="13_quvha"]
+[ext_resource type="PackedScene" path="res://world/entities/pickups/gold_pickup.tscn" id="14_i7ptv"]
+[ext_resource type="Script" path="res://world/entities/pickups/gold_pickup.gd" id="15_0kqxm"]
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_pkoxy"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_sdxjd"]
 _surfaces = [{
 "aabb": AABB(-4, -0.5, -4.5, 8, 0.5, 9),
 "attribute_data": PackedByteArray("AAAAwAAAAAAAAABAAAAAAAAAAEAAAIA+AAAAwAAAgD4AABBAAACAPgAAEMAAAIA+AAAQwAAAAAAAABBAAAAAAAAAEEAAAABAAAAQQAAAAMAAABDAAAAAwAAAEMAAAABAAAAQQAAAAEAAABDAAAAAQAAAEMAAAADAAAAQQAAAAMAAABDAAAAAAAAAEEAAAAAAAAAQQAAAgD4AABDAAACAPgAAAEAAAIA+AAAAwAAAgD4AAADAAAAAAAAAAEAAAAAA"),
 "format": 34359742487,
 "index_count": 36,
 "index_data": PackedByteArray("AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcA"),
-"material": ExtResource("4_4uqls"),
+"material": ExtResource("4_moo5e"),
 "name": "trenchbroom/dungeon/bs_crypt_floor_01",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
@@ -33,7 +35,7 @@ _surfaces = [{
 "format": 34359742487,
 "index_count": 180,
 "index_data": PackedByteArray("AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcAGAAZABoAGAAaABsAHAAdAB4AHAAeAB8AIAAhACIAIAAiACMAJAAlACYAJAAmACcAKAApACoAKAAqACsALAAtAC4ALAAuAC8AMAAxADIAMAAyADMANAA1ADYANAA2ADcAOAA5ADoAOAA6ADsAPAA9AD4APAA+AD8AQABBAEIAQABCAEMARABFAEYARABGAEcASABJAEoASABKAEsATABNAE4ATABOAE8AUABRAFIAUABSAFMAVABVAFYAVABWAFcAWABZAFoAWABaAFsAXABdAF4AXABeAF8AYABhAGIAYABiAGMAZABlAGYAZABmAGcAaABpAGoAaABqAGsAbABtAG4AbABuAG8AcABxAHIAcAByAHMAdAB1AHYAdAB2AHcA"),
-"material": ExtResource("5_kpn70"),
+"material": ExtResource("5_lh6nd"),
 "name": "trenchbroom/dungeon/bs_crypt_trim_01",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
@@ -45,7 +47,7 @@ _surfaces = [{
 "format": 34359742487,
 "index_count": 180,
 "index_data": PackedByteArray("AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcAGAAZABoAGAAaABsAHAAdAB4AHAAeAB8AIAAhACIAIAAiACMAJAAlACYAJAAmACcAKAApACoAKAAqACsALAAtAC4ALAAuAC8AMAAxADIAMAAyADMANAA1ADYANAA2ADcAOAA5ADoAOAA6ADsAPAA9AD4APAA+AD8AQABBAEIAQABCAEMARABFAEYARABGAEcASABJAEoASABKAEsATABNAE4ATABOAE8AUABRAFIAUABSAFMAVABVAFYAVABWAFcAWABZAFoAWABaAFsAXABdAF4AXABeAF8AYABhAGIAYABiAGMAZABlAGYAZABmAGcAaABpAGoAaABqAGsAbABtAG4AbABuAG8AcABxAHIAcAByAHMAdAB1AHYAdAB2AHcA"),
-"material": ExtResource("6_moo5e"),
+"material": ExtResource("6_cn2ey"),
 "name": "trenchbroom/dungeon/bs_crypt_wall_01",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
@@ -53,37 +55,37 @@ _surfaces = [{
 "vertex_data": PackedByteArray("AACAQAAAQEAAAJDAAABgQAAAQEAAAJDAAABgQAAAAAAAAJDAAACAQAAAAAAAAJDAAABgQAAAAAAAAJBAAABgQAAAAAAAAJDAAABgQAAAQEAAAJDAAABgQAAAQEAAAJBAAABgQAAAAAAAAJBAAACAQAAAAAAAAJBAAACAQAAAAAAAAJDAAABgQAAAAAAAAJDAAABgQAAAQEAAAJBAAABgQAAAQEAAAJDAAACAQAAAQEAAAJDAAACAQAAAQEAAAJBAAACAQAAAQEAAAJBAAACAQAAAQEAAAJDAAACAQAAAAAAAAJDAAACAQAAAAAAAAJBAAACAQAAAAAAAAJBAAABgQAAAAAAAAJBAAABgQAAAQEAAAJBAAACAQAAAQEAAAJBAAABgwAAAQEAAAJDAAACAwAAAQEAAAJDAAACAwAAAAAAAAJDAAABgwAAAAAAAAJDAAACAwAAAAAAAAJBAAACAwAAAAAAAAJDAAACAwAAAQEAAAJDAAACAwAAAQEAAAJBAAACAwAAAAAAAAJBAAABgwAAAAAAAAJBAAABgwAAAAAAAAJDAAACAwAAAAAAAAJDAAACAwAAAQEAAAJBAAACAwAAAQEAAAJDAAABgwAAAQEAAAJDAAABgwAAAQEAAAJBAAABgwAAAQEAAAJBAAABgwAAAQEAAAJDAAABgwAAAAAAAAJDAAABgwAAAAAAAAJBAAABgwAAAAAAAAJBAAACAwAAAAAAAAJBAAACAwAAAQEAAAJBAAABgwAAAQEAAAJBAAACAvwAAQEAAAJDAAABgwAAAQEAAAJDAAABgwAAAAAAAAJDAAACAvwAAAAAAAJDAAABgwAAAAAAAAIDAAABgwAAAAAAAAJDAAABgwAAAQEAAAJDAAABgwAAAQEAAAIDAAABgwAAAAAAAAIDAAACAvwAAAAAAAIDAAACAvwAAAAAAAJDAAABgwAAAAAAAAJDAAABgwAAAQEAAAIDAAABgwAAAQEAAAJDAAACAvwAAQEAAAJDAAACAvwAAQEAAAIDAAACAvwAAQEAAAIDAAACAvwAAQEAAAJDAAACAvwAAAAAAAJDAAACAvwAAAAAAAIDAAACAvwAAAAAAAIDAAABgwAAAAAAAAIDAAABgwAAAQEAAAIDAAACAvwAAQEAAAIDAAABgQAAAQEAAAJDAAACAPwAAQEAAAJDAAACAPwAAAAAAAJDAAABgQAAAAAAAAJDAAACAPwAAAAAAAIDAAACAPwAAAAAAAJDAAACAPwAAQEAAAJDAAACAPwAAQEAAAIDAAACAPwAAAAAAAIDAAABgQAAAAAAAAIDAAABgQAAAAAAAAJDAAACAPwAAAAAAAJDAAACAPwAAQEAAAIDAAACAPwAAQEAAAJDAAABgQAAAQEAAAJDAAABgQAAAQEAAAIDAAABgQAAAQEAAAIDAAABgQAAAQEAAAJDAAABgQAAAAAAAAJDAAABgQAAAAAAAAIDAAABgQAAAAAAAAIDAAACAPwAAAAAAAIDAAACAPwAAQEAAAIDAAABgQAAAQEAAAIDAAABgQAAAQEAAAIBAAABgwAAAQEAAAIBAAABgwAAAAAAAAIBAAABgQAAAAAAAAIBAAABgwAAAAAAAAJBAAABgwAAAAAAAAIBAAABgwAAAQEAAAIBAAABgwAAAQEAAAJBAAABgwAAAAAAAAJBAAABgQAAAAAAAAJBAAABgQAAAAAAAAIBAAABgwAAAAAAAAIBAAABgwAAAQEAAAJBAAABgwAAAQEAAAIBAAABgQAAAQEAAAIBAAABgQAAAQEAAAJBAAABgQAAAQEAAAJBAAABgQAAAQEAAAIBAAABgQAAAAAAAAIBAAABgQAAAAAAAAJBAAABgQAAAAAAAAJBAAABgwAAAAAAAAJBAAABgwAAAQEAAAJBAAABgQAAAQEAAAJBA/////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+//////wAA/7//////AAD/v/////8AAP+//////wAA/78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//v/9/AAD/f/8//38AAP9//z//fwAA/3//P/9/AAD/f/8//3////9//7//f////3//v/9/////f/+//3////9//7////9//////////3//////////f/////////9///////9//3////+//3//f////7//f/9/////v/9//3////+/")
 }]
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_quvha"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_8muuy"]
 points = PackedVector3Array(4, 0, 4.5, 4, -0.5, 4.5, -4, 0, 4.5, -4, -0.5, 4.5, 4, 0, -4.5, 4, -0.5, -4.5, -4, 0, -4.5, -4, -0.5, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_i7ptv"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_vjnki"]
 points = PackedVector3Array(4, 3.5, 4.5, 4, 3, 4.5, -4, 3.5, 4.5, -4, 3, 4.5, 4, 3.5, -4.5, 4, 3, -4.5, -4, 3.5, -4.5, -4, 3, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_0kqxm"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_jmbgr"]
 points = PackedVector3Array(4, 3, 4.5, 4, 0, 4.5, 3.5, 3, 4.5, 3.5, 0, 4.5, 4, 3, -4.5, 4, 0, -4.5, 3.5, 3, -4.5, 3.5, 0, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_sdxjd"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_b28cg"]
 points = PackedVector3Array(-3.5, 3, 4.5, -3.5, 0, 4.5, -4, 3, 4.5, -4, 0, 4.5, -3.5, 3, -4.5, -3.5, 0, -4.5, -4, 3, -4.5, -4, 0, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_8muuy"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_y4dwe"]
 points = PackedVector3Array(-1, 3, -4, -1, 0, -4, -3.5, 3, -4, -3.5, 0, -4, -1, 3, -4.5, -1, 0, -4.5, -3.5, 3, -4.5, -3.5, 0, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_vjnki"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_lwv0n"]
 points = PackedVector3Array(3.5, 3, -4, 3.5, 0, -4, 1, 3, -4, 1, 0, -4, 3.5, 3, -4.5, 3.5, 0, -4.5, 1, 3, -4.5, 1, 0, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_jmbgr"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3wxj1"]
 points = PackedVector3Array(1, 3, -4, 1, 2, -4, -1, 3, -4, -1, 2, -4, 1, 3, -4.5, 1, 2, -4.5, -1, 3, -4.5, -1, 2, -4.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_b28cg"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_cj2eu"]
 points = PackedVector3Array(3.5, 3, 4.5, 3.5, 0, 4.5, -3.5, 3, 4.5, -3.5, 0, 4.5, 3.5, 3, 4, 3.5, 0, 4, -3.5, 3, 4, -3.5, 0, 4)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_y4dwe"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_7quic"]
 points = PackedVector3Array(-0.5, 0.5, 2, -0.5, 0, 2, -1.5, 0.5, 2, -1.5, 0, 2, -0.5, 0.5, -2, -0.5, 0, -2, -1.5, 0.5, -2, -1.5, 0, -2)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_lwv0n"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_kormh"]
 points = PackedVector3Array(2.75, 0.75, -1.5, 2.75, 0, -1.5, 1.75, 0.75, -1.5, 1.75, 0, -1.5, 2.75, 0.75, -2.5, 2.75, 0, -2.5, 1.75, 0.75, -2.5, 1.75, 0, -2.5)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_3wxj1"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_r4paj"]
 points = PackedVector3Array(2.75, 0.75, 2.5, 2.75, 0, 2.5, 1.75, 0.75, 2.5, 1.75, 0, 2.5, 2.75, 0.75, 1.5, 2.75, 0, 1.5, 1.75, 0.75, 1.5, 1.75, 0, 1.5)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_1"]
@@ -92,69 +94,85 @@ height = 1.2
 [sub_resource type="CylinderMesh" id="CylinderMesh_1"]
 height = 1.2
 
-[node name="RoomTreasure01" type="Node3D" unique_id=2056893501]
-script = ExtResource("1_sd3gn")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gold"]
+albedo_color = Color(0.95, 0.68, 0.16, 1)
+metallic = 0.65
+roughness = 0.28
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_coin"]
+material = SubResource("StandardMaterial3D_gold")
+top_radius = 0.18
+bottom_radius = 0.18
+height = 0.04
+radial_segments = 20
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_collision"]
+height = 0.25
+radius = 0.42
+
+[node name="RoomTreasure01" type="Node3D" unique_id=1499090554]
+script = ExtResource("1_at0p6")
 room_id = &"room_treasure_01"
 room_type = &"treasure"
 footprint_modules = Vector2i(2, 2)
 preferred_tags = "crypt treasure"
 
-[node name="FuncGodotMap" type="Node3D" parent="." unique_id=371108174]
-script = ExtResource("2_jepph")
+[node name="FuncGodotMap" type="Node3D" parent="." unique_id=1323320048]
+script = ExtResource("2_4uqls")
 local_map_file = "res://trenchbroom/maps/room_treasure_01.map"
-map_settings = ExtResource("3_at0p6")
+map_settings = ExtResource("3_kpn70")
 
-[node name="entity_0_worldspawn" type="StaticBody3D" parent="FuncGodotMap" unique_id=305485258]
+[node name="entity_0_worldspawn" type="StaticBody3D" parent="FuncGodotMap" unique_id=1261347190]
 collision_mask = 0
 
-[node name="entity_0_mesh_instance" type="MeshInstance3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=459749771]
-mesh = SubResource("ArrayMesh_pkoxy")
+[node name="entity_0_mesh_instance" type="MeshInstance3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1740443772]
+mesh = SubResource("ArrayMesh_sdxjd")
 
-[node name="entity_0_brush_0_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=496404882]
-shape = SubResource("ConvexPolygonShape3D_quvha")
-
-[node name="entity_0_brush_1_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=944637081]
-shape = SubResource("ConvexPolygonShape3D_i7ptv")
-
-[node name="entity_0_brush_2_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=2017640016]
-shape = SubResource("ConvexPolygonShape3D_0kqxm")
-
-[node name="entity_0_brush_3_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1385553505]
-shape = SubResource("ConvexPolygonShape3D_sdxjd")
-
-[node name="entity_0_brush_4_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=166167220]
+[node name="entity_0_brush_0_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1055929371]
 shape = SubResource("ConvexPolygonShape3D_8muuy")
 
-[node name="entity_0_brush_5_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=877859477]
+[node name="entity_0_brush_1_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1788341428]
 shape = SubResource("ConvexPolygonShape3D_vjnki")
 
-[node name="entity_0_brush_6_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1959549528]
+[node name="entity_0_brush_2_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1463987622]
 shape = SubResource("ConvexPolygonShape3D_jmbgr")
 
-[node name="entity_0_brush_7_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1403553478]
+[node name="entity_0_brush_3_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=293525583]
 shape = SubResource("ConvexPolygonShape3D_b28cg")
 
-[node name="entity_0_brush_8_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1991442170]
+[node name="entity_0_brush_4_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1835177135]
 shape = SubResource("ConvexPolygonShape3D_y4dwe")
 
-[node name="entity_0_brush_9_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=959624526]
+[node name="entity_0_brush_5_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=393193625]
 shape = SubResource("ConvexPolygonShape3D_lwv0n")
 
-[node name="entity_0_brush_10_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=654414983]
+[node name="entity_0_brush_6_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1379487229]
 shape = SubResource("ConvexPolygonShape3D_3wxj1")
 
-[node name="entity_1_room_connector" type="Node3D" parent="FuncGodotMap" unique_id=628285517 instance=ExtResource("7_lh6nd")]
+[node name="entity_0_brush_7_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=855439825]
+shape = SubResource("ConvexPolygonShape3D_cj2eu")
+
+[node name="entity_0_brush_8_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1245530846]
+shape = SubResource("ConvexPolygonShape3D_7quic")
+
+[node name="entity_0_brush_9_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=807550885]
+shape = SubResource("ConvexPolygonShape3D_kormh")
+
+[node name="entity_0_brush_10_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1630327569]
+shape = SubResource("ConvexPolygonShape3D_r4paj")
+
+[node name="entity_1_room_connector" type="Node3D" parent="FuncGodotMap" unique_id=11578183 instance=ExtResource("7_w4hyl")]
 transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 0, 0.5, -4.5)
-script = ExtResource("8_cn2ey")
+script = ExtResource("8_lipah")
 connector_id = &"entrance"
 tags = "crypt standard treasure"
 
-[node name="entity_2_prop_urn" type="StaticBody3D" parent="FuncGodotMap" unique_id=140254574 instance=ExtResource("9_w4hyl")]
+[node name="entity_2_prop_urn" type="StaticBody3D" parent="FuncGodotMap" unique_id=140254574 instance=ExtResource("9_oied4")]
 transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, 2, 0.5, -2)
 collision_layer = 3
 collision_mask = 48
-script = ExtResource("10_lipah")
-debris_scene = ExtResource("11_oied4")
+script = ExtResource("10_jx2bi")
+debris_scene = ExtResource("11_gea4w")
 debris_count = 6
 debris_impulse_strength = 3.5
 debris_lifetime = 15.0
@@ -168,41 +186,136 @@ mesh = SubResource("CylinderMesh_1")
 [node name="Components" type="Node3D" parent="FuncGodotMap/entity_2_prop_urn" unique_id=493762429]
 
 [node name="Interactable" type="Node" parent="FuncGodotMap/entity_2_prop_urn/Components" unique_id=1112714247]
-script = ExtResource("12_jx2bi")
+script = ExtResource("12_pkoxy")
 prompt = "Smash"
 
-[node name="Hurtbox" type="Area3D" parent="FuncGodotMap/entity_2_prop_urn/Components" unique_id=439523617 node_paths=PackedStringArray("damage_target")]
-script = ExtResource("13_gea4w")
+[node name="Hurtbox" type="Area3D" parent="FuncGodotMap/entity_2_prop_urn/Components" unique_id=1338348868 node_paths=PackedStringArray("damage_target")]
+script = ExtResource("13_quvha")
 damage_target = NodePath("../..")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_2_prop_urn/Components/Hurtbox" unique_id=414333496]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_2_prop_urn/Components/Hurtbox" unique_id=470573410]
 shape = SubResource("CylinderShape3D_1")
 
-[node name="entity_3_prop_urn" type="StaticBody3D" parent="FuncGodotMap" unique_id=2085904740 instance=ExtResource("9_w4hyl")]
+[node name="entity_3_prop_urn" type="StaticBody3D" parent="FuncGodotMap" unique_id=1547698922 instance=ExtResource("9_oied4")]
 transform = Transform3D(-0.9396927, 0, 0.34202006, 0, 1, 0, -0.34202006, 0, -0.9396927, 2, 0.5, 2)
 collision_layer = 3
 collision_mask = 48
-script = ExtResource("10_lipah")
-debris_scene = ExtResource("11_oied4")
+script = ExtResource("10_jx2bi")
+debris_scene = ExtResource("11_gea4w")
 debris_count = 6
 debris_impulse_strength = 3.5
 debris_lifetime = 15.0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_3_prop_urn" unique_id=738896566]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_3_prop_urn" unique_id=256507076]
 shape = SubResource("CylinderShape3D_1")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="FuncGodotMap/entity_3_prop_urn" unique_id=1189878809]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FuncGodotMap/entity_3_prop_urn" unique_id=612032162]
 mesh = SubResource("CylinderMesh_1")
 
-[node name="Components" type="Node3D" parent="FuncGodotMap/entity_3_prop_urn" unique_id=1556354190]
+[node name="Components" type="Node3D" parent="FuncGodotMap/entity_3_prop_urn" unique_id=1787928021]
 
-[node name="Interactable" type="Node" parent="FuncGodotMap/entity_3_prop_urn/Components" unique_id=888690387]
-script = ExtResource("12_jx2bi")
+[node name="Interactable" type="Node" parent="FuncGodotMap/entity_3_prop_urn/Components" unique_id=1281388625]
+script = ExtResource("12_pkoxy")
 prompt = "Smash"
 
-[node name="Hurtbox" type="Area3D" parent="FuncGodotMap/entity_3_prop_urn/Components" unique_id=1053179927 node_paths=PackedStringArray("damage_target")]
-script = ExtResource("13_gea4w")
+[node name="Hurtbox" type="Area3D" parent="FuncGodotMap/entity_3_prop_urn/Components" unique_id=914185022 node_paths=PackedStringArray("damage_target")]
+script = ExtResource("13_quvha")
 damage_target = NodePath("../..")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_3_prop_urn/Components/Hurtbox" unique_id=665414109]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_3_prop_urn/Components/Hurtbox" unique_id=1862980392]
 shape = SubResource("CylinderShape3D_1")
+
+[node name="entity_4_pickup_gold" type="StaticBody3D" parent="FuncGodotMap" unique_id=1154708869 instance=ExtResource("14_i7ptv")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, -1, 1, 0)
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("15_0kqxm")
+pickup_id = &"treasure_gold_01"
+display_name = "Gold Coins"
+weight = 1
+
+[node name="CoinA" type="MeshInstance3D" parent="FuncGodotMap/entity_4_pickup_gold" unique_id=424627413]
+transform = Transform3D(0.9063078, 0, -0.42261827, 0, 1, 0, 0.42261827, 0, 0.9063078, -0.12, 0.08, 0.02)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CoinB" type="MeshInstance3D" parent="FuncGodotMap/entity_4_pickup_gold" unique_id=808800766]
+transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, 0.1, 0.13, -0.04)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CoinC" type="MeshInstance3D" parent="FuncGodotMap/entity_4_pickup_gold" unique_id=629234010]
+transform = Transform3D(0.25881907, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, 0.25881907, 0.02, 0.18, 0.12)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_4_pickup_gold" unique_id=631484419]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+shape = SubResource("CylinderShape3D_collision")
+
+[node name="Components" type="Node3D" parent="FuncGodotMap/entity_4_pickup_gold" unique_id=1102927963]
+
+[node name="Interactable" type="Node" parent="FuncGodotMap/entity_4_pickup_gold/Components" unique_id=1110683269]
+script = ExtResource("12_pkoxy")
+prompt = "Take Gold Coins"
+
+[node name="entity_5_pickup_gold" type="StaticBody3D" parent="FuncGodotMap" unique_id=1613978765 instance=ExtResource("14_i7ptv")]
+transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, 2.25, 0.5, -1.5)
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("15_0kqxm")
+coin_amount = 10
+pickup_id = &"treasure_gold_02"
+display_name = "Gold Coins"
+weight = 1
+
+[node name="CoinA" type="MeshInstance3D" parent="FuncGodotMap/entity_5_pickup_gold" unique_id=901014708]
+transform = Transform3D(0.9063078, 0, -0.42261827, 0, 1, 0, 0.42261827, 0, 0.9063078, -0.12, 0.08, 0.02)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CoinB" type="MeshInstance3D" parent="FuncGodotMap/entity_5_pickup_gold" unique_id=135327934]
+transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, 0.1, 0.13, -0.04)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CoinC" type="MeshInstance3D" parent="FuncGodotMap/entity_5_pickup_gold" unique_id=1663464360]
+transform = Transform3D(0.25881907, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, 0.25881907, 0.02, 0.18, 0.12)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_5_pickup_gold" unique_id=1590208448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+shape = SubResource("CylinderShape3D_collision")
+
+[node name="Components" type="Node3D" parent="FuncGodotMap/entity_5_pickup_gold" unique_id=1432208917]
+
+[node name="Interactable" type="Node" parent="FuncGodotMap/entity_5_pickup_gold/Components" unique_id=939201443]
+script = ExtResource("12_pkoxy")
+prompt = "Take Gold Coins"
+
+[node name="entity_6_pickup_gold" type="StaticBody3D" parent="FuncGodotMap" unique_id=1348020600 instance=ExtResource("14_i7ptv")]
+transform = Transform3D(-0.9396927, 0, 0.34202006, 0, 1, 0, -0.34202006, 0, -0.9396927, 2.25, 0.5, 1.5)
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("15_0kqxm")
+coin_amount = 10
+pickup_id = &"treasure_gold_03"
+display_name = "Gold Coins"
+weight = 1
+
+[node name="CoinA" type="MeshInstance3D" parent="FuncGodotMap/entity_6_pickup_gold" unique_id=1131743828]
+transform = Transform3D(0.9063078, 0, -0.42261827, 0, 1, 0, 0.42261827, 0, 0.9063078, -0.12, 0.08, 0.02)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CoinB" type="MeshInstance3D" parent="FuncGodotMap/entity_6_pickup_gold" unique_id=1285374483]
+transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, 0.1, 0.13, -0.04)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CoinC" type="MeshInstance3D" parent="FuncGodotMap/entity_6_pickup_gold" unique_id=1608584505]
+transform = Transform3D(0.25881907, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, 0.25881907, 0.02, 0.18, 0.12)
+mesh = SubResource("CylinderMesh_coin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FuncGodotMap/entity_6_pickup_gold" unique_id=499338417]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+shape = SubResource("CylinderShape3D_collision")
+
+[node name="Components" type="Node3D" parent="FuncGodotMap/entity_6_pickup_gold" unique_id=228374158]
+
+[node name="Interactable" type="Node" parent="FuncGodotMap/entity_6_pickup_gold/Components" unique_id=190550861]
+script = ExtResource("12_pkoxy")
+prompt = "Take Gold Coins"

@@ -51,6 +51,13 @@ func apply_damage(damage_request: Variant) -> void:
 	health.apply_damage(damage_request)
 
 
+func alert_to_player(player: Node3D) -> void:
+	if is_dead:
+		return
+
+	behavior.alert_to_target(player)
+
+
 func play_attack_tell(target: Node3D) -> void:
 	_restart_feedback_tween()
 	var backward := (global_position - target.global_position).normalized() * 0.12

@@ -3,8 +3,7 @@ extends Entity
 class_name ExitPortal
 
 @export var prompt := "Extract"
-@export var completion_message := "Run Complete"
-@export var requires_all_enemies_defeated := true
+@export var extraction_delay_seconds := 15.0
 
 @onready var interactable: Interactable = $Components/Interactable
 @onready var label: Label3D = $Label3D
@@ -25,35 +24,23 @@ func _process(delta: float) -> void:
 func _func_godot_apply_properties(properties: Dictionary) -> void:
 	if properties.has("prompt"):
 		prompt = str(properties["prompt"])
-	if properties.has("completion_message"):
-		completion_message = str(properties["completion_message"])
-	if properties.has("requires_all_enemies_defeated"):
-		requires_all_enemies_defeated = _property_to_bool(properties["requires_all_enemies_defeated"])
+	if properties.has("extraction_delay_seconds"):
+		extraction_delay_seconds = float(properties["extraction_delay_seconds"])
 
 
 func _on_interact(_interactable: Interactable, actor: Node) -> void:
 	if not Level.current_level:
-		push_error("ExitPortal %s could not complete the run because there is no current Level." % get_path())
+		push_error("ExitPortal %s could not start extraction because there is no current Level." % get_path())
 		return
 
-	if requires_all_enemies_defeated and Level.current_level.has_living_enemies():
-		print("ExitPortal: enemies remain. Extraction is not available yet.")
+	var player := actor as PlayerController
+	if not player:
+		push_error("ExitPortal %s can only exit a PlayerController." % get_path())
 		return
 
-	Level.current_level.complete_run(actor, completion_message)
+	Level.current_level.interact_with_extraction(player, extraction_delay_seconds)
 
 
 func _apply_display_state() -> void:
 	interactable.prompt = prompt
 	label.text = prompt.to_upper()
-
-
-func _property_to_bool(value: Variant) -> bool:
-	if value is bool:
-		return value
-	if value is int:
-		return value != 0
-	if value is String:
-		var normalized := str(value).to_lower()
-		return normalized == "1" or normalized == "true" or normalized == "yes"
-	return false

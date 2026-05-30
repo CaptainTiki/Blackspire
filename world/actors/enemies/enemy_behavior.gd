@@ -14,6 +14,7 @@ enum State {
 
 var current_state := State.IDLE
 var target: Node3D
+var forced_target: Node3D
 var _attack_timer := 0.0
 var _windup_timer := 0.0
 var _is_winding_up := false
@@ -49,7 +50,18 @@ func _physics_process(delta: float) -> void:
 
 func set_dead() -> void:
 	_transition_to(State.DEAD)
+	forced_target = null
 	enemy.velocity = Vector3.ZERO
+
+
+func alert_to_target(new_target: Node3D) -> void:
+	if not new_target:
+		push_error("EnemyBehavior.alert_to_target requires a target.")
+		return
+
+	forced_target = new_target
+	target = forced_target
+	_transition_to(State.CHASE)
 
 
 func _process_idle() -> void:
@@ -181,15 +193,16 @@ func _attack_target() -> void:
 
 
 func _get_target() -> Node3D:
+	if _is_valid_target(forced_target):
+		return forced_target
+
+	forced_target = null
+
 	var closest_player: Node3D
 	var closest_distance := INF
 
 	for player in enemy.get_tree().get_nodes_in_group("players"):
-		if not player is Node3D:
-			continue
-
-		var health := player.get_node("Components/HealthComponent")
-		if health.is_dead:
+		if not _is_valid_target(player):
 			continue
 
 		var distance: float = enemy.global_position.distance_to(player.global_position)
@@ -198,6 +211,16 @@ func _get_target() -> Node3D:
 			closest_player = player
 
 	return closest_player
+
+
+func _is_valid_target(candidate: Node) -> bool:
+	if not is_instance_valid(candidate):
+		return false
+	if not candidate is Node3D:
+		return false
+
+	var health := candidate.get_node("Components/HealthComponent")
+	return not health.is_dead
 
 
 func _distance_to_target() -> float:

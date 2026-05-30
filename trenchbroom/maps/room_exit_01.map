@@ -122,6 +122,5 @@
 "origin" "0 0 16"
 "angle" "90"
 "prompt" "Extract"
-"completion_message" "Run Complete"
-"requires_all_enemies_defeated" "1"
+"extraction_delay_seconds" "15.0"
 }

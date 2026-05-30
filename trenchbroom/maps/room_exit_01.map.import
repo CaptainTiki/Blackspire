@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://mhkstd8qpeb8"
+path="res://.godot/imported/room_exit_01.map-aa5ea6161e5a121bb75781f9ad9d87ab.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_exit_01.map"
+dest_files=["res://.godot/imported/room_exit_01.map-aa5ea6161e5a121bb75781f9ad9d87ab.tres"]
+
+[params]
+

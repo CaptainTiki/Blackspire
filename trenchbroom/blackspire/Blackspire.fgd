@@ -81,13 +81,16 @@
 	door_height_units(integer) : "Door/connector height in TrenchBroom units." : 64
 ]
 
-@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = exit_portal : "Run extraction portal. Interact to complete the prototype run."
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = exit_portal : "Run extraction portal. Interact to start a delayed extraction countdown."
 [
 	prompt(string) : "Interaction prompt shown for this portal." : "Extract"
-	completion_message(string) : "Run completion message shown when extraction succeeds." : "Run Complete"
-	requires_all_enemies_defeated(choices) : "When true, extraction waits until spawned enemies are gone." : 1 =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
+	extraction_delay_seconds(float) : "Seconds between starting extraction and leaving the level." : "15.0"
+]
+
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = pickup_gold : "Interactable gold coin pickup that adds coins to the player's inventory."
+[
+	pickup_id(string) : "Pickup identifier for future item/inventory systems." : "gold_coins"
+	display_name(string) : "Name shown in the interaction prompt." : "Gold Coins"
+	weight(integer) : "Prototype carry weight for future movement/extraction pressure." : 1
+	coin_amount(integer) : "Number of coins added to the collecting player's inventory." : 5
 ]

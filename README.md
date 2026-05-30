@@ -29,8 +29,14 @@
   - Current test chain uses hallway buffers between rooms: spawn, 4-way combat, treasure side branch, small combat, elite room, and exit room.
   - Enemy spawns, player spawns, breakable urns, extraction portal, and traversal all work across generated room transforms.
 - **Prototype loop closure**: `exit_portal` is a TrenchBroom-authored extraction entity.
-  - Extraction waits until spawned enemies are gone.
-  - Successful extraction calls `Level.complete_run()` and shows a temporary run-complete overlay.
+  - Extraction can start while enemies remain.
+  - Interacting with the portal starts a 15-second extraction countdown and alerts active enemies to the extracting player.
+  - When the countdown ends, the overlay changes to "Extraction Ready"; interacting with the portal again calls `Level.exit_level(player)`.
+  - Successful extraction shows a temporary run-complete overlay using the player's carried loot summary.
+- **First loot slice**: Mapper-authored gold pickups are interactable and player-owned.
+  - `PlayerInventory` currently tracks only picked-up coins.
+  - `Pickup` provides the base interactable collection flow; `GoldPickup` adds coins to the interacting player's inventory.
+  - `pickup_gold` is exposed through the FGD, and the treasure room currently contains 25 gold total.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 

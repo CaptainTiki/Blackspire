@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="FuncGodotFGDPointClass" format=3]
+
+[ext_resource type="Script" path="res://addons/func_godot/src/fgd/func_godot_fgd_point_class.gd" id="1_point"]
+[ext_resource type="PackedScene" path="res://world/entities/pickups/gold_pickup.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_point")
+scene_file = ExtResource("2_scene")
+apply_scale_on_map_build = false
+classname = "pickup_gold"
+description = "Interactable gold coin pickup that adds coins to the player's inventory."
+
+class_properties = {
+	"pickup_id": "gold_coins",
+	"display_name": "Gold Coins",
+	"weight": 1,
+	"coin_amount": 5
+}
+class_property_descriptions = {
+	"pickup_id": "Pickup identifier for future item/inventory systems.",
+	"display_name": "Name shown in the interaction prompt.",
+	"weight": "Prototype carry weight for future movement/extraction pressure.",
+	"coin_amount": "Number of coins added to the collecting player's inventory."
+}

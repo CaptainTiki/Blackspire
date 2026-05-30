@@ -128,3 +128,33 @@
 "origin" "64 64 16"
 "angle" "340"
 }
+// entity 4
+{
+"classname" "pickup_gold"
+"origin" "0 -32 32"
+"angle" "90"
+"pickup_id" "treasure_gold_01"
+"display_name" "Gold Coins"
+"weight" "1"
+"coin_amount" "5"
+}
+// entity 5
+{
+"classname" "pickup_gold"
+"origin" "-48 72 16"
+"angle" "20"
+"pickup_id" "treasure_gold_02"
+"display_name" "Gold Coins"
+"weight" "1"
+"coin_amount" "10"
+}
+// entity 6
+{
+"classname" "pickup_gold"
+"origin" "48 72 16"
+"angle" "340"
+"pickup_id" "treasure_gold_03"
+"display_name" "Gold Coins"
+"weight" "1"
+"coin_amount" "10"
+}

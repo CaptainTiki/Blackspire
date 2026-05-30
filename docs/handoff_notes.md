@@ -49,31 +49,38 @@ These are durable truths about how we build Blackspire.
 ## Current Session Context
 
 **Last Worked On:**
-- Closed the first run loop with a mapper-authored exit room and extraction portal.
-  - `exit_portal` is a scene-backed FGD point entity with mapper-facing prompt, completion message, and `requires_all_enemies_defeated` properties.
-  - `room_exit_01.map` / `room_exit_01.tscn` adds a small crypt exit room with a visible portal plinth/glow/label.
-  - `test_level` now connects elite room -> hallway -> exit room, preserving the current hallway-between-rooms convention.
-  - `Level.complete_run()` emits `run_completed`, shows a temporary run-complete overlay, and pauses the tree.
-  - `Level.has_living_enemies()` lets the portal block extraction until spawned enemies have been cleared.
+- Changed extraction from a living-enemy gate into a delayed holdout.
+  - `ExitPortal` now starts extraction through `Level.begin_extraction(player, extraction_delay_seconds)`.
+  - The mapper-facing `exit_portal` property is now `extraction_delay_seconds`, currently authored as 15 seconds.
+  - Extraction can start while enemies remain.
+  - Starting extraction alerts every active spawned enemy to the extracting player.
+  - `Level` shows a temporary countdown overlay, changes it to `Extraction Ready` when the countdown expires, and waits for another portal interaction before calling `exit_level(player)`.
+- Added the first loot pickup slice on top of the closed run loop.
+  - `PlayerInventory` is a tiny player-owned component that currently tracks only collected coins.
+  - `Pickup` is the base interactable collection entity; `GoldPickup` adds coins to the interacting player's inventory.
+  - `pickup_gold` is exposed through the FGD, and `room_treasure_01.map` / generated scene now contains 25 gold total.
+  - `Level` asks the player for the exit summary, emits exit/completion signals, shows the prototype overlay, and pauses the tree.
 
 **Current State:**
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
-  - Treasure side room contains breakable urns.
+  - Treasure side room contains breakable urns and interactable gold pickups.
   - Final elite room spawns the elite enemy from the same marker type with `elite = true`.
   - Exit room contains the extraction portal.
-  - Extraction is smoke-verified to refuse while enemies remain and complete once `Level.spawned_enemies` is clear.
+  - Extraction is smoke-verified to start while enemies remain, alert those enemies to the extracting player, become ready after the countdown, and only complete after a second portal interaction.
 - Validation completed:
-  - Targeted exit-loop smoke script passed.
+  - Targeted extraction-ready smoke script passed.
   - Godot check-only exited 0.
-  - Short headless boot exited 0.
+  - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals (for tomorrow):**
-- Manual play-test the full chain and confirm the portal room reads well after the elite fight.
+- Manual play-test the full chain and confirm the countdown-to-ready-to-interact extraction flow feels readable and tense.
 - Decide the next slice:
-  - Real loot pickup / carry / extract storage.
+  - Minimal loot UI / carried weight pressure.
+  - Run result storage above the current `Level`.
+  - Extraction tuning: longer delay, cancellation rules, portal VFX/audio escalation.
   - Exit transition target: menu, next biome placeholder, or run summary screen.
   - Enemy architecture cleanup toward state charts/state machines.
   - Mapper workflow cleanup for enemy spawn types and room metadata.
@@ -103,7 +110,11 @@ It should feel like early MMO raiding before everything was known.
 - `world/components/combat/floating_damage_number_3d.gd`
 - `world/components/combat/world_health_bar_3d.gd`
 - `world/components/combat/player_hit_feedback.gd`
+- `world/components/player/player_inventory.gd`
 - `world/entities/entity.gd`
+- `world/entities/pickups/pickup.gd`
+- `world/entities/pickups/gold_pickup.gd`
+- `world/entities/exit/exit_portal.gd`
 - `world/level.gd`
 - `world/systems/MapEntityRegistry.gd`
 - `world/entities/lever/lever.gd`

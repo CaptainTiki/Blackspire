@@ -8,15 +8,13 @@ script = ExtResource("1_point")
 scene_file = ExtResource("2_scene")
 apply_scale_on_map_build = false
 classname = "exit_portal"
-description = "Run extraction portal. Interact to complete the prototype run."
+description = "Run extraction portal. Interact to start a delayed extraction countdown."
 
 class_properties = {
 	"prompt": "Extract",
-	"completion_message": "Run Complete",
-	"requires_all_enemies_defeated": true
+	"extraction_delay_seconds": 15.0
 }
 class_property_descriptions = {
 	"prompt": "Interaction prompt shown for this portal.",
-	"completion_message": "Run completion message shown when extraction succeeds.",
-	"requires_all_enemies_defeated": "When true, extraction waits until spawned enemies are gone."
+	"extraction_delay_seconds": "Seconds between starting extraction and leaving the level."
 }

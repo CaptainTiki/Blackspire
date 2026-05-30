@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="4_health"]
 [ext_resource type="Script" uid="uid://21j40pjto1k4" path="res://world/components/combat/player_melee_attack.gd" id="5_melee_attack"]
 [ext_resource type="Script" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
+[ext_resource type="Script" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -150,10 +151,14 @@ shape = SubResource("BoxShape3D_sword_hitbox")
 libraries/ = SubResource("AnimationLibrary_sword")
 autoplay = &"RESET"
 
-[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig")]
+[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "inventory")]
 script = ExtResource("2_player_components")
 player = NodePath("..")
 camerarig = NodePath("../CameraRig")
+inventory = NodePath("PlayerInventory")
+
+[node name="PlayerInventory" type="Node" parent="Components"]
+script = ExtResource("7_inventory")
 
 [node name="InteractionScanner" type="Node3D" parent="Components" unique_id=277905915 node_paths=PackedStringArray("player_components")]
 script = ExtResource("3_interaction")
