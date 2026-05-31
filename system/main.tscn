@@ -4,3 +4,7 @@
 
 [node name="Main" type="Node3D" unique_id=1901487878]
 script = ExtResource("1_main")
+
+## Main is now the application root.
+## It owns the menu system and can spawn Game sessions.
+## For fast testing without the menu, use quick_entry.tscn instead.

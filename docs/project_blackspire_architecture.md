@@ -909,6 +909,25 @@ Preferred flow:
 
 This keeps single-player, couch co-op, and future online modes flowing through the same run architecture.
 
+### Current Bootstrap Implementation
+
+As of `v0.0.0032`, the working prototype flow is:
+
+```text
+system/main.tscn
+  -> system/menu/main_menu.tscn
+  -> GameSessionConfig
+  -> system/game/game.tscn
+  -> PlayerSlotManager.create_local_slots(...)
+  -> world/levels/test_level.tscn
+  -> LevelGenerator generated room chain
+  -> temporary Level.spawn_player(...) bridge
+```
+
+`system/quick_entry.tscn` bypasses the menu for fast iteration, but still creates the same `GameSessionConfig` and enters through `system/game/game.tscn`.
+
+The temporary bridge is intentional: single-player remains playable while the next local co-op milestone moves player spawning, input-device assignment, split-screen viewports, camera binding, and per-player HUD binding into `PlayerSlotManager`.
+
 ## 30. UI Architecture
 
 UI should be split into per-player UI and global UI.
@@ -1158,4 +1177,3 @@ If the architecture helps answer those questions quickly, it is doing its job.
 The guiding idea is:
 
 > Build clear scenes, focused components, visible states, and explicit relationships. Let the dungeon be dangerous, not the codebase.
-

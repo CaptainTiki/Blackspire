@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://quick_entry"]
+
+[ext_resource type="Script" path="res://system/quick_entry.gd" id="1"]
+
+[node name="QuickEntry" type="Node"]
+script = ExtResource("1")
+session_type = 0
+local_player_count = 1

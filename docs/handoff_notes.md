@@ -165,6 +165,14 @@ These are durable truths about how we build Blackspire.
   - Controller-held items mark the source slot as `[Held]` instead of using the mouse-follow drag label.
 
 **Current State:**
+- The application bootstrap now follows the new session chain:
+  - `system/main.tscn` is the app root and opens the main menu.
+  - `system/menu/main_menu.tscn` routes Single Player into a `GameSessionConfig`.
+  - `system/game/game.tscn` owns `PlayerSlotManager`, creates configured local slots, and loads the temporary test level world.
+  - `world/levels/test_level.tscn` still owns the deterministic generated dungeon chain through `LevelGenerator`.
+  - Single Player is restored through `Main -> Menu -> Game -> Level -> Rooms`.
+  - `system/quick_entry.tscn` skips the menu for fast iteration while still using the same `Game` session path.
+  - Temporary bridge: `Game` waits for `Level.level_ready`, calls `Level.spawn_player(player_scene)`, and assigns the spawned player/input to slot 0. This should move into `PlayerSlotManager` when local co-op spawning and viewports are implemented.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -197,32 +205,21 @@ These are durable truths about how we build Blackspire.
   - Targeted controller inventory pick/place smoke script passed.
   - Targeted controller inventory cursor-mode smoke script passed.
   - Targeted controller held-item affordance smoke script passed.
+  - Targeted main-menu single-player boot smoke passed: `main.tscn` created `Game`, loaded `Level`, generated rooms, spawned the player, and assigned slot 0.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
-**Next Steps / Pickup Goals (for tomorrow):**
-- Manual play-test the full chain and confirm the countdown-to-ready-to-interact extraction flow feels readable and tense.
-- Manual play-test player death: enemy drops player, camera collapse reads correctly, and all-down failure overlay appears.
-- Next foundational systems path:
-  1. Equipment foundation without inventory UI.
-     - Next: manual play-test pickup prompts, equip feedback, and Tab equipment inspection in the generated treasure room.
-     - Armor mitigation is now smoke-verified; manual play-test enemy hits with/without the padded vest.
-  2. Item instance / inventory model without fancy UI.
-     - Backend now supports item instances, stack merging, split, and item count queries.
-     - First backpack display now exists on the paper doll.
-     - Bag definitions now alter backpack slot and hotbar counts.
-     - Backpack capacity is now enforced with all-or-nothing pickup rejection.
-     - Mouse equip-from-backpack movement now exists.
-     - Hotbar binding now exists and health potions can be used from bound slots.
-     - Generic backpack drop now exists as shareable world loot.
-     - Controller input now covers and has manually verified the core single-player run loop.
-     - Next: decide between player-slot/local co-op scaffolding and the first Hub/Town shell.
-  3. Paper-doll / equipment UI.
-     - Later: add inventory-to-equipment movement, visible icons, and deeper mouse/controller input.
-  4. Hub / town.
-     - Add stash, prep, multiplayer lobby flow, villagers, crafting, quests, lore, and run entry once loot/equipment matters.
+**Next Steps / Pickup Goals:**
+- Manual play-test the restored menu path in the editor: launch `main.tscn`, choose Single Player, confirm mouse capture, movement/combat/loot/paper-doll/hotbar/extraction still feel correct.
+- Start the local co-op slice on top of the restored session chain:
+  1. Move player spawning responsibility from the temporary `Game -> Level.spawn_player()` bridge into `PlayerSlotManager`.
+  2. Spawn two local players for `LOCAL_COOP`.
+  3. Assign distinct `PlayerInput.device` / `owns_mouse` values per slot.
+  4. Add the first 2-player split-screen viewport layout.
+  5. Bind each local player's camera and HUD to that player's slot.
+- Keep online/host flow as menu-only placeholder until local co-op is proven.
 
 ---
 

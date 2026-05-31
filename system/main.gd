@@ -1,23 +1,16 @@
 extends Node3D
 class_name Main
 
-## Main bootstrapper for the game.
-## Responsibilities:
-## - Load the current level/world
-## - Spawn the player
-## - Handle global input (mouse capture, quit, etc.)
+## Main is the true root of the application.
+## It owns the menu system and can create/destroy Game sessions.
 
-@export var starting_level: PackedScene = preload("res://world/levels/test_level.tscn")
-@export var player_scene: PackedScene = preload("res://world/actors/player/Player.tscn")
+@export var main_menu_scene: PackedScene = preload("res://system/menu/main_menu.tscn")
 
-var current_level: Level
-var player: PlayerController
+var current_menu: Control
+var current_game: Game
 
 func _ready() -> void:
-	# Capture mouse on game start
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
-	_load_starting_level()
+	_show_main_menu()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -27,32 +20,55 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
-func _load_starting_level() -> void:
-	if not starting_level:
-		push_error("No starting level assigned in Main!")
-		return
-	
-	current_level = starting_level.instantiate() as Level
-	if not current_level:
-		push_error("Starting level is not a Level!")
-		return
-	
-	add_child(current_level)
-	
-	# Wait until the level says it's ready
-	if current_level.has_signal("level_ready"):
-		current_level.level_ready.connect(_on_level_ready, CONNECT_ONE_SHOT)
-	else:
-		# Fallback if signal doesn't exist
-		call_deferred("_on_level_ready")
+## Shows the main menu
+func _show_main_menu() -> void:
+	if current_game:
+		current_game.queue_free()
+		current_game = null
 
-func _on_level_ready() -> void:
-	# Delegate player spawning to the level (keeps spawn logic with the world)
-	if current_level and player_scene:
-		player = current_level.spawn_player(player_scene)
-		if player:
-			print("Player successfully spawned by level: ", current_level.level_name)
-		else:
-			push_warning("Level did not spawn a player.")
+	if main_menu_scene:
+		current_menu = main_menu_scene.instantiate()
+		add_child(current_menu)
+
+		# Connect menu signals (we'll expand these)
+		if current_menu.has_signal("start_single_player_requested"):
+			current_menu.start_single_player_requested.connect(_on_start_single_player)
+		if current_menu.has_signal("start_local_coop_requested"):
+			current_menu.start_local_coop_requested.connect(_on_start_local_coop)
+		if current_menu.has_signal("host_game_requested"):
+			current_menu.host_game_requested.connect(_on_host_game)
+		if current_menu.has_signal("exit_requested"):
+			current_menu.exit_requested.connect(_on_exit_requested)
 	else:
-		push_error("Cannot spawn player - missing level or player scene.")
+		push_error("Main: No main_menu_scene assigned!")
+
+func _on_start_single_player() -> void:
+	print("Main: Starting Single Player session")
+	_start_game_session(GameSessionConfig.SessionType.SINGLE_PLAYER, 1)
+
+func _on_start_local_coop() -> void:
+	print("Main: Starting Local Co-op session (2 players)")
+	_start_game_session(GameSessionConfig.SessionType.LOCAL_COOP, 2)
+
+func _on_host_game() -> void:
+	print("Main: Host Game selected (not implemented yet)")
+
+func _on_exit_requested() -> void:
+	get_tree().quit()
+
+func _start_game_session(session_type: GameSessionConfig.SessionType, player_count: int) -> void:
+	# Remove menu
+	if current_menu:
+		current_menu.queue_free()
+		current_menu = null
+
+	var config := GameSessionConfig.new()
+	config.session_type = session_type
+	config.local_player_count = player_count
+
+	# Load the Game scene
+	var game_scene := preload("res://system/game/game.tscn")
+	current_game = game_scene.instantiate() as Game
+	add_child(current_game)
+
+	current_game.start_session(config)
