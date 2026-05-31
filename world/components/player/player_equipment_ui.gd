@@ -104,13 +104,15 @@ func _ready() -> void:
 	set_process(false)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_equipment"):
 		_toggle_paper_doll()
 		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("inventory_cancel_drag") and held_item_instance:
 		_show_feedback("Place held item in a slot")
 		get_viewport().set_input_as_handled()
+		return
 	for index in HOTBAR_INPUT_ACTIONS.size():
 		if event.is_action_pressed(HOTBAR_INPUT_ACTIONS[index]):
 			hotbar.activate_slot(index)

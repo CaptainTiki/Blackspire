@@ -27,37 +27,46 @@ func _physics_process(_delta: float) -> void:
 	_update_interactable()
 
 func _update_interactable() -> void:
-	var previous = current_interactable
-	
-	if raycast.is_colliding():
-		var collider = raycast.get_collider()
-		current_interactable = _find_interactable_on_node(collider)
+	var previous: Interactable = null
+	if is_instance_valid(current_interactable):
+		previous = current_interactable
 	else:
 		current_interactable = null
+	
+	var next_interactable: Interactable = null
+	if raycast.is_colliding():
+		var collider = raycast.get_collider()
+		next_interactable = _find_interactable_on_node(collider)
+
+	if not is_instance_valid(next_interactable):
+		next_interactable = null
+
+	current_interactable = next_interactable
 	
 	if current_interactable != previous:
 		_on_interactable_changed(previous, current_interactable)
 
 func _find_interactable_on_node(node: Node) -> Interactable:
-	if not node:
+	if not is_instance_valid(node):
 		return null
 	
 	# Check the collider itself
 	if node.has_node("Components/Interactable"):
-		return node.get_node("Components/Interactable") as Interactable
+		var interactable := node.get_node("Components/Interactable") as Interactable
+		return interactable if is_instance_valid(interactable) else null
 	
 	# Also check if the node itself has an Interactable child (more flexible)
 	for child in node.get_children():
-		if child is Interactable:
+		if is_instance_valid(child) and child is Interactable:
 			return child
 	
 	return null
 
 func _on_interactable_changed(previous: Interactable, new: Interactable) -> void:
-	if previous:
+	if is_instance_valid(previous):
 		previous.focus_lost.emit()
 	
-	if new:
+	if is_instance_valid(new):
 		new.focus_gained.emit()
 		# TODO: Show interaction prompt in UI
 

@@ -176,3 +176,27 @@
 "origin" "0 -72 16"
 "angle" "0"
 }
+// entity 10
+{
+"classname" "pickup_rusted_sword"
+"origin" "-24 96 16"
+"angle" "180"
+}
+// entity 11
+{
+"classname" "pickup_padded_vest"
+"origin" "24 96 16"
+"angle" "180"
+}
+// entity 12
+{
+"classname" "pickup_rusted_sword"
+"origin" "-96 0 16"
+"angle" "90"
+}
+// entity 13
+{
+"classname" "pickup_padded_vest"
+"origin" "96 0 16"
+"angle" "270"
+}

@@ -331,3 +331,15 @@ transform = Transform3D(-0.90630776, 0, 0.42261836, 0, 1, 0, -0.42261836, 0, -0.
 
 [node name="entity_9_pickup_worn_pack" parent="FuncGodotMap" instance=ExtResource("18_pack")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.25, 0.5, 0)
+
+[node name="entity_10_pickup_rusted_sword" parent="FuncGodotMap" instance=ExtResource("16_sword")]
+transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 3, 0.5, -0.75)
+
+[node name="entity_11_pickup_padded_vest" parent="FuncGodotMap" instance=ExtResource("17_vest")]
+transform = Transform3D(1, 0, 1.7484555e-07, 0, 1, 0, -1.7484555e-07, 0, 1, 3, 0.5, 0.75)
+
+[node name="entity_12_pickup_rusted_sword" parent="FuncGodotMap" instance=ExtResource("16_sword")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, 0.5, -3)
+
+[node name="entity_13_pickup_padded_vest" parent="FuncGodotMap" instance=ExtResource("17_vest")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0.5, 3)
