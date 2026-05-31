@@ -12,6 +12,7 @@ value = 4.0
 script = ExtResource("1_equipment_definition")
 id = &"rusted_sword"
 display_name = "Rusted Sword"
+world_pickup_scene_path = "res://world/entities/pickups/rusted_sword_pickup.tscn"
 stackable = false
 max_stack = 1
 item_type = 3

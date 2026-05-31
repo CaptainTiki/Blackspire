@@ -602,6 +602,9 @@ Build:
 - Weapon slot
 - Armor slot
 - Consumable slot
+- Backpack slots, starting at 5 baseline slots per player
+- Bag equipment that later expands backpack capacity and defines usable hotbar capacity
+- Visible hotbar for future potion/item usage
 - Stat modifiers from equipment
 - Pickup/equip feedback
 
@@ -610,7 +613,26 @@ Definition of done:
 - Player can pick up and equip a weapon.
 - Equipped weapon changes attack damage.
 - Player can pick up armor and reduce incoming damage.
+- Player can see their baseline backpack slots on the paper-doll screen.
+- Player can see a hotbar placeholder for future consumable/item usage.
 - Player can use a potion or consumable.
+
+Inventory direction:
+
+- The backpack belongs to the player, not the level, so it stays multiplayer-shaped.
+- Baseline players start with 5 backpack slots before bag equipment is considered.
+- Bags are planned as equipment that can add backpack slots and alter hotbar size.
+- The first bag slice uses a worn pack that increases backpack capacity and visible hotbar size.
+- Backpack capacity is enforced as all-or-nothing pickup acceptance for now.
+- Rejected pickups remain in the world and tell the player there is not enough backpack space.
+- Mouse item movement supports holding, placing, equipping, unequipping, and swapping between backpack/equipment slots.
+- Equipment pickups go into the backpack first; equipping happens from the paper-doll UI.
+- Hotbar slots use bindings that link to real backpack item instances rather than containing moved items.
+- Initial hotbar activation is placeholder feedback only.
+- Item definitions point to their world pickup scene so dropped loot is generic rather than hardcoded by item ID.
+- Backpack items can be dropped back into the world as rigid-body pickups tossed forward from the player camera.
+- Dropped items are intended as shareable loot for other players, not just trash/delete behavior.
+- Split, controller support, real hotbar item use, and partial pickup behavior come after the drop-from-backpack slice.
 
 ### M4 — Prototype Dungeon Run
 
@@ -784,4 +806,3 @@ This milestone should answer the first major question:
 > Is first-person dungeon combat inside a Project Blackspire room worth building on?
 
 If yes, move immediately into player slot and split-screen architecture.
-

@@ -19,9 +19,11 @@ radial_segments = 20
 height = 0.25
 radius = 0.42
 
-[node name="GoldPickup" type="StaticBody3D"]
+[node name="GoldPickup" type="RigidBody3D"]
 collision_layer = 3
-collision_mask = 48
+collision_mask = 49
+freeze = true
+mass = 0.2
 script = ExtResource("1_gold")
 pickup_id = &"gold_coins"
 display_name = "Gold Coins"

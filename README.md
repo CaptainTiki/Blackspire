@@ -52,7 +52,25 @@
 - **Equipment inspection UI**: Tab opens a small player-owned paper doll.
   - Equip pickups show a short "Equipped X" feedback toast.
   - The panel shows equipment slots, focused item details, and current prototype stats.
-  - This is inspection only, not a backpack/grid inventory.
+  - The same panel now carries the first backpack display slice.
+- **Armor mitigation**: Equipped armor now affects incoming physical damage.
+  - `PlayerController.apply_damage()` applies player-owned mitigation before forwarding to `HealthComponent`.
+  - The padded vest's armor currently reduces physical hits by 3, with at least 1 chip damage.
+  - Non-physical damage bypasses armor for now.
+- **Item backend foundation**: Inventory is now item-instance backed without a grid UI yet.
+  - `ItemInstance` tracks item definition, quantity, stackability, split behavior, and non-stackable ids.
+  - `PlayerInventory` supports `add_item()`, stack merging, max-stack overflow, item counts, and gold through `gold_coin`.
+  - Pickup readouts use a player-local toast so backend changes are visible during playtests.
+- **Backpack and hotbar UI foundation**: The paper-doll panel now shows inventory space.
+  - Players start with 5 baseline backpack slots and 3 baseline hotbar placeholders.
+  - Hotbar slots can now bind to backpack items without moving the item out of the backpack.
+  - Bag equipment now expands backpack capacity and can alter hotbar size.
+  - The current `worn_pack` pickup grows the backpack from 5 to 8 slots and the hotbar from 3 to 4 slots.
+  - Backpack capacity is enforced: full backpacks reject new item stacks/instances and leave pickups in the world.
+  - Mouse-driven backpack/equipment movement is working: click to hold, click to place, occupied slots swap.
+  - Equipment pickups now go to the backpack first instead of direct-equipping.
+  - Hotbar activation is placeholder-only for now and reports item-specific "not implemented" feedback.
+  - Backpack items can be dropped through the paper-doll Drop button, spawning their definition's pickup scene as a tossed rigid body.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -77,8 +95,16 @@ Latest equipment milestones:
 - `v0.0.0018` Equipment Definition Foundation.
 - `v0.0.0019` Direct Equip-on-Pickup.
 - `v0.0.0020` Paper-doll + Stats.
+- `v0.0.0021` Armor Mitigation + Stat Pipeline.
+- `v0.0.0022` Item Backend Foundation.
+- `v0.0.0023` Backpack and Hotbar UI Foundation.
+- `v0.0.0024` Bag Equipment Capacity Pipeline.
+- `v0.0.0025` Backpack Capacity Enforcement.
+- `v0.0.0026` Mouse Equip From Backpack.
+- `v0.0.0027` Hotbar Binding Foundation.
+- `v0.0.0028` Generic Drop From Backpack.
 
-Current focus: Manual play-test treasure-room equipment pickup plus Tab inspection, then mirror the modifier path for armor reducing incoming damage.
+Current focus: Manual play-test backpack drops as shareable world loot, then decide whether the next slice is consumable use or controller support.
 
 ---
 

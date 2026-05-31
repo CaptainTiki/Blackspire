@@ -10,6 +10,7 @@ enum EquipmentSlot {
 	LEGS,
 	FEET,
 	ACCESSORY,
+	BAG,
 }
 
 @export var equipment_slot := EquipmentSlot.PRIMARY_WEAPON

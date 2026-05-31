@@ -189,7 +189,11 @@ func _is_target_in_attack_cone() -> bool:
 
 func _attack_target() -> void:
 	var damage_request := DamageRequestScript.new(enemy, enemy.attack_damage, target.global_position + Vector3.UP)
-	target.get_node("Components/HealthComponent").apply_damage(damage_request)
+	if not target.has_method("apply_damage"):
+		push_error("Enemy target '%s' must implement apply_damage." % target.name)
+		return
+
+	target.apply_damage(damage_request)
 
 
 func _get_target() -> Node3D:

@@ -102,3 +102,7 @@
 @PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = pickup_padded_vest : "Interactable padded vest equipment pickup."
 [
 ]
+
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = pickup_worn_pack : "Interactable worn pack equipment pickup."
+[
+]

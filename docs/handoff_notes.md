@@ -89,7 +89,65 @@ These are durable truths about how we build Blackspire.
   - `PlayerEquipmentUI` is a player-owned CanvasLayer that reads that player's `PlayerEquipment` and `PlayerMeleeAttack`.
   - Direct equip-on-pickup now shows a short "Equipped X" feedback toast.
   - The Tab panel shows equipment slots, focused slot/item details, and current prototype stats.
-  - This is intentionally not a backpack/grid inventory yet.
+  - The Tab panel now also carries the first backpack display slice.
+- Added armor mitigation and hardened the stat pipeline.
+  - `PlayerEquipment` now exposes named stat helpers for attack damage, armor, max health, and move speed.
+  - `PlayerEquipment.mitigate_physical_damage()` applies flat armor reduction with a minimum of 1 chip damage for positive physical hits.
+  - `PlayerController.apply_damage()` is now the player-side damage entry point and applies physical mitigation before forwarding to `HealthComponent`.
+  - Enemy attacks now call `target.apply_damage(damage_request)` instead of reaching directly into the target's `HealthComponent`.
+  - Non-physical damage bypasses armor for now.
+  - `DamageRequest.with_amount()` preserves source, hit position, and damage type when producing adjusted requests.
+- Added the item backend foundation without inventory UI.
+  - `ItemInstance` is the runtime item model: item definition reference, quantity, stack helpers, split support, and unique ids for non-stackables.
+  - `PlayerInventory` now stores item instances instead of only a raw coin counter.
+  - `PlayerInventory.add_item()` supports stack merging, max-stack overflow, and non-stackable item instance creation.
+  - Gold still works through `add_coins()` and the extraction summary, but it now uses the `gold_coin` item definition internally.
+  - Inventory pickups emit `inventory_toast`, currently shown through the existing player-local equipment feedback label.
+  - This deliberately does not add the inventory grid yet.
+- Added the backpack and hotbar display foundation.
+  - `PlayerInventory` exposes baseline slot counts: 5 backpack slots and a 3-slot hotbar placeholder.
+  - The Tab paper-doll panel now shows a Backpack section populated from `PlayerInventory.get_items()`.
+  - Backpack slot focus uses the existing item details area to show quantity and item modifier details where available.
+  - The Hotbar section is visible but intentionally nonfunctional for now.
+  - Future bag equipment should expand backpack capacity and alter hotbar size.
+- Added the bag equipment capacity pipeline.
+  - `EquipmentDefinition.EquipmentSlot` now includes `BAG`.
+  - `StatModifierDefinition.StatType` now includes `BACKPACK_SLOTS` and `HOTBAR_SLOTS`.
+  - `worn_pack` is the first bag definition: +3 backpack slots and +1 hotbar slot.
+  - `pickup_worn_pack` is exposed through the TrenchBroom FGD and placed in the treasure room.
+  - `PlayerInventory` computes current backpack/hotbar counts from base values plus equipped modifiers.
+  - `PlayerEquipmentUI` rebuilds backpack and hotbar buttons when equipment changes the counts.
+- Added backpack capacity enforcement.
+  - `PlayerInventory.add_item()` and `add_coins()` now return success/failure.
+  - Capacity is enforced as all-or-nothing for now; no partial gold/item pickup yet.
+  - Stackable items can fit into matching stacks plus available empty slots.
+  - Non-stackable items require one empty slot per instance.
+  - Failed pickups emit an inventory toast and remain in the world.
+  - The paper-doll stats readout shows backpack usage as used/total.
+- Added mouse equip-from-backpack behavior.
+  - `inventory_pick_place` and `inventory_cancel_drag` are defined in the input map.
+  - Backpack slots preserve explicit slot positions, including empty holes.
+  - Left-click backpack slot with no held item: hold that item.
+  - Left-click backpack slot with a held item: place into empty slot or swap with occupied slot.
+  - Left-click compatible equipment slot with a held equipment item: equip it.
+  - Left-click occupied equipment slot with no held item: unequip it into the held cursor item.
+  - Equipment pickups now go into the backpack first instead of direct-equipping.
+  - Hotbar remains display-only; future hotbar assignment should link to backpack items rather than move them.
+- Added hotbar binding foundation.
+  - `HotbarBinding` links a hotbar slot to a real backpack `ItemInstance`.
+  - `PlayerHotbar` owns bindings and uses the player's current hotbar slot count.
+  - Dropping a held backpack item onto a hotbar slot returns it to the backpack and creates a link.
+  - The link survives moving that same item instance to another backpack slot.
+  - Clicking a bound hotbar slot, or pressing number keys 1-4, produces placeholder use feedback.
+  - Hotbar slots still do not consume, equip, cast, or move items yet.
+- Added generic drop-from-backpack.
+  - `ItemDefinition` now carries `world_pickup_scene_path`.
+  - Existing item definitions point to their pickup scenes.
+  - Pickup scene roots are now `RigidBody3D`, so dropped loot can be tossed into the world.
+  - The paper-doll Backpack panel has a Drop button.
+  - Dropping requires holding a backpack item; equipped items must be unequipped to backpack first.
+  - Dropping removes that item instance from the backpack, clears matching hotbar bindings, spawns the configured pickup scene near the player camera, and applies a small forward/up impulse.
+  - Gold drops preserve stack quantity; equipment drops preserve equipment definition.
 
 **Current State:**
 - The deterministic generated dungeon now supports the full rough loop:
@@ -110,6 +168,14 @@ These are durable truths about how we build Blackspire.
   - Targeted equipment pickup smoke script passed.
   - Targeted treasure equipment placement smoke script passed.
   - Targeted equipment UI smoke script passed.
+  - Targeted armor mitigation smoke script passed.
+  - Targeted inventory backend smoke script passed.
+  - Targeted backpack UI smoke script passed.
+  - Targeted bag capacity smoke script passed.
+  - Targeted inventory capacity enforcement smoke script passed.
+  - Targeted mouse inventory/equipment movement smoke script passed.
+  - Targeted hotbar binding smoke script passed.
+  - Targeted drop-from-backpack smoke script passed.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
@@ -120,9 +186,16 @@ These are durable truths about how we build Blackspire.
 - Next foundational systems path:
   1. Equipment foundation without inventory UI.
      - Next: manual play-test pickup prompts, equip feedback, and Tab equipment inspection in the generated treasure room.
-     - Mirror later with armor reducing incoming damage.
+     - Armor mitigation is now smoke-verified; manual play-test enemy hits with/without the padded vest.
   2. Item instance / inventory model without fancy UI.
-     - Add enough model support for held items, stack/non-stack rules, drop, and pickup semantics.
+     - Backend now supports item instances, stack merging, split, and item count queries.
+     - First backpack display now exists on the paper doll.
+     - Bag definitions now alter backpack slot and hotbar counts.
+     - Backpack capacity is now enforced with all-or-nothing pickup rejection.
+     - Mouse equip-from-backpack movement now exists.
+     - Hotbar binding now exists with placeholder activation.
+     - Generic backpack drop now exists as shareable world loot.
+     - Next: decide whether to implement consumable use or controller support first.
   3. Paper-doll / equipment UI.
      - Later: add inventory-to-equipment movement, visible icons, and deeper mouse/controller input.
   4. Hub / town.

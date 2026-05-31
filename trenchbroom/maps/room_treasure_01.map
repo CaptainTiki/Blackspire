@@ -170,3 +170,9 @@
 "origin" "72 -72 16"
 "angle" "335"
 }
+// entity 9
+{
+"classname" "pickup_worn_pack"
+"origin" "0 -72 16"
+"angle" "0"
+}

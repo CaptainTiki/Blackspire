@@ -81,7 +81,7 @@ func get_attack_damage() -> int:
 	var total_damage := float(attack_damage)
 
 	if player_components.equipment:
-		total_damage += player_components.equipment.get_stat_modifier_total(StatModifierDefinitionScript.StatType.ATTACK_DAMAGE)
+		total_damage += player_components.equipment.get_attack_damage_modifier()
 
 	return maxi(roundi(total_damage), 0)
 

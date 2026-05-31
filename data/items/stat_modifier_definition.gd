@@ -6,6 +6,8 @@ enum StatType {
 	ARMOR,
 	MAX_HEALTH,
 	MOVE_SPEED,
+	BACKPACK_SLOTS,
+	HOTBAR_SLOTS,
 }
 
 @export var stat_type := StatType.ATTACK_DAMAGE

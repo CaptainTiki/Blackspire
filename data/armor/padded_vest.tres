@@ -17,6 +17,7 @@ value = -0.1
 script = ExtResource("1_equipment_definition")
 id = &"padded_vest"
 display_name = "Padded Vest"
+world_pickup_scene_path = "res://world/entities/pickups/padded_vest_pickup.tscn"
 stackable = false
 max_stack = 1
 item_type = 3

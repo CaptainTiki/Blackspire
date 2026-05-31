@@ -14,9 +14,10 @@
 [ext_resource type="Resource" path="res://trenchbroom/entities/pickup_gold.tres" id="12_pickup_gold"]
 [ext_resource type="Resource" path="res://trenchbroom/entities/pickup_rusted_sword.tres" id="13_pickup_rusted_sword"]
 [ext_resource type="Resource" path="res://trenchbroom/entities/pickup_padded_vest.tres" id="14_pickup_padded_vest"]
+[ext_resource type="Resource" path="res://trenchbroom/entities/pickup_worn_pack.tres" id="15_pickup_worn_pack"]
 
 [resource]
 script = ExtResource("1_fgdfile")
 fgd_name = "Blackspire"
 base_fgd_files = Array[Resource]([ExtResource("2_base_fgd")])
-entity_definitions = Array[Resource]([ExtResource("3_player_start"), ExtResource("4_enemy_spawn"), ExtResource("5_urn"), ExtResource("6_door"), ExtResource("7_lever"), ExtResource("8_iron_door"), ExtResource("9_enemy_basic"), ExtResource("10_room_connector"), ExtResource("11_exit_portal"), ExtResource("12_pickup_gold"), ExtResource("13_pickup_rusted_sword"), ExtResource("14_pickup_padded_vest")])
+entity_definitions = Array[Resource]([ExtResource("3_player_start"), ExtResource("4_enemy_spawn"), ExtResource("5_urn"), ExtResource("6_door"), ExtResource("7_lever"), ExtResource("8_iron_door"), ExtResource("9_enemy_basic"), ExtResource("10_room_connector"), ExtResource("11_exit_portal"), ExtResource("12_pickup_gold"), ExtResource("13_pickup_rusted_sword"), ExtResource("14_pickup_padded_vest"), ExtResource("15_pickup_worn_pack")])

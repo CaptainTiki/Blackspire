@@ -10,26 +10,26 @@ func _ready() -> void:
 	super._ready()
 
 
-func collect(actor: Node) -> void:
-	if is_collected:
-		return
-	if not equipment_definition:
-		push_error("EquipmentPickup requires an EquipmentDefinition.")
-		return
-
-	var player := actor as PlayerController
-	if not player:
-		push_error("EquipmentPickup '%s' can only be collected by a PlayerController." % display_name)
-		return
-
-	player.get_equipment().equip(equipment_definition)
-	is_collected = true
-	collected.emit(actor)
-	queue_free()
+func setup_from_item_instance(item_instance: Resource) -> void:
+	super.setup_from_item_instance(item_instance)
+	equipment_definition = item_instance.item_definition
+	_apply_equipment_definition()
+	_apply_display_state()
 
 
 func _apply_display_state() -> void:
-	interactable.prompt = "Equip %s" % display_name
+	if not interactable:
+		return
+
+	interactable.prompt = "Take %s" % display_name
+
+
+func _apply_to_inventory(inventory: Node) -> bool:
+	if not equipment_definition:
+		push_error("EquipmentPickup requires an EquipmentDefinition.")
+		return false
+
+	return inventory.add_item(equipment_definition)
 
 
 func _apply_equipment_definition() -> void:

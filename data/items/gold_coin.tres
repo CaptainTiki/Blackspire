@@ -6,6 +6,7 @@
 script = ExtResource("1_item_definition")
 id = &"gold_coin"
 display_name = "Gold Coin"
+world_pickup_scene_path = "res://world/entities/pickups/gold_pickup.tscn"
 stackable = true
 max_stack = 999
 item_type = 1

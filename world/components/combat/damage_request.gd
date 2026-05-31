@@ -16,3 +16,7 @@ func _init(
 	amount = damage_amount
 	hit_position = world_hit_position
 	damage_type = request_damage_type
+
+
+func with_amount(new_amount: int) -> DamageRequest:
+	return DamageRequest.new(source, new_amount, hit_position, damage_type)

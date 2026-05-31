@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://world/entities/pickups/gold_pickup.gd" id="15_0kqxm"]
 [ext_resource type="PackedScene" path="res://world/entities/pickups/rusted_sword_pickup.tscn" id="16_sword"]
 [ext_resource type="PackedScene" path="res://world/entities/pickups/padded_vest_pickup.tscn" id="17_vest"]
+[ext_resource type="PackedScene" path="res://world/entities/pickups/worn_pack_pickup.tscn" id="18_pack"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_sdxjd"]
 _surfaces = [{
@@ -327,3 +328,6 @@ transform = Transform3D(-0.90630776, 0, -0.42261836, 0, 1, 0, 0.42261836, 0, -0.
 
 [node name="entity_8_pickup_padded_vest" parent="FuncGodotMap" instance=ExtResource("17_vest")]
 transform = Transform3D(-0.90630776, 0, 0.42261836, 0, 1, 0, -0.42261836, 0, -0.90630776, -2.25, 0.5, 2.25)
+
+[node name="entity_9_pickup_worn_pack" parent="FuncGodotMap" instance=ExtResource("18_pack")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.25, 0.5, 0)

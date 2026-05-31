@@ -12,5 +12,12 @@ func _func_godot_apply_properties(properties: Dictionary) -> void:
 		coin_amount = int(properties["coin_amount"])
 
 
-func _apply_to_inventory(inventory: Node) -> void:
-	inventory.add_coins(coin_amount)
+func setup_from_item_instance(item_instance: Resource) -> void:
+	super.setup_from_item_instance(item_instance)
+	coin_amount = item_instance.quantity
+	display_name = "%d Gold" % coin_amount
+	_apply_display_state()
+
+
+func _apply_to_inventory(inventory: Node) -> bool:
+	return inventory.add_coins(coin_amount)

@@ -13,6 +13,19 @@ var is_collected := false
 @onready var interactable: Interactable = $Components/Interactable
 
 
+func setup_from_item_instance(item_instance: Resource) -> void:
+	if not item_instance:
+		push_error("Pickup.setup_from_item_instance requires an item instance.")
+		return
+	if not item_instance.item_definition:
+		push_error("Pickup.setup_from_item_instance requires an item definition.")
+		return
+
+	pickup_id = item_instance.item_definition.id
+	display_name = item_instance.item_definition.display_name
+	_apply_display_state()
+
+
 func _ready() -> void:
 	_apply_display_state()
 
@@ -41,17 +54,23 @@ func collect(actor: Node) -> void:
 	if not inventory:
 		return
 
-	_apply_to_inventory(inventory)
+	if not _apply_to_inventory(inventory):
+		return
+
 	is_collected = true
 	collected.emit(actor)
 	queue_free()
 
 
-func _apply_to_inventory(_inventory: Node) -> void:
+func _apply_to_inventory(_inventory: Node) -> bool:
 	push_error("Pickup subclass '%s' must implement _apply_to_inventory()." % get_class())
+	return false
 
 
 func _apply_display_state() -> void:
+	if not interactable:
+		return
+
 	interactable.prompt = "Take %s" % display_name
 
 

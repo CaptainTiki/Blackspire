@@ -1,6 +1,8 @@
 extends CharacterBody3D
 class_name PlayerController
 
+const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
+
 # --- Movement Settings ---
 @export var walk_speed: float = 5.0
 @export var sprint_speed: float = 8.0
@@ -19,6 +21,8 @@ class_name PlayerController
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var inventory: Node = $Components/PlayerInventory
 @onready var equipment: Node = $Components/PlayerEquipment
+@onready var hotbar: Node = $Components/PlayerHotbar
+@onready var health: Node = $Components/HealthComponent
 @onready var life_state: Node = $Components/PlayerLifeState
 
 # --- Internal ---
@@ -61,6 +65,24 @@ func get_inventory() -> Node:
 
 func get_equipment() -> Node:
 	return equipment
+
+
+func get_hotbar() -> Node:
+	return hotbar
+
+
+func apply_damage(damage_request: Variant) -> void:
+	if damage_request.damage_type != &"physical":
+		health.apply_damage(damage_request)
+		return
+
+	var mitigated_amount: int = equipment.mitigate_physical_damage(damage_request.amount)
+	var mitigated_request := DamageRequestScript.new(
+			damage_request.source,
+			mitigated_amount,
+			damage_request.hit_position,
+			damage_request.damage_type)
+	health.apply_damage(mitigated_request)
 
 
 func get_level_exit_summary() -> String:
