@@ -82,8 +82,11 @@
   - `system/main.tscn` is the application root and opens the main menu.
   - `system/menu/main_menu.tscn` offers Single Player, Local Co-op, Host Game placeholder, and Exit.
   - Single Player creates a `GameSessionConfig`, instantiates `system/game/game.tscn`, creates one local `PlayerSlot`, loads `world/levels/test_level.tscn`, then enters the generated room chain.
+  - Local Co-op now creates two local slots and spawns two players into the level.
+  - Slot 0 is keyboard/mouse, owns mouse look, and keeps the active camera until split-screen exists.
+  - Slot 1 is assigned to controller device 0 and does not receive mouse or unassigned joypad input.
   - `system/quick_entry.tscn` bypasses the menu for fast iteration while still using the same `Game` session path.
-  - Player spawning is temporarily bridged through the existing `Level.spawn_player()` path until `PlayerSlotManager` owns local player spawning, viewports, and per-slot camera/HUD setup.
+  - `PlayerSlotManager` now owns local player spawning; split-screen viewports and per-slot camera/HUD binding are still next.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -120,8 +123,9 @@ Latest equipment milestones:
 - `v0.0.0030` Controller Input Foundation.
 - `v0.0.0031` Player Input Device Isolation.
 - `v0.0.0032` Main Menu / Game Session Bootstrap.
+- `v0.0.0033` Local Co-op Player Slot Spawning.
 
-Current focus: Local co-op scaffolding on top of the restored `Main -> Menu -> Game -> Level -> Rooms` single-player path.
+Current focus: First split-screen viewport layout and per-slot camera/HUD binding for the two spawned local players.
 
 ---
 

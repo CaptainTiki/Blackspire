@@ -33,6 +33,10 @@ signal mouse_motion_captured(relative: Vector2)
 ## In split-screen this will matter a lot.
 @export var owns_mouse: bool = true
 
+## Single-player convenience: keyboard/mouse player can also accept joypad input.
+## Local co-op disables this so controller devices can belong to other slots.
+@export var accepts_unassigned_joypads: bool = true
+
 ## Input inversion settings.
 ## These are exposed so a future Settings menu can let each player customize
 ## their controls (very common request for both movement and look).
@@ -111,19 +115,19 @@ func _input(event: InputEvent) -> void:
 
 func _event_belongs_to_this_player(event: InputEvent) -> bool:
 	if device == -1:
-		# Keyboard + mouse player.
-		# Accept keyboard, mouse, and (for now) joypad events.
-		# When we properly assign joypads to other players, those events
-		# will be filtered out because they will have a device >= 0.
-		return (
-			event is InputEventKey or
-			event is InputEventMouse or
-			event is InputEventJoypadButton or
-			event is InputEventJoypadMotion
-		)
+		if event is InputEventKey or event is InputEventMouse:
+			return true
+
+		if accepts_unassigned_joypads:
+			return event is InputEventJoypadButton or event is InputEventJoypadMotion
+
+		return false
 	else:
 		# Strict joypad player — only events from our exact device.
-		return event.device == device
+		return (
+			(event is InputEventJoypadButton or event is InputEventJoypadMotion) and
+			event.device == device
+		)
 
 
 func _handle_joypad_motion(motion: InputEventJoypadMotion) -> void:

@@ -45,24 +45,14 @@ func _load_starting_world() -> void:
 	print("Game: Loaded test level as temporary world for session type: ", 
 		GameSessionConfig.SessionType.keys()[current_session.session_type])
 
-	# Temporary: Let the Level handle initial player spawning the old way
-	# until we fully move spawning responsibility into PlayerSlotManager.
 	level.level_ready.connect(_on_level_ready, CONNECT_ONE_SHOT)
 
 
 func _on_level_ready() -> void:
-	if not player_scene:
-		push_error("Game: No player_scene assigned!")
-		return
-
 	var level := current_world as Level
-	var player := level.spawn_player(player_scene) as PlayerController
-	if not player:
-		push_error("Game: Level did not spawn a player.")
+	var players := player_slot_manager.spawn_local_players(level, player_scene)
+	if players.is_empty():
+		push_error("Game: PlayerSlotManager did not spawn any local players.")
 		return
 
-	var slot := player_slot_manager.get_slot(0)
-	slot.player = player
-	slot.input = player.input_reader
-
-	print("Game: Single-player slot 0 assigned to spawned player.")
+	print("Game: Spawned %d local player(s)." % players.size())

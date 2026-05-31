@@ -14,11 +14,14 @@ extends Resource
 var slot_index: int = -1
 var is_local: bool = true
 
-## The actual player actor (PlayerController) once spawned.
-var player: Node = null
+## The actual player actor once spawned.
+var player: PlayerController = null
 
 ## The PlayerInput component assigned to this slot.
 ## This is how we know which physical device (or keyboard) belongs to this player.
-var input: Node = null   # Will be PlayerInput once we wire it
+var input: PlayerInput = null
+
+## The player's camera. This becomes the viewport camera once split-screen lands.
+var camera: Camera3D = null
 
 ## Future: camera, viewport, hud references will live here too.

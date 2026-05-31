@@ -172,7 +172,10 @@ These are durable truths about how we build Blackspire.
   - `world/levels/test_level.tscn` still owns the deterministic generated dungeon chain through `LevelGenerator`.
   - Single Player is restored through `Main -> Menu -> Game -> Level -> Rooms`.
   - `system/quick_entry.tscn` skips the menu for fast iteration while still using the same `Game` session path.
-  - Temporary bridge: `Game` waits for `Level.level_ready`, calls `Level.spawn_player(player_scene)`, and assigns the spawned player/input to slot 0. This should move into `PlayerSlotManager` when local co-op spawning and viewports are implemented.
+  - `PlayerSlotManager` now owns local player spawning once `Game` receives `Level.level_ready`.
+  - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
+  - Local Co-op spawns two local players. Slot 0 uses keyboard/mouse and owns mouse look; slot 1 uses controller device 0 and does not receive mouse or unassigned joypad input.
+  - Until split-screen exists, only slot 0's camera is current.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -206,6 +209,8 @@ These are durable truths about how we build Blackspire.
   - Targeted controller inventory cursor-mode smoke script passed.
   - Targeted controller held-item affordance smoke script passed.
   - Targeted main-menu single-player boot smoke passed: `main.tscn` created `Game`, loaded `Level`, generated rooms, spawned the player, and assigned slot 0.
+  - Targeted single-player player-slot boot smoke passed: one slot, one player, slot 0 camera/input assigned.
+  - Targeted local co-op player-slot boot smoke passed: two slots, two players, slot 0 keyboard/mouse, slot 1 controller device 0, only slot 0 camera current.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
@@ -213,12 +218,12 @@ These are durable truths about how we build Blackspire.
 
 **Next Steps / Pickup Goals:**
 - Manual play-test the restored menu path in the editor: launch `main.tscn`, choose Single Player, confirm mouse capture, movement/combat/loot/paper-doll/hotbar/extraction still feel correct.
-- Start the local co-op slice on top of the restored session chain:
-  1. Move player spawning responsibility from the temporary `Game -> Level.spawn_player()` bridge into `PlayerSlotManager`.
-  2. Spawn two local players for `LOCAL_COOP`.
-  3. Assign distinct `PlayerInput.device` / `owns_mouse` values per slot.
-  4. Add the first 2-player split-screen viewport layout.
-  5. Bind each local player's camera and HUD to that player's slot.
+- Manual play-test Local Co-op from `main.tscn`: confirm player 1 responds to keyboard/mouse, player 2 responds to controller 0, and controller input no longer moves player 1.
+- Add the first split-screen slice:
+  1. Add a 2-player viewport layout for local co-op.
+  2. Bind each slot's camera to its viewport.
+  3. Move or duplicate per-player HUD/UI into the correct viewport layer.
+  4. Verify player 2 can see, move, interact, fight, and open their own UI without stealing player 1 input.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 
 ---

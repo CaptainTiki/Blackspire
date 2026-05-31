@@ -911,7 +911,7 @@ This keeps single-player, couch co-op, and future online modes flowing through t
 
 ### Current Bootstrap Implementation
 
-As of `v0.0.0032`, the working prototype flow is:
+As of `v0.0.0033`, the working prototype flow is:
 
 ```text
 system/main.tscn
@@ -921,12 +921,14 @@ system/main.tscn
   -> PlayerSlotManager.create_local_slots(...)
   -> world/levels/test_level.tscn
   -> LevelGenerator generated room chain
-  -> temporary Level.spawn_player(...) bridge
+  -> PlayerSlotManager.spawn_local_players(...)
 ```
 
 `system/quick_entry.tscn` bypasses the menu for fast iteration, but still creates the same `GameSessionConfig` and enters through `system/game/game.tscn`.
 
-The temporary bridge is intentional: single-player remains playable while the next local co-op milestone moves player spawning, input-device assignment, split-screen viewports, camera binding, and per-player HUD binding into `PlayerSlotManager`.
+`PlayerSlotManager` now owns local player spawning and slot input assignment. Single Player spawns one slot/player and keeps controller-friendly solo play by letting slot 0 accept unassigned joypads. Local Co-op spawns two slots/players: slot 0 uses keyboard/mouse and owns mouse look, while slot 1 uses controller device 0. Until split-screen lands, only slot 0's camera is current.
+
+The next local co-op milestone is viewport ownership: create the first 2-player split-screen layout, bind each slot's camera to its viewport, and move per-player HUD/UI into the correct viewport context.
 
 ## 30. UI Architecture
 
