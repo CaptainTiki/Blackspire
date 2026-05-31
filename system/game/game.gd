@@ -18,6 +18,8 @@ extends Node
 
 var current_session: GameSessionConfig
 var current_world: Node = null   # Will hold Hub or Level later
+var split_screen_layer: CanvasLayer
+var split_screen_root: Control
 
 
 func start_session(config: GameSessionConfig) -> void:
@@ -55,4 +57,83 @@ func _on_level_ready() -> void:
 		push_error("Game: PlayerSlotManager did not spawn any local players.")
 		return
 
+	if current_session.session_type == GameSessionConfig.SessionType.LOCAL_COOP:
+		_create_local_coop_viewports()
+
 	print("Game: Spawned %d local player(s)." % players.size())
+
+
+func _process(_delta: float) -> void:
+	_sync_split_screen_cameras()
+
+
+func _create_local_coop_viewports() -> void:
+	if player_slot_manager.get_local_player_count() != 2:
+		push_error("Game: First local co-op viewport pass requires exactly 2 local players.")
+		return
+
+	if split_screen_layer:
+		split_screen_layer.queue_free()
+
+	split_screen_layer = CanvasLayer.new()
+	split_screen_layer.name = "LocalCoopSplitScreen"
+	split_screen_layer.layer = 0
+	add_child(split_screen_layer)
+
+	var backdrop := ColorRect.new()
+	backdrop.name = "SplitScreenBackdrop"
+	backdrop.color = Color.BLACK
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	split_screen_layer.add_child(backdrop)
+
+	split_screen_root = VBoxContainer.new()
+	split_screen_root.name = "SplitScreenRoot"
+	split_screen_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	split_screen_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	split_screen_root.add_theme_constant_override("separation", 4)
+	split_screen_layer.add_child(split_screen_root)
+
+	var shared_world := get_viewport().world_3d
+	for slot in player_slot_manager.slots:
+		_create_slot_viewport(slot, shared_world)
+
+	print("Game: Created 2-player local co-op split-screen viewports.")
+
+
+func _create_slot_viewport(slot: PlayerSlot, shared_world: World3D) -> void:
+	var container := SubViewportContainer.new()
+	container.name = "Player%dViewportContainer" % (slot.slot_index + 1)
+	container.stretch = true
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split_screen_root.add_child(container)
+
+	var viewport := SubViewport.new()
+	viewport.name = "Player%dViewport" % (slot.slot_index + 1)
+	viewport.world_3d = shared_world
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	container.add_child(viewport)
+
+	var camera := Camera3D.new()
+	camera.name = "Player%dViewportCamera" % (slot.slot_index + 1)
+	camera.current = true
+	viewport.add_child(camera)
+
+	slot.viewport = viewport
+	slot.viewport_camera = camera
+
+
+func _sync_split_screen_cameras() -> void:
+	if not split_screen_layer:
+		return
+
+	for slot in player_slot_manager.slots:
+		if not slot.camera or not slot.viewport_camera:
+			continue
+
+		slot.viewport_camera.global_transform = slot.camera.global_transform
+		slot.viewport_camera.fov = slot.camera.fov
+		slot.viewport_camera.near = slot.camera.near
+		slot.viewport_camera.far = slot.camera.far

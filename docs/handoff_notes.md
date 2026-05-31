@@ -175,7 +175,10 @@ These are durable truths about how we build Blackspire.
   - `PlayerSlotManager` now owns local player spawning once `Game` receives `Level.level_ready`.
   - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
   - Local Co-op spawns two local players. Slot 0 uses keyboard/mouse and owns mouse look; slot 1 uses controller device 0 and does not receive mouse or unassigned joypad input.
-  - Until split-screen exists, only slot 0's camera is current.
+  - Local Co-op now creates a two-row split-screen overlay using shared-world `SubViewport`s.
+  - Slot 0 renders through the top viewport; slot 1 renders through the bottom viewport.
+  - Each slot gets a viewport-local camera that mirrors that player's real camera every frame.
+  - Per-player HUD/UI is not correctly scoped per viewport yet; expect UI polish to be the next local co-op slice.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -211,6 +214,7 @@ These are durable truths about how we build Blackspire.
   - Targeted main-menu single-player boot smoke passed: `main.tscn` created `Game`, loaded `Level`, generated rooms, spawned the player, and assigned slot 0.
   - Targeted single-player player-slot boot smoke passed: one slot, one player, slot 0 camera/input assigned.
   - Targeted local co-op player-slot boot smoke passed: two slots, two players, slot 0 keyboard/mouse, slot 1 controller device 0, only slot 0 camera current.
+  - Targeted local co-op split-screen boot smoke passed: two slots, two players, two shared-world `SubViewport`s, and two current viewport cameras.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
@@ -218,12 +222,11 @@ These are durable truths about how we build Blackspire.
 
 **Next Steps / Pickup Goals:**
 - Manual play-test the restored menu path in the editor: launch `main.tscn`, choose Single Player, confirm mouse capture, movement/combat/loot/paper-doll/hotbar/extraction still feel correct.
-- Manual play-test Local Co-op from `main.tscn`: confirm player 1 responds to keyboard/mouse, player 2 responds to controller 0, and controller input no longer moves player 1.
-- Add the first split-screen slice:
-  1. Add a 2-player viewport layout for local co-op.
-  2. Bind each slot's camera to its viewport.
-  3. Move or duplicate per-player HUD/UI into the correct viewport layer.
-  4. Verify player 2 can see, move, interact, fight, and open their own UI without stealing player 1 input.
+- Manual play-test Local Co-op from `main.tscn`: confirm both viewports render, player 1 responds to keyboard/mouse in the top view, player 2 responds to controller 0 in the bottom view, and controller input no longer moves player 1.
+- Add the next split-screen UI slice:
+  1. Scope player HUD, hit feedback, interaction prompts, and paper-doll UI per slot/viewport.
+  2. Verify player 2 can see health/feedback and open their own UI without stealing player 1 input.
+  3. Decide whether the long-term UI should be duplicated under viewport-local CanvasLayers or routed through a slot-owned UI host.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 
 ---

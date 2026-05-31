@@ -24,4 +24,8 @@ var input: PlayerInput = null
 ## The player's camera. This becomes the viewport camera once split-screen lands.
 var camera: Camera3D = null
 
+## Split-screen viewport plumbing for local players.
+var viewport: SubViewport = null
+var viewport_camera: Camera3D = null
+
 ## Future: camera, viewport, hud references will live here too.

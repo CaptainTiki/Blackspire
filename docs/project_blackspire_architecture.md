@@ -911,7 +911,7 @@ This keeps single-player, couch co-op, and future online modes flowing through t
 
 ### Current Bootstrap Implementation
 
-As of `v0.0.0033`, the working prototype flow is:
+As of `v0.0.0034`, the working prototype flow is:
 
 ```text
 system/main.tscn
@@ -922,13 +922,16 @@ system/main.tscn
   -> world/levels/test_level.tscn
   -> LevelGenerator generated room chain
   -> PlayerSlotManager.spawn_local_players(...)
+  -> Local Co-op only: shared-world SubViewport split-screen overlay
 ```
 
 `system/quick_entry.tscn` bypasses the menu for fast iteration, but still creates the same `GameSessionConfig` and enters through `system/game/game.tscn`.
 
-`PlayerSlotManager` now owns local player spawning and slot input assignment. Single Player spawns one slot/player and keeps controller-friendly solo play by letting slot 0 accept unassigned joypads. Local Co-op spawns two slots/players: slot 0 uses keyboard/mouse and owns mouse look, while slot 1 uses controller device 0. Until split-screen lands, only slot 0's camera is current.
+`PlayerSlotManager` now owns local player spawning and slot input assignment. Single Player spawns one slot/player and keeps controller-friendly solo play by letting slot 0 accept unassigned joypads. Local Co-op spawns two slots/players: slot 0 uses keyboard/mouse and owns mouse look, while slot 1 uses controller device 0.
 
-The next local co-op milestone is viewport ownership: create the first 2-player split-screen layout, bind each slot's camera to its viewport, and move per-player HUD/UI into the correct viewport context.
+The first split-screen pass lives in `Game`: Local Co-op creates a full-screen two-row `SubViewportContainer` layout, gives each slot a shared-world `SubViewport`, and mirrors each player's source camera into a viewport-local camera. This proves two-player visibility without moving the dungeon world under a viewport.
+
+The next local co-op milestone is per-slot UI ownership: move or duplicate HUD, hit feedback, interaction prompts, and paper-doll UI into the correct viewport context.
 
 ## 30. UI Architecture
 
