@@ -62,6 +62,9 @@ func _on_interactable_changed(previous: Interactable, new: Interactable) -> void
 		# TODO: Show interaction prompt in UI
 
 func try_interact() -> void:
+	if not player_components.player.can_act():
+		return
+
 	if current_interactable and is_instance_valid(current_interactable):
 		current_interactable.interact(player_components.player)  # Pass the player as the actor
 

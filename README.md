@@ -17,7 +17,10 @@
   - Reusable health/damage/hurtbox path.
   - Wooden doors and urns can be damaged/broken by sword hits.
   - Iron doors are combat-immune but can still be lever/interaction controlled.
-  - Floating damage numbers, timed damaged-target health bars, and player hit flash feedback are working.
+  - Floating damage numbers, timed damaged-target health bars, player hit flash feedback, and a small player HP HUD are working.
+  - Player zero-health now enters a bleeding-out state with controls locked and camera collapsed toward the floor.
+  - Bleeding-out players notify `Level`; bleed-out expiry marks the player dead.
+  - `Level` tracks active players and shows a run-failed overlay when all active players are bleeding out or dead.
   - Basic enemy spawns from TrenchBroom `info_enemy_spawn`, chases, uses a readable windup + forward cone lunge attack, damages the player, and can be killed.
   - Elite enemy variant spawns from the same marker type via an `elite` Yes/No property, using the basic enemy brain with heavier prototype tuning.
   - Enemy death now has a clear lifecycle: `die()` starts cleanup, then `decompose()` removes the enemy after a short timer.

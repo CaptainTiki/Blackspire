@@ -8,6 +8,8 @@
 [ext_resource type="Script" uid="uid://21j40pjto1k4" path="res://world/components/combat/player_melee_attack.gd" id="5_melee_attack"]
 [ext_resource type="Script" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
 [ext_resource type="Script" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
+[ext_resource type="Script" path="res://world/components/player/player_life_state.gd" id="8_life_state"]
+[ext_resource type="Script" path="res://world/components/player/player_hud.gd" id="9_hud"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -151,11 +153,12 @@ shape = SubResource("BoxShape3D_sword_hitbox")
 libraries/ = SubResource("AnimationLibrary_sword")
 autoplay = &"RESET"
 
-[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "inventory")]
+[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "inventory", "life_state")]
 script = ExtResource("2_player_components")
 player = NodePath("..")
 camerarig = NodePath("../CameraRig")
 inventory = NodePath("PlayerInventory")
+life_state = NodePath("PlayerLifeState")
 
 [node name="PlayerInventory" type="Node" parent="Components"]
 script = ExtResource("7_inventory")
@@ -173,6 +176,11 @@ script = ExtResource("4_health")
 max_health = 100
 current_health = 100
 
+[node name="PlayerLifeState" type="Node" parent="Components" node_paths=PackedStringArray("player", "health_component")]
+script = ExtResource("8_life_state")
+player = NodePath("../..")
+health_component = NodePath("../HealthComponent")
+
 [node name="PlayerHitFeedback" type="CanvasLayer" parent="." node_paths=PackedStringArray("health_component")]
 script = ExtResource("6_hit_feedback")
 health_component = NodePath("../Components/HealthComponent")
@@ -185,3 +193,18 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.85, 0.02, 0.02, 0)
+
+[node name="PlayerHUD" type="CanvasLayer" parent="." node_paths=PackedStringArray("health_component")]
+script = ExtResource("9_hud")
+health_component = NodePath("../Components/HealthComponent")
+
+[node name="HealthLabel" type="Label" parent="PlayerHUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -64.0
+offset_right = 220.0
+offset_bottom = -28.0
+grow_vertical = 0
+text = "HP 100/100"

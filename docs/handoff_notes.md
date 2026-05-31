@@ -49,6 +49,17 @@ These are durable truths about how we build Blackspire.
 ## Current Session Context
 
 **Last Worked On:**
+- Added a small player HP HUD.
+  - `HealthComponent` now emits `health_changed(current_health, max_health)`.
+  - `PlayerHUD` is a player-owned `CanvasLayer` bound directly to that player's `HealthComponent`.
+  - The HUD currently shows `HP current/max` in the lower-left overlay.
+- Added the player bleedout / run-fail slice.
+  - `PlayerLifeState` listens to player `HealthComponent.died` and turns zero HP into bleeding out instead of immediate final death.
+  - Bleeding out locks player control, interaction, and melee attacks, and collapses the camera toward the floor.
+  - Bleed-out duration is currently 60 seconds; expiry marks the player dead.
+  - Bleeding-out and dead players notify `Level`.
+  - `Level` tracks active players and shows a run-failed overlay when all active players are bleeding out or dead.
+  - A small revive hook exists on `PlayerLifeState`, but revive interaction/gameplay is not wired yet.
 - Changed extraction from a living-enemy gate into a delayed holdout.
   - `ExitPortal` now starts extraction through `Level.begin_extraction(player, extraction_delay_seconds)`.
   - The mapper-facing `exit_portal` property is now `extraction_delay_seconds`, currently authored as 15 seconds.
@@ -69,7 +80,11 @@ These are durable truths about how we build Blackspire.
   - Final elite room spawns the elite enemy from the same marker type with `elite = true`.
   - Exit room contains the extraction portal.
   - Extraction is smoke-verified to start while enemies remain, alert those enemies to the extracting player, become ready after the countdown, and only complete after a second portal interaction.
+  - Player failure is smoke-verified with two active players: one down/dead player does not fail the run while another player is active, but all active players bleeding out/dead fails the run.
+  - Player HUD is smoke-verified to update on damage and revive.
 - Validation completed:
+  - Targeted player HUD smoke script passed.
+  - Targeted player bleedout/fail-state smoke script passed.
   - Targeted extraction-ready smoke script passed.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
@@ -77,7 +92,9 @@ These are durable truths about how we build Blackspire.
 
 **Next Steps / Pickup Goals (for tomorrow):**
 - Manual play-test the full chain and confirm the countdown-to-ready-to-interact extraction flow feels readable and tense.
+- Manual play-test player death: enemy drops player, camera collapse reads correctly, and all-down failure overlay appears.
 - Decide the next slice:
+  - Revive interaction for bleeding-out players.
   - Minimal loot UI / carried weight pressure.
   - Run result storage above the current `Level`.
   - Extraction tuning: longer delay, cancellation rules, portal VFX/audio escalation.
@@ -111,6 +128,8 @@ It should feel like early MMO raiding before everything was known.
 - `world/components/combat/world_health_bar_3d.gd`
 - `world/components/combat/player_hit_feedback.gd`
 - `world/components/player/player_inventory.gd`
+- `world/components/player/player_life_state.gd`
+- `world/components/player/player_hud.gd`
 - `world/entities/entity.gd`
 - `world/entities/pickups/pickup.gd`
 - `world/entities/pickups/gold_pickup.gd`

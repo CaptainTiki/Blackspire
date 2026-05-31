@@ -12,7 +12,9 @@ static var current_level: Level
 
 var entity_registry: MapEntityRegistry
 var spawned_enemies: Array[Node3D] = []
+var active_players: Array[PlayerController] = []
 var is_run_completed := false
+var is_run_failed := false
 var is_extraction_in_progress := false
 var is_extraction_ready := false
 var run_complete_message := ""
@@ -27,7 +29,10 @@ var _extraction_label: Label
 signal level_ready
 signal extraction_started(player: PlayerController, duration_seconds: float)
 signal extraction_ready(player: PlayerController)
+signal player_bleeding_out(player: PlayerController)
+signal player_died(player: PlayerController)
 signal run_completed(actor: Node)
+signal run_failed(reason: String)
 signal player_exited_level(player: PlayerController)
 
 func _enter_tree() -> void:
@@ -122,8 +127,29 @@ func has_living_enemies() -> bool:
 	return false
 
 
+func register_player(player: PlayerController) -> void:
+	if active_players.has(player):
+		return
+
+	active_players.append(player)
+
+
+func notify_player_bleeding_out(player: PlayerController) -> void:
+	register_player(player)
+	player_bleeding_out.emit(player)
+	print("Level: Player bleeding out - ", player.name)
+	_evaluate_player_failure_state()
+
+
+func notify_player_died(player: PlayerController) -> void:
+	register_player(player)
+	player_died.emit(player)
+	print("Level: Player died - ", player.name)
+	_evaluate_player_failure_state()
+
+
 func interact_with_extraction(player: PlayerController, delay_seconds: float) -> void:
-	if is_run_completed:
+	if is_run_completed or is_run_failed:
 		return
 	if is_extraction_ready:
 		exit_level(player)
@@ -136,7 +162,7 @@ func interact_with_extraction(player: PlayerController, delay_seconds: float) ->
 
 
 func begin_extraction(player: PlayerController, delay_seconds: float) -> void:
-	if is_run_completed:
+	if is_run_completed or is_run_failed:
 		return
 	if is_extraction_in_progress:
 		print("Level: Extraction charging - %.1f seconds remain." % extraction_remaining_seconds)
@@ -158,7 +184,7 @@ func begin_extraction(player: PlayerController, delay_seconds: float) -> void:
 
 
 func exit_level(player: PlayerController) -> void:
-	if is_run_completed:
+	if is_run_completed or is_run_failed:
 		return
 
 	is_run_completed = true
@@ -170,6 +196,20 @@ func exit_level(player: PlayerController) -> void:
 	run_completed.emit(player)
 	print("Level: Player exited level - ", run_complete_message)
 	_show_run_complete_overlay(run_complete_message)
+	get_tree().paused = true
+
+
+func fail_level(reason: String = "All Players Are Down") -> void:
+	if is_run_completed or is_run_failed:
+		return
+
+	is_run_failed = true
+	is_extraction_in_progress = false
+	is_extraction_ready = false
+	_remove_extraction_countdown_overlay()
+	run_failed.emit(reason)
+	print("Level: Run failed - ", reason)
+	_show_run_failed_overlay(reason)
 	get_tree().paused = true
 
 
@@ -205,6 +245,29 @@ func _show_run_complete_overlay(exit_summary: String) -> void:
 	overlay.add_child(label)
 
 
+func _show_run_failed_overlay(reason: String) -> void:
+	if has_node("RunFailedOverlay"):
+		get_node("RunFailedOverlay").queue_free()
+
+	var overlay := CanvasLayer.new()
+	overlay.name = "RunFailedOverlay"
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(overlay)
+
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0.0, 0.0, 0.0, 0.78)
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(backdrop)
+
+	var label := Label.new()
+	label.text = "%s\nRun Failed" % reason
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.add_theme_font_size_override("font_size", 42)
+	overlay.add_child(label)
+
+
 func _process_extraction_countdown(delta: float) -> void:
 	if not is_extraction_in_progress:
 		return
@@ -221,6 +284,21 @@ func _process_extraction_countdown(delta: float) -> void:
 
 	if extraction_remaining_seconds == 0.0 and not is_extraction_ready:
 		_mark_extraction_ready()
+
+
+func _evaluate_player_failure_state() -> void:
+	if is_run_completed or is_run_failed:
+		return
+	if active_players.is_empty():
+		return
+
+	for player in active_players:
+		if not is_instance_valid(player):
+			continue
+		if not player.is_bleeding_out_or_dead():
+			return
+
+	fail_level("All Players Are Down")
 
 
 func _alert_living_enemies_to_player(player: PlayerController) -> void:
@@ -306,6 +384,7 @@ func spawn_player(player_scene: PackedScene) -> Node3D:
 	
 	add_child(player)
 	player.global_transform = spawn_point.global_transform
+	register_player(player)
 	
 	print("Level: Spawned player at ", player.global_position, " using spawn point: ", spawn_point.name)
 	

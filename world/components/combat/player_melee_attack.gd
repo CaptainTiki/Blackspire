@@ -38,6 +38,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func attack() -> void:
 	if _is_attacking:
 		return
+	if not player_components.player.can_act():
+		return
 
 	_is_attacking = true
 	_hit_targets.clear()
