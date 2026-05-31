@@ -1,6 +1,6 @@
 # Handoff Notes
 
-**Last Updated:** 2026-05-30
+**Last Updated:** 2026-05-31
 
 ---
 
@@ -71,12 +71,32 @@ These are durable truths about how we build Blackspire.
   - `Pickup` is the base interactable collection entity; `GoldPickup` adds coins to the interacting player's inventory.
   - `pickup_gold` is exposed through the FGD, and `room_treasure_01.map` / generated scene now contains 25 gold total.
   - `Level` asks the player for the exit summary, emits exit/completion signals, shows the prototype overlay, and pauses the tree.
+- Added the first equipment data foundation.
+  - `ItemDefinition` owns id, display name, icon, stackability, max stack, and enum-backed item type.
+  - `EquipmentDefinition` extends item data with enum-backed equipment slot and an array of stat modifier resources.
+  - `StatModifierDefinition` owns enum-backed stat type and a signed value, so authored equipment can carry positive and negative modifiers.
+  - Added sample `gold_coin`, `rusted_sword`, and `padded_vest` resources under `data/`.
+  - Focused smoke coverage loads the sample resources and verifies item type, equipment slot, and stat modifier totals.
+- Added placeable direct-equipment pickups.
+  - `PlayerEquipment` tracks equipped equipment definitions by slot and totals stat modifiers from equipped gear.
+  - `EquipmentPickup` reads an `EquipmentDefinition`, shows an equip prompt, equips directly into the interacting player's `PlayerEquipment`, then removes itself.
+  - Added `rusted_sword_pickup.tscn` and `padded_vest_pickup.tscn`.
+  - Added TrenchBroom point entities `pickup_rusted_sword` and `pickup_padded_vest` to the Blackspire FGD.
+  - Placed one rusted sword and one padded vest in `room_treasure_01`.
+  - `PlayerMeleeAttack` now includes equipped `ATTACK_DAMAGE` modifiers; the rusted sword raises melee damage from 10 to 14.
+- Added the first equipment inspection UI.
+  - `toggle_equipment` is bound to Tab.
+  - `PlayerEquipmentUI` is a player-owned CanvasLayer that reads that player's `PlayerEquipment` and `PlayerMeleeAttack`.
+  - Direct equip-on-pickup now shows a short "Equipped X" feedback toast.
+  - The Tab panel shows equipment slots, focused slot/item details, and current prototype stats.
+  - This is intentionally not a backpack/grid inventory yet.
 
 **Current State:**
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
   - Treasure side room contains breakable urns and interactable gold pickups.
+  - Treasure side room also contains one rusted sword pickup and one padded vest pickup.
   - Final elite room spawns the elite enemy from the same marker type with `elite = true`.
   - Exit room contains the extraction portal.
   - Extraction is smoke-verified to start while enemies remain, alert those enemies to the extracting player, become ready after the countdown, and only complete after a second portal interaction.
@@ -86,6 +106,10 @@ These are durable truths about how we build Blackspire.
   - Targeted player HUD smoke script passed.
   - Targeted player bleedout/fail-state smoke script passed.
   - Targeted extraction-ready smoke script passed.
+  - Targeted equipment definition smoke script passed.
+  - Targeted equipment pickup smoke script passed.
+  - Targeted treasure equipment placement smoke script passed.
+  - Targeted equipment UI smoke script passed.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
@@ -93,14 +117,16 @@ These are durable truths about how we build Blackspire.
 **Next Steps / Pickup Goals (for tomorrow):**
 - Manual play-test the full chain and confirm the countdown-to-ready-to-interact extraction flow feels readable and tense.
 - Manual play-test player death: enemy drops player, camera collapse reads correctly, and all-down failure overlay appears.
-- Decide the next slice:
-  - Revive interaction for bleeding-out players.
-  - Minimal loot UI / carried weight pressure.
-  - Run result storage above the current `Level`.
-  - Extraction tuning: longer delay, cancellation rules, portal VFX/audio escalation.
-  - Exit transition target: menu, next biome placeholder, or run summary screen.
-  - Enemy architecture cleanup toward state charts/state machines.
-  - Mapper workflow cleanup for enemy spawn types and room metadata.
+- Next foundational systems path:
+  1. Equipment foundation without inventory UI.
+     - Next: manual play-test pickup prompts, equip feedback, and Tab equipment inspection in the generated treasure room.
+     - Mirror later with armor reducing incoming damage.
+  2. Item instance / inventory model without fancy UI.
+     - Add enough model support for held items, stack/non-stack rules, drop, and pickup semantics.
+  3. Paper-doll / equipment UI.
+     - Later: add inventory-to-equipment movement, visible icons, and deeper mouse/controller input.
+  4. Hub / town.
+     - Add stash, prep, multiplayer lobby flow, villagers, crafting, quests, lore, and run entry once loot/equipment matters.
 
 ---
 

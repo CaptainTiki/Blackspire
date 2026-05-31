@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
 [ext_resource type="Script" path="res://world/components/player/player_life_state.gd" id="8_life_state"]
 [ext_resource type="Script" path="res://world/components/player/player_hud.gd" id="9_hud"]
+[ext_resource type="Script" path="res://world/components/player/player_equipment.gd" id="10_equipment"]
+[ext_resource type="Script" path="res://world/components/player/player_equipment_ui.gd" id="11_equipment_ui"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -153,15 +155,19 @@ shape = SubResource("BoxShape3D_sword_hitbox")
 libraries/ = SubResource("AnimationLibrary_sword")
 autoplay = &"RESET"
 
-[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "inventory", "life_state")]
+[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "inventory", "equipment", "life_state")]
 script = ExtResource("2_player_components")
 player = NodePath("..")
 camerarig = NodePath("../CameraRig")
 inventory = NodePath("PlayerInventory")
+equipment = NodePath("PlayerEquipment")
 life_state = NodePath("PlayerLifeState")
 
 [node name="PlayerInventory" type="Node" parent="Components"]
 script = ExtResource("7_inventory")
+
+[node name="PlayerEquipment" type="Node" parent="Components"]
+script = ExtResource("10_equipment")
 
 [node name="InteractionScanner" type="Node3D" parent="Components" unique_id=277905915 node_paths=PackedStringArray("player_components")]
 script = ExtResource("3_interaction")
@@ -208,3 +214,84 @@ offset_right = 220.0
 offset_bottom = -28.0
 grow_vertical = 0
 text = "HP 100/100"
+
+[node name="PlayerEquipmentUI" type="CanvasLayer" parent="." node_paths=PackedStringArray("equipment", "melee_attack")]
+script = ExtResource("11_equipment_ui")
+equipment = NodePath("../Components/PlayerEquipment")
+melee_attack = NodePath("../Components/PlayerMeleeAttack")
+
+[node name="Root" type="Control" parent="PlayerEquipmentUI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PaperDollPanel" type="PanelContainer" parent="PlayerEquipmentUI/Root"]
+custom_minimum_size = Vector2(820, 420)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -410.0
+offset_top = -210.0
+offset_right = 410.0
+offset_bottom = 210.0
+
+[node name="Layout" type="HBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="StatsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+
+[node name="StatsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/StatsPanel"]
+layout_mode = 2
+text = "Stats"
+
+[node name="StatsLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/StatsPanel"]
+layout_mode = 2
+text = "Attack Damage: 10"
+
+[node name="SlotsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+
+[node name="SlotsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/SlotsPanel"]
+layout_mode = 2
+text = "Equipment"
+
+[node name="SlotButtons" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/SlotsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DetailsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+
+[node name="DetailsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel"]
+layout_mode = 2
+text = "Item"
+
+[node name="ItemNameLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel"]
+layout_mode = 2
+text = "Primary Weapon"
+
+[node name="ItemDetailsLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel"]
+layout_mode = 2
+text = "Empty slot"
+
+[node name="FeedbackLabel" type="Label" parent="PlayerEquipmentUI/Root"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 92.0
+offset_right = 220.0
+offset_bottom = 132.0
+horizontal_alignment = 1
+text = "Equipped"

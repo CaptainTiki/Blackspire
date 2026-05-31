@@ -2,7 +2,7 @@
 
 **Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.** It recreates the feeling of early MMO raiding before every answer was known.
 
-## Current Status (as of 2026-05-30)
+## Current Status (as of 2026-05-31)
 
 - **Core authoring pipeline**: Fully TrenchBroom + FuncGodot. Everything placeable comes through the FGD.
 - **Interaction system**: Thin `Interactable` component + `Entity` owns real behavior (proven pattern).
@@ -40,6 +40,19 @@
   - `PlayerInventory` currently tracks only picked-up coins.
   - `Pickup` provides the base interactable collection flow; `GoldPickup` adds coins to the interacting player's inventory.
   - `pickup_gold` is exposed through the FGD, and the treasure room currently contains 25 gold total.
+- **Equipment data foundation**: First item/equipment definitions are in place.
+  - `ItemDefinition`, `EquipmentDefinition`, and `StatModifierDefinition` are enum-backed Godot resources under `data/items`.
+  - Equipment carries an equipment slot plus an array of signed stat modifiers.
+  - Sample definitions exist for a gold coin, rusted sword, and padded vest.
+- **Placeable equipment pickups**: Direct equip-on-pickup is working without inventory UI.
+  - `PlayerEquipment` tracks equipped definitions by slot.
+  - `rusted_sword_pickup` and `padded_vest_pickup` are available as TrenchBroom point entities.
+  - The current treasure room contains one rusted sword and one padded vest.
+  - The rusted sword's attack modifier currently raises player melee damage from 10 to 14.
+- **Equipment inspection UI**: Tab opens a small player-owned paper doll.
+  - Equip pickups show a short "Equipped X" feedback toast.
+  - The panel shows equipment slots, focused item details, and current prototype stats.
+  - This is inspection only, not a backpack/grid inventory.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -60,7 +73,12 @@
 
 See [docs/README.md](docs/README.md) for the full version history.
 
-Current focus: Play-test the closed spawn, fight, loot, elite, and extract loop, then choose the next prototype slice.
+Latest equipment milestones:
+- `v0.0.0018` Equipment Definition Foundation.
+- `v0.0.0019` Direct Equip-on-Pickup.
+- `v0.0.0020` Paper-doll + Stats.
+
+Current focus: Manual play-test treasure-room equipment pickup plus Tab inspection, then mirror the modifier path for armor reducing incoming damage.
 
 ---
 

@@ -1,0 +1,33 @@
+extends Resource
+class_name ItemDefinition
+
+enum ItemType {
+	MISC,
+	CURRENCY,
+	CONSUMABLE,
+	EQUIPMENT,
+	QUEST,
+}
+
+@export var id: StringName = &""
+@export var display_name := ""
+@export var icon: Texture2D
+@export var stackable := false
+@export_range(1, 999, 1) var max_stack := 1
+@export var item_type := ItemType.MISC
+
+
+func validate_definition() -> bool:
+	var is_valid := true
+
+	if id == &"":
+		push_error("ItemDefinition is missing id.")
+		is_valid = false
+	if display_name.is_empty():
+		push_error("ItemDefinition '%s' is missing display_name." % id)
+		is_valid = false
+	if not stackable and max_stack != 1:
+		push_error("ItemDefinition '%s' is not stackable but max_stack is %d." % [id, max_stack])
+		is_valid = false
+
+	return is_valid

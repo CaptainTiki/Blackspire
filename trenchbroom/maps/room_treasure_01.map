@@ -158,3 +158,15 @@
 "weight" "1"
 "coin_amount" "10"
 }
+// entity 7
+{
+"classname" "pickup_rusted_sword"
+"origin" "-72 -72 16"
+"angle" "25"
+}
+// entity 8
+{
+"classname" "pickup_padded_vest"
+"origin" "72 -72 16"
+"angle" "335"
+}

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EquipmentDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://data/items/equipment_definition.gd" id="1_equipment_definition"]
+[ext_resource type="Script" path="res://data/items/stat_modifier_definition.gd" id="2_stat_modifier_definition"]
+
+[sub_resource type="Resource" id="StatModifierDefinition_attack_damage"]
+script = ExtResource("2_stat_modifier_definition")
+stat_type = 0
+value = 4.0
+
+[resource]
+script = ExtResource("1_equipment_definition")
+id = &"rusted_sword"
+display_name = "Rusted Sword"
+stackable = false
+max_stack = 1
+item_type = 3
+equipment_slot = 0
+stat_modifiers = Array[Resource]([SubResource("StatModifierDefinition_attack_damage")])

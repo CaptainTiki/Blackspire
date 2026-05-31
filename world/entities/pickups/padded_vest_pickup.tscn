@@ -1,0 +1,52 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://world/entities/pickups/equipment_pickup.gd" id="1_equipment_pickup"]
+[ext_resource type="Resource" path="res://data/armor/padded_vest.tres" id="2_equipment_definition"]
+[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="3_interactable"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cloth"]
+albedo_color = Color(0.22, 0.24, 0.2, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_strap"]
+albedo_color = Color(0.12, 0.08, 0.04, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_vest"]
+material = SubResource("StandardMaterial3D_cloth")
+size = Vector3(0.55, 0.18, 0.7)
+
+[sub_resource type="BoxMesh" id="BoxMesh_strap"]
+material = SubResource("StandardMaterial3D_strap")
+size = Vector3(0.08, 0.2, 0.78)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_collision"]
+size = Vector3(0.75, 0.35, 0.9)
+
+[node name="PaddedVestPickup" type="StaticBody3D"]
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("1_equipment_pickup")
+equipment_definition = ExtResource("2_equipment_definition")
+
+[node name="Vest" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 0, 0.16, 0)
+mesh = SubResource("BoxMesh_vest")
+
+[node name="StrapA" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, -0.16, 0.18, 0)
+mesh = SubResource("BoxMesh_strap")
+
+[node name="StrapB" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 0.16, 0.18, 0)
+mesh = SubResource("BoxMesh_strap")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 0, 0.16, 0)
+shape = SubResource("BoxShape3D_collision")
+
+[node name="Components" type="Node3D" parent="."]
+
+[node name="Interactable" type="Node" parent="Components"]
+script = ExtResource("3_interactable")
+prompt = "Equip Padded Vest"

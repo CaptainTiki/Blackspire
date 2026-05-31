@@ -2,6 +2,7 @@ extends Node
 class_name PlayerMeleeAttack
 
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
+const StatModifierDefinitionScript := preload("res://data/items/stat_modifier_definition.gd")
 
 @export var player_components: PlayerComponents
 @export var attack_damage := 10
@@ -72,8 +73,17 @@ func _try_damage_area(area: Area3D) -> void:
 
 	_hit_targets.append(area)
 	var hit_position := _get_feedback_hit_position(area)
-	var damage_request := DamageRequestScript.new(player_components.player, attack_damage, hit_position)
+	var damage_request := DamageRequestScript.new(player_components.player, get_attack_damage(), hit_position)
 	area.apply_damage(damage_request)
+
+
+func get_attack_damage() -> int:
+	var total_damage := float(attack_damage)
+
+	if player_components.equipment:
+		total_damage += player_components.equipment.get_stat_modifier_total(StatModifierDefinitionScript.StatType.ATTACK_DAMAGE)
+
+	return maxi(roundi(total_damage), 0)
 
 
 func _get_feedback_hit_position(area: Area3D) -> Vector3:

@@ -94,3 +94,11 @@
 	weight(integer) : "Prototype carry weight for future movement/extraction pressure." : 1
 	coin_amount(integer) : "Number of coins added to the collecting player's inventory." : 5
 ]
+
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = pickup_rusted_sword : "Interactable rusted sword equipment pickup."
+[
+]
+
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = pickup_padded_vest : "Interactable padded vest equipment pickup."
+[
+]

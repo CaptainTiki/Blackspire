@@ -18,6 +18,7 @@ class_name PlayerController
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var inventory: Node = $Components/PlayerInventory
+@onready var equipment: Node = $Components/PlayerEquipment
 @onready var life_state: Node = $Components/PlayerLifeState
 
 # --- Internal ---
@@ -56,6 +57,10 @@ func _apply_player_height() -> void:
 
 func get_inventory() -> Node:
 	return inventory
+
+
+func get_equipment() -> Node:
+	return equipment
 
 
 func get_level_exit_summary() -> String:
