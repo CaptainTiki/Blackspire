@@ -6,6 +6,7 @@ class_name PlayerComponents
 
 @export var player: PlayerController
 @export var camerarig: CameraRig
+@export var input: PlayerInput
 @export var inventory: Node
 @export var equipment: Node
 @export var hotbar: Node
@@ -16,6 +17,8 @@ func _ready() -> void:
 		push_error("PlayerComponents: No player assigned. This is a required reference.")
 	if not camerarig:
 		push_error("PlayerComponents: No camerarig assigned. This is a required reference.")
+	if not input:
+		push_error("PlayerComponents: No input assigned. This is a required reference.")
 	if not inventory:
 		push_error("PlayerComponents: No inventory assigned. This is a required reference.")
 	if not equipment:

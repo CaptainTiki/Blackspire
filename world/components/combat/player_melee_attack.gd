@@ -31,8 +31,10 @@ func _ready() -> void:
 	hitbox.area_entered.connect(_on_hitbox_area_entered)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("primary_action"):
+func _unhandled_input(_event: InputEvent) -> void:
+	# Input must come through the per-player PlayerInput component.
+	# Missing wiring will cause a hard error here — this is intentional ("fail loudly").
+	if player_components.input.is_primary_action_just_pressed():
 		attack()
 
 

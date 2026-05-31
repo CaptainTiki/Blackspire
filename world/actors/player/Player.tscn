@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://world/components/player/player_equipment.gd" id="10_equipment"]
 [ext_resource type="Script" path="res://world/components/player/player_equipment_ui.gd" id="11_equipment_ui"]
 [ext_resource type="Script" path="res://world/components/player/player_hotbar.gd" id="12_hotbar"]
+[ext_resource type="Script" path="res://world/components/player/player_input.gd" id="13_player_input"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -156,10 +157,11 @@ shape = SubResource("BoxShape3D_sword_hitbox")
 libraries/ = SubResource("AnimationLibrary_sword")
 autoplay = &"RESET"
 
-[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "inventory", "equipment", "hotbar", "life_state")]
+[node name="Components" type="Node3D" parent="." unique_id=1248400361 node_paths=PackedStringArray("player", "camerarig", "input", "inventory", "equipment", "hotbar", "life_state")]
 script = ExtResource("2_player_components")
 player = NodePath("..")
 camerarig = NodePath("../CameraRig")
+input = NodePath("PlayerInput")
 inventory = NodePath("PlayerInventory")
 equipment = NodePath("PlayerEquipment")
 hotbar = NodePath("PlayerHotbar")
@@ -176,6 +178,17 @@ script = ExtResource("10_equipment")
 script = ExtResource("12_hotbar")
 player = NodePath("../..")
 inventory = NodePath("../PlayerInventory")
+
+[node name="PlayerInput" type="Node" parent="Components" node_paths=PackedStringArray("player")]
+script = ExtResource("13_player_input")
+player = NodePath("../..")
+device = -1
+owns_mouse = true
+invert_movement_y = true
+invert_look_y = false
+invert_movement_x = false
+invert_look_x = false
+joy_deadzone = 0.2
 
 [node name="InteractionScanner" type="Node3D" parent="Components" unique_id=277905915 node_paths=PackedStringArray("player_components")]
 script = ExtResource("3_interaction")

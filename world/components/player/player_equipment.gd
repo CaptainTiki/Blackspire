@@ -2,10 +2,11 @@ extends Node
 class_name PlayerEquipment
 
 const StatModifierDefinitionScript := preload("res://data/items/stat_modifier_definition.gd")
+const EquipmentDefinitionScript := preload("res://data/items/equipment_definition.gd")
 
 signal equipment_changed(slot: int, equipment_definition: Resource)
 
-var equipped_items: Dictionary = {}
+var equipped_items: Dictionary[EquipmentDefinitionScript.EquipmentSlot, Resource] = {}
 
 
 func equip(equipment_definition: Resource) -> void:

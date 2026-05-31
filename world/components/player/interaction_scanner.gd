@@ -77,6 +77,8 @@ func try_interact() -> void:
 	if current_interactable and is_instance_valid(current_interactable):
 		current_interactable.interact(player_components.player)  # Pass the player as the actor
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact"):
+func _unhandled_input(_event: InputEvent) -> void:
+	# Input must come through the per-player PlayerInput component.
+	# Missing wiring will cause a hard error here — this is intentional ("fail loudly").
+	if player_components.input.is_interact_just_pressed():
 		try_interact()

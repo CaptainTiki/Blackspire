@@ -2,6 +2,7 @@ extends CharacterBody3D
 class_name PlayerController
 
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
+const PlayerInputScript := preload("res://world/components/player/player_input.gd")
 
 const DROP_IMPULSE := 3.25
 const DROP_UP_IMPULSE := 1.4
@@ -30,6 +31,7 @@ const DROP_DOWN_OFFSET := 0.35
 @onready var hotbar: Node = $Components/PlayerHotbar
 @onready var health: Node = $Components/HealthComponent
 @onready var life_state: Node = $Components/PlayerLifeState
+@onready var input_reader: PlayerInputScript = $Components/PlayerInput
 
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -48,6 +50,11 @@ func _ready() -> void:
 	
 	if not camera:
 		push_error("PlayerController is missing a Camera3D child node!")
+	
+	if not input_reader:
+		push_error("PlayerController is missing PlayerInput component!")
+	else:
+		input_reader.mouse_motion_captured.connect(_on_mouse_motion_captured)
 	
 	# Apply capsule and camera height from exported variables (useful for testing different sizes)
 	_apply_player_height()
@@ -172,14 +179,21 @@ func exit_bleeding_out_state() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Mouse motion is now delivered via signal from PlayerInput.
+	# We keep this stub in case other one-off input is needed later.
+	pass
+
+
+func _on_mouse_motion_captured(relative: Vector2) -> void:
 	if not can_act():
 		return
+	if not input_reader.owns_mouse:
+		return
 
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		if camera:
-			camera.rotate_x(-event.relative.y * mouse_sensitivity)
-			camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
+	rotate_y(-relative.x * mouse_sensitivity)
+	if camera:
+		camera.rotate_x(-relative.y * mouse_sensitivity)
+		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
 
 func _physics_process(delta: float) -> void:
 	if not can_act():
@@ -190,15 +204,17 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	# Handle jump
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	# Handle jump via PlayerInput (required — fail loudly if missing)
+	if input_reader.is_jump_just_pressed() and is_on_floor():
 		velocity.y = jump_velocity
 
-	# Get movement input
-	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	# Movement comes exclusively from the per-player input reader.
+	# If this is null the game will error here — that is intentional.
+	var input_dir := input_reader.get_movement_vector()
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
-	var current_speed = sprint_speed if Input.is_action_pressed("sprint") else walk_speed
+	var sprinting := input_reader.is_sprint_pressed()
+	var current_speed = sprint_speed if sprinting else walk_speed
 
 	if direction:
 		velocity.x = direction.x * current_speed
@@ -224,7 +240,8 @@ func _process_controller_look(delta: float) -> void:
 	if not _controller_look_enabled:
 		return
 
-	var look_input := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	# Direct access — missing input_reader will error loudly (desired).
+	var look_input := input_reader.get_look_vector()
 	if look_input.is_zero_approx():
 		return
 

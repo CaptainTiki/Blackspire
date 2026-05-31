@@ -52,7 +52,7 @@ const STAT_NAMES := {
 
 var selected_slot := EquipmentDefinitionScript.EquipmentSlot.PRIMARY_WEAPON
 var selected_backpack_slot := -1
-var slot_buttons: Dictionary = {}
+var slot_buttons: Dictionary[EquipmentDefinitionScript.EquipmentSlot, Button] = {}
 var backpack_slot_buttons: Array[Button] = []
 var hotbar_slot_buttons: Array[Button] = []
 var current_backpack_slot_count := 0
