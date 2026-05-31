@@ -106,3 +106,7 @@
 @PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 204 204) = pickup_worn_pack : "Interactable worn pack equipment pickup."
 [
 ]
+
+@PointClass size(-8.0 -8.0 -8.0, 8.0 8.0 8.0) color(204 32 32) = pickup_health_potion : "Interactable health potion pickup."
+[
+]

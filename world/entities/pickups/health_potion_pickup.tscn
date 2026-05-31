@@ -1,0 +1,58 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://world/entities/pickups/item_pickup.gd" id="1_item_pickup"]
+[ext_resource type="Resource" path="res://data/items/health_potion.tres" id="2_item_definition"]
+[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="3_interactable"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glass"]
+albedo_color = Color(0.78, 0.88, 0.9, 0.4)
+roughness = 0.12
+alpha_scissor_threshold = 0.01
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_red"]
+albedo_color = Color(0.86, 0.05, 0.03, 1)
+roughness = 0.22
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_bottle"]
+material = SubResource("StandardMaterial3D_glass")
+top_radius = 0.12
+bottom_radius = 0.18
+height = 0.46
+radial_segments = 16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_liquid"]
+material = SubResource("StandardMaterial3D_red")
+top_radius = 0.155
+bottom_radius = 0.17
+height = 0.26
+radial_segments = 16
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_collision"]
+radius = 0.22
+height = 0.52
+
+[node name="HealthPotionPickup" type="RigidBody3D"]
+collision_layer = 3
+collision_mask = 49
+freeze = true
+mass = 0.3
+script = ExtResource("1_item_pickup")
+item_definition = ExtResource("2_item_definition")
+
+[node name="Bottle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, 0, 0.2, 0)
+mesh = SubResource("CylinderMesh_bottle")
+
+[node name="Liquid" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, 0, 0.16, 0)
+mesh = SubResource("CylinderMesh_liquid")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, -0.70710677, 0, 0.70710677, 0.70710677, 0, 0.2, 0)
+shape = SubResource("CapsuleShape3D_collision")
+
+[node name="Components" type="Node3D" parent="."]
+
+[node name="Interactable" type="Node" parent="Components"]
+script = ExtResource("3_interactable")
+prompt = "Take Health Potion"

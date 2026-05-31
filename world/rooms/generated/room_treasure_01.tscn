@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" path="res://world/entities/pickups/rusted_sword_pickup.tscn" id="16_sword"]
 [ext_resource type="PackedScene" path="res://world/entities/pickups/padded_vest_pickup.tscn" id="17_vest"]
 [ext_resource type="PackedScene" path="res://world/entities/pickups/worn_pack_pickup.tscn" id="18_pack"]
+[ext_resource type="PackedScene" path="res://world/entities/pickups/health_potion_pickup.tscn" id="19_potion"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_sdxjd"]
 _surfaces = [{
@@ -343,3 +344,9 @@ transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, 0
 
 [node name="entity_13_pickup_padded_vest" parent="FuncGodotMap" instance=ExtResource("17_vest")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0.5, 3)
+
+[node name="entity_14_pickup_health_potion" parent="FuncGodotMap" instance=ExtResource("19_potion")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.75, 0.5, -0.75)
+
+[node name="entity_15_pickup_health_potion" parent="FuncGodotMap" instance=ExtResource("19_potion")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.75, 0.5, 0.75)

@@ -69,8 +69,9 @@
   - Backpack capacity is enforced: full backpacks reject new item stacks/instances and leave pickups in the world.
   - Mouse-driven backpack/equipment movement is working: click to hold, click to place, occupied slots swap.
   - Equipment pickups now go to the backpack first instead of direct-equipping.
-  - Hotbar activation is placeholder-only for now and reports item-specific "not implemented" feedback.
+  - Hotbar activation now supports health potion use; other item actions still report item-specific placeholder feedback.
   - Backpack items can be dropped through the paper-doll Drop button, spawning their definition's pickup scene as a tossed rigid body.
+  - Health potions restore 15 HP from the hotbar, consume one potion, and leave an empty bottle in the backpack or drop it if the backpack is full.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -103,8 +104,9 @@ Latest equipment milestones:
 - `v0.0.0026` Mouse Equip From Backpack.
 - `v0.0.0027` Hotbar Binding Foundation.
 - `v0.0.0028` Generic Drop From Backpack.
+- `v0.0.0029` Health Potion Hotbar Use.
 
-Current focus: Manual play-test backpack drops as shareable world loot, then decide whether the next slice is consumable use or controller support.
+Current focus: Manual play-test health potion use/replacement bottles in the generated dungeon, then decide whether the next slice is controller support or a small inventory polish pass.
 
 ---
 

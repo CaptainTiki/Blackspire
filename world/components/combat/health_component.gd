@@ -34,3 +34,19 @@ func revive(health_amount: int) -> void:
 	current_health = clamp(health_amount, 1, max_health)
 	is_dead = false
 	health_changed.emit(current_health, max_health)
+
+
+func heal(amount: int) -> int:
+	if amount <= 0:
+		push_error("HealthComponent.heal requires a positive amount.")
+		return 0
+	if is_dead:
+		return 0
+
+	var previous_health := current_health
+	current_health = mini(current_health + amount, max_health)
+	var healed_amount := current_health - previous_health
+	if healed_amount > 0:
+		health_changed.emit(current_health, max_health)
+
+	return healed_amount

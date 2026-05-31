@@ -148,6 +148,13 @@ These are durable truths about how we build Blackspire.
   - Dropping requires holding a backpack item; equipped items must be unequipped to backpack first.
   - Dropping removes that item instance from the backpack, clears matching hotbar bindings, spawns the configured pickup scene near the player camera, and applies a small forward/up impulse.
   - Gold drops preserve stack quantity; equipment drops preserve equipment definition.
+- Added health potion hotbar use.
+  - `ConsumableDefinition` extends `ItemDefinition` for authored consumables.
+  - `health_potion` restores 15 HP when used from a bound hotbar slot.
+  - Health potion use consumes one item from the linked backpack stack and clears the hotbar binding when that stack is exhausted.
+  - Health potion use creates an `empty_bottle` replacement item.
+  - Replacement bottles go into the backpack when space is available; otherwise they drop into the world through the same generic rigid-body drop path.
+  - `pickup_health_potion` is exposed through the TrenchBroom FGD and placed in the treasure room.
 
 **Current State:**
 - The deterministic generated dungeon now supports the full rough loop:
@@ -155,6 +162,7 @@ These are durable truths about how we build Blackspire.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
   - Treasure side room contains breakable urns and interactable gold pickups.
   - Treasure side room also contains one rusted sword pickup and one padded vest pickup.
+  - Treasure side room also contains two health potion pickups.
   - Final elite room spawns the elite enemy from the same marker type with `elite = true`.
   - Exit room contains the extraction portal.
   - Extraction is smoke-verified to start while enemies remain, alert those enemies to the extracting player, become ready after the countdown, and only complete after a second portal interaction.
@@ -176,6 +184,7 @@ These are durable truths about how we build Blackspire.
   - Targeted mouse inventory/equipment movement smoke script passed.
   - Targeted hotbar binding smoke script passed.
   - Targeted drop-from-backpack smoke script passed.
+  - Targeted health potion smoke script passed.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
@@ -193,9 +202,9 @@ These are durable truths about how we build Blackspire.
      - Bag definitions now alter backpack slot and hotbar counts.
      - Backpack capacity is now enforced with all-or-nothing pickup rejection.
      - Mouse equip-from-backpack movement now exists.
-     - Hotbar binding now exists with placeholder activation.
+     - Hotbar binding now exists and health potions can be used from bound slots.
      - Generic backpack drop now exists as shareable world loot.
-     - Next: decide whether to implement consumable use or controller support first.
+     - Next: decide whether to implement controller support or a small inventory polish pass first.
   3. Paper-doll / equipment UI.
      - Later: add inventory-to-equipment movement, visible icons, and deeper mouse/controller input.
   4. Hub / town.
@@ -227,6 +236,7 @@ It should feel like early MMO raiding before everything was known.
 - `world/components/combat/world_health_bar_3d.gd`
 - `world/components/combat/player_hit_feedback.gd`
 - `world/components/player/player_inventory.gd`
+- `world/components/player/player_hotbar.gd`
 - `world/components/player/player_life_state.gd`
 - `world/components/player/player_hud.gd`
 - `world/entities/entity.gd`

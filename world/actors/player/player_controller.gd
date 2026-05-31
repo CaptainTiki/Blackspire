@@ -3,6 +3,11 @@ class_name PlayerController
 
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
 
+const DROP_IMPULSE := 3.25
+const DROP_UP_IMPULSE := 1.4
+const DROP_FORWARD_OFFSET := 1.35
+const DROP_DOWN_OFFSET := 0.35
+
 # --- Movement Settings ---
 @export var walk_speed: float = 5.0
 @export var sprint_speed: float = 8.0
@@ -69,6 +74,45 @@ func get_equipment() -> Node:
 
 func get_hotbar() -> Node:
 	return hotbar
+
+
+func heal(amount: int) -> int:
+	return health.heal(amount)
+
+
+func drop_item_instance(item_instance: Resource) -> Node3D:
+	if not item_instance:
+		push_error("PlayerController.drop_item_instance requires an item instance.")
+		return null
+	if not item_instance.item_definition:
+		push_error("PlayerController.drop_item_instance requires an item definition.")
+		return null
+	if item_instance.item_definition.world_pickup_scene_path.is_empty():
+		push_error("ItemDefinition '%s' is missing world_pickup_scene_path." % item_instance.item_definition.id)
+		return null
+
+	var pickup_scene := load(item_instance.item_definition.world_pickup_scene_path) as PackedScene
+	if not pickup_scene:
+		push_error("Could not load world pickup scene '%s'." % item_instance.item_definition.world_pickup_scene_path)
+		return null
+
+	var pickup: Node3D = pickup_scene.instantiate()
+	if pickup.has_method("setup_from_item_instance"):
+		pickup.setup_from_item_instance(item_instance)
+
+	var camera_transform := camera.global_transform
+	var forward := -camera_transform.basis.z.normalized()
+	var spawn_position := camera_transform.origin + forward * DROP_FORWARD_OFFSET - Vector3.UP * DROP_DOWN_OFFSET
+	get_parent().add_child(pickup)
+	pickup.global_position = spawn_position
+	pickup.global_rotation = global_rotation
+
+	if pickup is RigidBody3D:
+		var body := pickup as RigidBody3D
+		body.freeze = false
+		body.apply_central_impulse(forward * DROP_IMPULSE + Vector3.UP * DROP_UP_IMPULSE)
+
+	return pickup
 
 
 func apply_damage(damage_request: Variant) -> void:

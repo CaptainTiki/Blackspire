@@ -36,11 +36,6 @@ const HOTBAR_INPUT_ACTIONS := [
 	"hotbar_slot_4",
 ]
 
-const DROP_IMPULSE := 3.25
-const DROP_UP_IMPULSE := 1.4
-const DROP_FORWARD_OFFSET := 1.35
-const DROP_DOWN_OFFSET := 0.35
-
 const STAT_NAMES := {
 	StatModifierDefinitionScript.StatType.ATTACK_DAMAGE: "Attack Damage",
 	StatModifierDefinitionScript.StatType.ARMOR: "Armor",
@@ -267,7 +262,11 @@ func _drop_held_item() -> void:
 	held_backpack_slot_index = -1
 	_update_held_item_label()
 	hotbar.clear_bindings_for_item(item_instance_to_drop)
-	_spawn_dropped_item(item_instance_to_drop)
+	var player := get_parent() as PlayerController
+	if player:
+		player.drop_item_instance(item_instance_to_drop)
+	else:
+		push_error("PlayerEquipmentUI expected to be parented to PlayerController.")
 	_show_feedback("Dropped %s" % item_instance_to_drop.get_display_name())
 	_refresh()
 
@@ -441,45 +440,6 @@ func _return_held_item_to_backpack() -> Resource:
 	held_backpack_slot_index = -1
 	_update_held_item_label()
 	return item_instance_to_place
-
-
-func _spawn_dropped_item(item_instance: Resource) -> void:
-	if not item_instance:
-		push_error("PlayerEquipmentUI._spawn_dropped_item requires an item instance.")
-		return
-	if not item_instance.item_definition:
-		push_error("PlayerEquipmentUI._spawn_dropped_item requires an item definition.")
-		return
-	if item_instance.item_definition.world_pickup_scene_path.is_empty():
-		push_error("ItemDefinition '%s' is missing world_pickup_scene_path." % item_instance.item_definition.id)
-		return
-
-	var pickup_scene := load(item_instance.item_definition.world_pickup_scene_path) as PackedScene
-	if not pickup_scene:
-		push_error("Could not load world pickup scene '%s'." % item_instance.item_definition.world_pickup_scene_path)
-		return
-
-	var player := get_parent() as PlayerController
-	if not player:
-		push_error("PlayerEquipmentUI expected to be parented to PlayerController.")
-		return
-
-	var pickup: Node3D = pickup_scene.instantiate()
-	if pickup.has_method("setup_from_item_instance"):
-		pickup.setup_from_item_instance(item_instance)
-
-	var camera_transform := player.camera.global_transform
-	var forward := -camera_transform.basis.z.normalized()
-	var spawn_position := camera_transform.origin + forward * DROP_FORWARD_OFFSET - Vector3.UP * DROP_DOWN_OFFSET
-	var spawn_parent := player.get_parent()
-	spawn_parent.add_child(pickup)
-	pickup.global_position = spawn_position
-	pickup.global_rotation = player.global_rotation
-
-	if pickup is RigidBody3D:
-		var body := pickup as RigidBody3D
-		body.freeze = false
-		body.apply_central_impulse(forward * DROP_IMPULSE + Vector3.UP * DROP_UP_IMPULSE)
 
 
 func _update_held_item_label() -> void:

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ConsumableDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://data/items/consumable_definition.gd" id="1_consumable_definition"]
+[ext_resource type="Resource" path="res://data/items/empty_bottle.tres" id="2_empty_bottle"]
+
+[resource]
+script = ExtResource("1_consumable_definition")
+id = &"health_potion"
+display_name = "Health Potion"
+world_pickup_scene_path = "res://world/entities/pickups/health_potion_pickup.tscn"
+stackable = true
+max_stack = 5
+item_type = 2
+use_type = 1
+heal_amount = 15
+replacement_item_definition = ExtResource("2_empty_bottle")

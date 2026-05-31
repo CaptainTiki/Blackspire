@@ -172,8 +172,9 @@ equipment = NodePath("../PlayerEquipment")
 [node name="PlayerEquipment" type="Node" parent="Components"]
 script = ExtResource("10_equipment")
 
-[node name="PlayerHotbar" type="Node" parent="Components" node_paths=PackedStringArray("inventory")]
+[node name="PlayerHotbar" type="Node" parent="Components" node_paths=PackedStringArray("player", "inventory")]
 script = ExtResource("12_hotbar")
+player = NodePath("../..")
 inventory = NodePath("../PlayerInventory")
 
 [node name="InteractionScanner" type="Node3D" parent="Components" unique_id=277905915 node_paths=PackedStringArray("player_components")]

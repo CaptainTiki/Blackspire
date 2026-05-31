@@ -5,8 +5,10 @@ signal hotbar_changed
 signal hotbar_toast(message: String)
 
 const HotbarBindingScript := preload("res://data/items/hotbar_binding.gd")
+const ItemInstanceScript := preload("res://data/items/item_instance.gd")
 
 @export var inventory: Node
+@export var player: PlayerController
 
 var bindings: Array[Resource] = []
 
@@ -14,6 +16,9 @@ var bindings: Array[Resource] = []
 func _ready() -> void:
 	if not inventory:
 		push_error("PlayerHotbar requires an inventory reference.")
+		return
+	if not player:
+		push_error("PlayerHotbar requires a player reference.")
 		return
 
 	inventory.inventory_changed.connect(_on_inventory_changed)
@@ -96,7 +101,61 @@ func activate_slot(slot_index: int) -> void:
 		hotbar_toast.emit("Hotbar %d is empty" % (slot_index + 1))
 		return
 
-	hotbar_toast.emit(binding.get_activation_message())
+	_activate_binding(binding)
+
+
+func _activate_binding(binding: Resource) -> void:
+	if not binding.is_valid():
+		hotbar_toast.emit("Hotbar slot is empty")
+		return
+
+	if binding.action_type != HotbarBindingScript.ActionType.CONSUMABLE:
+		hotbar_toast.emit(binding.get_activation_message())
+		return
+
+	var item_instance: Resource = binding.item_instance
+	if not inventory.has_item_instance(item_instance):
+		clear_bindings_for_item(item_instance)
+		hotbar_toast.emit("%s is no longer in backpack" % binding.get_display_name())
+		return
+
+	var consumable_definition: Resource = item_instance.item_definition
+	if not consumable_definition or not "use_type" in consumable_definition:
+		hotbar_toast.emit("%s use not implemented" % binding.get_display_name())
+		return
+
+	match consumable_definition.use_type:
+		1:
+			_use_heal_consumable(item_instance, consumable_definition)
+		_:
+			hotbar_toast.emit("%s use not implemented" % binding.get_display_name())
+
+
+func _use_heal_consumable(item_instance: Resource, consumable_definition: Resource) -> void:
+	var healed_amount := player.heal(consumable_definition.heal_amount)
+	if healed_amount <= 0:
+		hotbar_toast.emit("Already at full health")
+		return
+	if not inventory.consume_item_instance(item_instance, 1):
+		hotbar_toast.emit("%s is no longer in backpack" % consumable_definition.display_name)
+		return
+	if item_instance.quantity == 0:
+		clear_bindings_for_item(item_instance)
+
+	if consumable_definition.replacement_item_definition:
+		_add_or_drop_replacement(consumable_definition.replacement_item_definition)
+
+	hotbar_toast.emit("Used %s: +%d HP" % [consumable_definition.display_name, healed_amount])
+
+
+func _add_or_drop_replacement(item_definition: Resource) -> void:
+	if inventory.add_item(item_definition):
+		return
+
+	var item_instance := ItemInstanceScript.new()
+	item_instance.setup(item_definition, 1)
+	player.drop_item_instance(item_instance)
+	hotbar_toast.emit("Dropped %s" % item_definition.display_name)
 
 
 func _sync_slot_count() -> void:

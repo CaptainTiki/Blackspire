@@ -194,6 +194,29 @@ func has_item_instance(item_instance: Resource) -> bool:
 	return item_instances.has(item_instance)
 
 
+func consume_item_instance(item_instance: Resource, quantity: int = 1) -> bool:
+	if not item_instance:
+		push_error("PlayerInventory.consume_item_instance requires an item instance.")
+		return false
+	if quantity <= 0:
+		push_error("PlayerInventory.consume_item_instance requires a positive quantity.")
+		return false
+	if not has_item_instance(item_instance):
+		return false
+	if item_instance.quantity < quantity:
+		return false
+
+	item_instance.quantity -= quantity
+	if item_instance.quantity == 0:
+		var item_index := item_instances.find(item_instance)
+		if item_index >= 0:
+			item_instances[item_index] = null
+			_trim_empty_tail_slots()
+
+	inventory_changed.emit()
+	return true
+
+
 func get_coin_count() -> int:
 	return get_item_count(GoldCoinDefinition.id)
 

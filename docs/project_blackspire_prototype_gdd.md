@@ -344,6 +344,7 @@ Initial item types:
 - Better sword or axe
 - Basic armor
 - Health potion
+- Empty bottle replacement from used potions
 
 Items should be data-driven with item definition resources.
 
@@ -628,11 +629,12 @@ Inventory direction:
 - Mouse item movement supports holding, placing, equipping, unequipping, and swapping between backpack/equipment slots.
 - Equipment pickups go into the backpack first; equipping happens from the paper-doll UI.
 - Hotbar slots use bindings that link to real backpack item instances rather than containing moved items.
-- Initial hotbar activation is placeholder feedback only.
+- Health potions can be used from bound hotbar slots and currently restore 15 HP instantly.
+- Used health potions create an empty bottle replacement; if no backpack space is available, the bottle drops into the world as shareable loot.
 - Item definitions point to their world pickup scene so dropped loot is generic rather than hardcoded by item ID.
 - Backpack items can be dropped back into the world as rigid-body pickups tossed forward from the player camera.
 - Dropped items are intended as shareable loot for other players, not just trash/delete behavior.
-- Split, controller support, real hotbar item use, and partial pickup behavior come after the drop-from-backpack slice.
+- Split, controller support, broader hotbar item types, and partial pickup behavior come after the first health-potion slice.
 
 ### M4 — Prototype Dungeon Run
 
