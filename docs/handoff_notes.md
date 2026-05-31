@@ -155,6 +155,14 @@ These are durable truths about how we build Blackspire.
   - Health potion use creates an `empty_bottle` replacement item.
   - Replacement bottles go into the backpack when space is available; otherwise they drop into the world through the same generic rigid-body drop path.
   - `pickup_health_potion` is exposed through the TrenchBroom FGD and placed in the treasure room.
+- Added controller input foundation.
+  - Existing keyboard/mouse controls remain in place.
+  - Controller bindings now cover the basic run loop: left stick movement, right stick look, left-stick press sprint, A jump, X interact, right trigger primary attack, Y paper-doll toggle, B drag cancel, and D-pad hotbar slots 1-4.
+  - `PlayerController` owns right-stick look through `look_left/right/up/down` actions and `controller_look_speed`.
+  - `PlayerEquipmentUI` disables gameplay input and controller look while the paper doll is open, then re-enables them when the panel closes.
+  - Opening the paper doll from controller keeps the mouse cursor hidden; keyboard/mouse toggles still show the cursor.
+  - Controller inventory movement uses focus + A-button hold/place/equip/bind/drop.
+  - Controller-held items mark the source slot as `[Held]` instead of using the mouse-follow drag label.
 
 **Current State:**
 - The deterministic generated dungeon now supports the full rough loop:
@@ -185,6 +193,11 @@ These are durable truths about how we build Blackspire.
   - Targeted hotbar binding smoke script passed.
   - Targeted drop-from-backpack smoke script passed.
   - Targeted health potion smoke script passed.
+  - Targeted controller input smoke script passed.
+  - Targeted controller inventory pick/place smoke script passed.
+  - Targeted controller inventory cursor-mode smoke script passed.
+  - Targeted controller held-item affordance smoke script passed.
+  - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
@@ -204,7 +217,8 @@ These are durable truths about how we build Blackspire.
      - Mouse equip-from-backpack movement now exists.
      - Hotbar binding now exists and health potions can be used from bound slots.
      - Generic backpack drop now exists as shareable world loot.
-     - Next: decide whether to implement controller support or a small inventory polish pass first.
+     - Controller input now covers and has manually verified the core single-player run loop.
+     - Next: decide between player-slot/local co-op scaffolding and the first Hub/Town shell.
   3. Paper-doll / equipment UI.
      - Later: add inventory-to-equipment movement, visible icons, and deeper mouse/controller input.
   4. Hub / town.

@@ -72,6 +72,12 @@
   - Hotbar activation now supports health potion use; other item actions still report item-specific placeholder feedback.
   - Backpack items can be dropped through the paper-doll Drop button, spawning their definition's pickup scene as a tossed rigid body.
   - Health potions restore 15 HP from the hotbar, consume one potion, and leave an empty bottle in the backpack or drop it if the backpack is full.
+- **Controller input foundation**: First single-controller pass is in place.
+  - Left stick moves, right stick looks, left-stick press sprints, A jumps, X interacts, right trigger attacks, Y opens the paper doll, B cancels held inventory drag, and the D-pad activates hotbar slots 1-4.
+  - Right-stick look is handled in `PlayerController` and pauses while the paper-doll UI is open.
+  - Opening the paper doll from controller keeps the mouse cursor hidden; opening it from keyboard/mouse still shows the cursor.
+  - Paper-doll inventory movement now supports controller focus + A-button hold/place/equip/bind/drop without fake mouse dragging.
+  - Manual controller playtest verified the full current run loop has no missing controller-only blockers.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -105,8 +111,9 @@ Latest equipment milestones:
 - `v0.0.0027` Hotbar Binding Foundation.
 - `v0.0.0028` Generic Drop From Backpack.
 - `v0.0.0029` Health Potion Hotbar Use.
+- `v0.0.0030` Controller Input Foundation.
 
-Current focus: Manual play-test health potion use/replacement bottles in the generated dungeon, then decide whether the next slice is controller support or a small inventory polish pass.
+Current focus: Choose the next large slice: player-slot/local co-op scaffolding, or the first Hub/Town shell and run-transition wrapper.
 
 ---
 

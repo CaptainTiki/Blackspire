@@ -13,6 +13,7 @@ const DROP_DOWN_OFFSET := 0.35
 @export var sprint_speed: float = 8.0
 @export var jump_velocity: float = 4.5
 @export var mouse_sensitivity: float = 0.002
+@export var controller_look_speed: float = 2.8
 
 # --- Player Sizing (Standard) ---
 # Locked after testing with 64-unit rooms.
@@ -33,9 +34,11 @@ const DROP_DOWN_OFFSET := 0.35
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _can_act := true
+var _gameplay_input_enabled := true
 var _life_state_tween: Tween
 var _standing_camera_position := Vector3.ZERO
 var _standing_camera_rotation := Vector3.ZERO
+var _controller_look_enabled := true
 
 func _ready() -> void:
 	add_to_group("players")
@@ -134,7 +137,15 @@ func get_level_exit_summary() -> String:
 
 
 func can_act() -> bool:
-	return _can_act
+	return _can_act and _gameplay_input_enabled
+
+
+func set_gameplay_input_enabled(is_enabled: bool) -> void:
+	_gameplay_input_enabled = is_enabled
+
+
+func set_controller_look_enabled(is_enabled: bool) -> void:
+	_controller_look_enabled = is_enabled
 
 
 func is_bleeding_out_or_dead() -> bool:
@@ -196,6 +207,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, current_speed)
 		velocity.z = move_toward(velocity.z, 0, current_speed)
 
+	_process_controller_look(delta)
 	move_and_slide()
 
 
@@ -206,6 +218,20 @@ func _process_disabled_movement(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, walk_speed)
 	velocity.z = move_toward(velocity.z, 0.0, walk_speed)
 	move_and_slide()
+
+
+func _process_controller_look(delta: float) -> void:
+	if not _controller_look_enabled:
+		return
+
+	var look_input := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if look_input.is_zero_approx():
+		return
+
+	rotate_y(-look_input.x * controller_look_speed * delta)
+	if camera:
+		camera.rotate_x(-look_input.y * controller_look_speed * delta)
+		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
 
 
 func _play_collapse_pose() -> void:

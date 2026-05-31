@@ -182,6 +182,26 @@ The prototype player controller should support:
 - Use consumable
 - Equip or pick up item
 
+Current controller default:
+
+- Left stick: move
+- Right stick: look
+- Left-stick press: sprint
+- A: jump
+- A while paper doll is open: hold/place/equip/bind/drop focused inventory item or control
+- X: interact
+- Right trigger: primary attack
+- Y: paper doll / equipment screen
+- B: cancel held inventory drag
+- D-pad left/up/right/down: hotbar slots 1-4
+
+Controller UI direction:
+
+- Controller focus navigation, not a virtual mouse cursor, drives inventory movement.
+- Controller-opened inventory keeps the mouse cursor hidden.
+- Keyboard/mouse-opened inventory keeps mouse affordances available.
+- While the paper doll is open, player gameplay input is disabled so the character does not move, look, attack, or interact behind the UI.
+
 The controller should be cleanly separated from the player actor.
 
 Preferred structure:
@@ -627,6 +647,7 @@ Inventory direction:
 - Backpack capacity is enforced as all-or-nothing pickup acceptance for now.
 - Rejected pickups remain in the world and tell the player there is not enough backpack space.
 - Mouse item movement supports holding, placing, equipping, unequipping, and swapping between backpack/equipment slots.
+- Controller item movement supports focus + A-button hold/place/equip/bind/drop without showing a fake mouse-drag label.
 - Equipment pickups go into the backpack first; equipping happens from the paper-doll UI.
 - Hotbar slots use bindings that link to real backpack item instances rather than containing moved items.
 - Health potions can be used from bound hotbar slots and currently restore 15 HP instantly.
@@ -634,7 +655,7 @@ Inventory direction:
 - Item definitions point to their world pickup scene so dropped loot is generic rather than hardcoded by item ID.
 - Backpack items can be dropped back into the world as rigid-body pickups tossed forward from the player camera.
 - Dropped items are intended as shareable loot for other players, not just trash/delete behavior.
-- Split, controller support, broader hotbar item types, and partial pickup behavior come after the first health-potion slice.
+- Split, broader hotbar item types, and partial pickup behavior come after the controller foundation slice.
 
 ### M4 — Prototype Dungeon Run
 
