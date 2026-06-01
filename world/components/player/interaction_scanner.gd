@@ -1,6 +1,8 @@
 extends Node3D
 class_name InteractionScanner
 
+signal focus_changed(prompt: String)
+
 ## Always-active raycast interaction system.
 ## Attach this under the player's Components node.
 
@@ -68,7 +70,9 @@ func _on_interactable_changed(previous: Interactable, new: Interactable) -> void
 	
 	if is_instance_valid(new):
 		new.focus_gained.emit()
-		# TODO: Show interaction prompt in UI
+		focus_changed.emit(new.prompt)
+	else:
+		focus_changed.emit("")
 
 func try_interact() -> void:
 	if not player_components.player.can_act():

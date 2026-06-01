@@ -90,6 +90,8 @@
   - Player HUD, hit feedback, paper-doll UI, hotbar input, and inventory UI input are now bound to their owning slot/viewport.
   - Local co-op HUD and paper-doll UI now use a compact split-screen layout that fits inside each half-screen viewport.
   - Local co-op HP readouts now use slot-owned split-screen overlay labels so each viewport shows and updates its own player's health.
+  - Local co-op now creates a `PlayerXUIHost` under each split-screen pane for pane-local UI surfaces.
+  - Per-player interaction prompts now update from each player's own `InteractionScanner`, and pickup/hotbar/potion feedback is manually verified as player-local.
   - Simultaneous local co-op inventory ownership is now manually verified: player 1 mouse and player 2 controller can use their own paper-doll, backpack, equipment, hotbar, and Drop controls at the same time without cross-panel mutation.
   - `PlayerEquipmentUI` uses an explicit per-player selection model for controller navigation instead of Godot's single native `Control` focus.
   - `system/quick_entry.tscn` bypasses the menu for fast iteration while still using the same `Game` session path.
@@ -137,8 +139,9 @@ Latest equipment milestones:
 - `v0.0.0037` Slot-Owned Split-Screen HP Labels.
 - `v0.0.0038` Manual Local Co-op Inventory Focus Bug Capture.
 - `v0.0.0039` Simultaneous Local Co-op Inventory Ownership.
+- `v0.0.0040` First Slot-Owned Local Co-op UI Host.
 
-Current focus: Continue local co-op full-run hardening now that simultaneous inventory ownership is working.
+Current focus: Continue local co-op full-run hardening now that simultaneous inventory ownership and pane-local prompts/feedback are working.
 
 ---
 

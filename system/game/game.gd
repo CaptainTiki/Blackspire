@@ -132,7 +132,7 @@ func _create_slot_viewport(slot: PlayerSlot, shared_world: World3D) -> void:
 	slot.viewport = viewport
 	slot.viewport_camera = camera
 	_bind_slot_canvas_layers(slot)
-	_create_slot_hud(slot, slot_root)
+	_create_slot_ui_host(slot, slot_root)
 
 
 func _sync_split_screen_cameras() -> void:
@@ -167,7 +167,19 @@ func _bind_slot_canvas_layers(slot: PlayerSlot) -> void:
 				canvas_layer.configure_for_split_screen()
 
 
-func _create_slot_hud(slot: PlayerSlot, slot_root: Control) -> void:
+func _create_slot_ui_host(slot: PlayerSlot, slot_root: Control) -> void:
+	var ui_root := Control.new()
+	ui_root.name = "Player%dUIHost" % (slot.slot_index + 1)
+	ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ui_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	slot_root.add_child(ui_root)
+	slot.split_screen_ui_root = ui_root
+
+	_create_slot_hud(slot, ui_root)
+	_create_slot_prompt(slot, ui_root)
+
+
+func _create_slot_hud(slot: PlayerSlot, ui_root: Control) -> void:
 	var label := Label.new()
 	label.name = "Player%dHPLabel" % (slot.slot_index + 1)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -178,7 +190,7 @@ func _create_slot_hud(slot: PlayerSlot, slot_root: Control) -> void:
 	label.offset_bottom = -8.0
 	label.add_theme_font_size_override("font_size", 18)
 	label.add_theme_color_override("font_color", Color(0.95, 0.92, 0.82, 1.0))
-	slot_root.add_child(label)
+	ui_root.add_child(label)
 	slot.split_screen_hud_label = label
 
 	var health := slot.player.health as HealthComponent
@@ -186,8 +198,36 @@ func _create_slot_hud(slot: PlayerSlot, slot_root: Control) -> void:
 	health.health_changed.connect(_update_slot_hud.bind(slot))
 
 
+func _create_slot_prompt(slot: PlayerSlot, ui_root: Control) -> void:
+	var label := Label.new()
+	label.name = "Player%dPromptLabel" % (slot.slot_index + 1)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.visible = false
+	label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	label.offset_left = 0.0
+	label.offset_top = -70.0
+	label.offset_right = 0.0
+	label.offset_bottom = -42.0
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", Color(0.95, 0.92, 0.82, 1.0))
+	ui_root.add_child(label)
+	slot.split_screen_prompt_label = label
+
+	var scanner := slot.player.get_node("Components/InteractionScanner") as InteractionScanner
+	scanner.focus_changed.connect(_update_slot_prompt.bind(slot))
+
+
 func _update_slot_hud(current_health: int, max_health: int, slot: PlayerSlot) -> void:
 	if not slot.split_screen_hud_label:
 		return
 
 	slot.split_screen_hud_label.text = "P%d HP %d/%d" % [slot.slot_index + 1, current_health, max_health]
+
+
+func _update_slot_prompt(prompt: String, slot: PlayerSlot) -> void:
+	if not slot.split_screen_prompt_label:
+		return
+
+	slot.split_screen_prompt_label.text = prompt
+	slot.split_screen_prompt_label.visible = not prompt.is_empty()

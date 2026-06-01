@@ -169,6 +169,12 @@ These are durable truths about how we build Blackspire.
   - Player 1 mouse hover/click is accepted only by the mouse-owning UI.
   - Player 2 controller navigation and A-button activation are routed through that player's own `PlayerInput` and `PlayerEquipmentUI` selection state.
   - Manual local co-op verification passed with both inventories open: both players can navigate their own inventory, pick up equipment, equip from backpack, bind items to their own hotbar, drop backpack items, and close inventory without cross-panel mutation.
+- Added the first slot-owned local co-op UI host slice.
+  - `Game` now creates a `PlayerXUIHost` under each split-screen pane.
+  - Existing split-screen HP labels now live under the owning slot's UI host.
+  - `InteractionScanner` emits `focus_changed(prompt)` when that player's raycast focus changes.
+  - Each slot UI host owns a prompt label driven by that slot player's scanner.
+  - Manual local co-op verification passed at the equipment stash: both players see their own pickup prompt, pickup toast, hotbar binding feedback, and potion-use feedback without crossing panes.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -191,7 +197,8 @@ These are durable truths about how we build Blackspire.
   - The paper-doll panel is top-aligned and shortened to fit the half-height viewport.
   - Player inventory components are smoke-verified as separate instances; adding coins to player 1 does not mutate player 2.
   - Simultaneous paper-doll inventory ownership is now manually verified for player 1 mouse and player 2 controller.
-  - Remaining local co-op risks: pickup prompts, dropped-item behavior in live split-screen rooms, damage HUD/hit feedback, combat readability, extraction, and the broader two-player run loop still need manual split-screen hardening.
+  - Slot-owned prompt and feedback path is now manually verified for pickup prompts, item pickup toasts, hotbar binding feedback, and potion-use feedback.
+  - Remaining local co-op risks: dropped-item behavior in live split-screen rooms, damage HUD/hit feedback, combat readability, extraction, death/bleedout, and the broader two-player run loop still need manual split-screen hardening.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -234,17 +241,18 @@ These are durable truths about how we build Blackspire.
   - Manual local co-op viewport/input test passed: player 1 keyboard/mouse movement only moves the player-1/top camera, and player 2 controller movement only moves the player-2/bottom camera.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Manual simultaneous local co-op inventory playtest passed: with both paper dolls open, player 1 mouse and player 2 controller can independently use backpack/equipment/hotbar/drop and close their own inventories.
+  - Manual slot-owned local co-op UI host playtest passed: both players see their own pickup prompt, pickup toast, hotbar feedback, and potion-use feedback.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals:**
 - Start next session by continuing local co-op full-run hardening now that simultaneous inventory ownership is working.
-  1. Re-test pickup prompts and interactable focus in both split-screen viewports.
-  2. Re-test dropped backpack items in live rooms: toss direction, pickup ownership, and cross-player sharing.
-  3. Re-test damage HUD, hit feedback, health labels, death/bleedout, and run-fail state with both players active.
-  4. Re-test combat readability and enemy targeting with both players moving/fighting.
-  5. Re-test extraction countdown/readiness/completion with two local players.
+  1. Re-test dropped backpack items in live rooms: toss direction, pickup ownership, and cross-player sharing.
+  2. Re-test damage HUD, hit feedback, health labels, death/bleedout, and run-fail state with both players active.
+  3. Re-test combat readability and enemy targeting with both players moving/fighting.
+  4. Re-test extraction countdown/readiness/completion with two local players.
+  5. Decide which remaining global overlays should move into slot-owned UI hosts versus stay run-global.
 - Decide later whether Local Co-op needs a fuller slot-owned UI host scene; the current explicit selection model is sufficient for the inventory milestone.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 

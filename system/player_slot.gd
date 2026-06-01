@@ -27,6 +27,8 @@ var camera: Camera3D = null
 ## Split-screen viewport plumbing for local players.
 var viewport: SubViewport = null
 var viewport_camera: Camera3D = null
+var split_screen_ui_root: Control = null
 var split_screen_hud_label: Label = null
+var split_screen_prompt_label: Label = null
 
 ## Future: camera, viewport, hud references will live here too.
