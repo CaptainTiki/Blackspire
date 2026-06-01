@@ -123,6 +123,9 @@ func _ready() -> void:
 	inventory.inventory_toast.connect(_show_feedback)
 	hotbar.hotbar_changed.connect(_on_hotbar_changed)
 	hotbar.hotbar_toast.connect(_show_feedback)
+	var life_state := player.get_node("Components/PlayerLifeState") as PlayerLifeState
+	life_state.bleeding_out_started.connect(_on_player_became_unable_to_use_inventory)
+	life_state.died.connect(_on_player_became_unable_to_use_inventory)
 	drop_button.toggle_mode = true
 	drop_button.mouse_entered.connect(_select_drop)
 	drop_button.pressed.connect(_on_drop_button_pressed)
@@ -137,6 +140,10 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("toggle_equipment"):
+		if player.is_bleeding_out_or_dead():
+			_show_feedback("Cannot use inventory while downed")
+			_set_ui_input_handled()
+			return
 		_toggle_paper_doll(_should_show_mouse_for_toggle(event))
 		_set_ui_input_handled()
 		return
@@ -186,6 +193,28 @@ func _toggle_paper_doll(show_mouse_cursor: bool = true) -> void:
 		player.set_gameplay_input_enabled(true)
 		player.set_controller_look_enabled(true)
 		Input.set_mouse_mode(previous_mouse_mode)
+
+
+func _close_paper_doll_for_life_state() -> void:
+	if held_item_instance:
+		if held_backpack_slot_index >= 0:
+			held_item_instance = inventory.place_item_at(held_backpack_slot_index, held_item_instance)
+		else:
+			player.drop_item_instance(held_item_instance)
+			held_item_instance = null
+		if not held_item_instance:
+			held_backpack_slot_index = -1
+		is_controller_holding_item = false
+		_update_held_item_label()
+	if not paper_doll_panel.visible:
+		return
+
+	paper_doll_panel.visible = false
+	is_controller_selection_mode = false
+	_refresh_mouse_filters()
+	player.set_gameplay_input_enabled(true)
+	player.set_controller_look_enabled(true)
+	Input.set_mouse_mode(previous_mouse_mode)
 
 
 func _should_show_mouse_for_toggle(event: InputEvent) -> bool:
@@ -733,6 +762,11 @@ func _on_inventory_changed() -> void:
 
 func _on_hotbar_changed() -> void:
 	_refresh()
+
+
+func _on_player_became_unable_to_use_inventory(_player: PlayerController) -> void:
+	_close_paper_doll_for_life_state()
+	_show_feedback("Cannot use inventory while downed")
 
 
 func _show_feedback(message: String) -> void:

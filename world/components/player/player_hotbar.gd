@@ -92,6 +92,9 @@ func clear_bindings_for_item(item_instance: Resource) -> void:
 
 
 func activate_slot(slot_index: int) -> void:
+	if player.is_bleeding_out_or_dead():
+		hotbar_toast.emit("Cannot use items while downed")
+		return
 	if slot_index < 0 or slot_index >= get_slot_count():
 		return
 

@@ -24,6 +24,7 @@
   - Basic enemy spawns from TrenchBroom `info_enemy_spawn`, chases, uses a readable windup + forward cone lunge attack, damages the player, and can be killed.
   - Elite enemy variant spawns from the same marker type via an `elite` Yes/No property, using the basic enemy brain with heavier prototype tuning.
   - Enemy death now has a clear lifecycle: `die()` starts cleanup, then `decompose()` removes the enemy after a short timer.
+  - Local co-op downed/revive lifecycle is now manually verified: one player down does not fail the run, both players down fails the run, another player can revive a bleeding-out player to 25 HP, and downed players cannot use inventory or hotbar items.
 - **Collision layers**: First named layer pass is in place for world, interactables, combat hurtboxes, weapon hitboxes, player, and enemy bodies.
 - **Manual room-chain generation**: First deterministic authored dungeon chain is playable and runtime verified.
   - Rooms are authored as TrenchBroom maps and wrapped by reusable `Room` scenes.
@@ -94,8 +95,9 @@
   - Per-player interaction prompts now update from each player's own `InteractionScanner`, and pickup/hotbar/potion feedback is manually verified as player-local.
   - Simultaneous local co-op inventory ownership is now manually verified: player 1 mouse and player 2 controller can use their own paper-doll, backpack, equipment, hotbar, and Drop controls at the same time without cross-panel mutation.
   - `PlayerEquipmentUI` uses an explicit per-player selection model for controller navigation instead of Godot's single native `Control` focus.
+  - The full two-player local co-op prototype loop has been manually completed through extraction, including fight, loot, inventory/equip/hotbar/drop, down/revive, and run-complete gold readout.
   - `system/quick_entry.tscn` bypasses the menu for fast iteration while still using the same `Game` session path.
-  - `PlayerSlotManager` now owns local player spawning; local co-op now needs broader full-run manual hardening beyond inventory.
+  - `PlayerSlotManager` now owns local player spawning; next systems target is a temporary hub / repeatable run loop.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -140,8 +142,9 @@ Latest equipment milestones:
 - `v0.0.0038` Manual Local Co-op Inventory Focus Bug Capture.
 - `v0.0.0039` Simultaneous Local Co-op Inventory Ownership.
 - `v0.0.0040` First Slot-Owned Local Co-op UI Host.
+- `v0.0.0041` Local Co-op Downed / Revive Lifecycle Hardening.
 
-Current focus: Continue local co-op full-run hardening now that simultaneous inventory ownership and pane-local prompts/feedback are working.
+Current focus: Build the temporary hub / repeatable run loop now that the local co-op prototype spine is validated.
 
 ---
 

@@ -9,10 +9,14 @@ signal focus_changed(prompt: String)
 @export var interaction_distance: float = 2.0
 @export var player_components: PlayerComponents
 
-const INTERACTION_RAY_MASK := 0b000011
+const WORLD_LAYER_MASK := 1 << 0
+const INTERACTABLE_LAYER_MASK := 1 << 1
+const PLAYER_LAYER_MASK := 1 << 4
+const INTERACTION_RAY_MASK := WORLD_LAYER_MASK | INTERACTABLE_LAYER_MASK | PLAYER_LAYER_MASK
 
 var raycast: RayCast3D = null
 var current_interactable: Interactable = null
+var current_revive_target: PlayerController = null
 
 func _ready() -> void:
 	if not player_components:
@@ -24,6 +28,7 @@ func _ready() -> void:
 	raycast.collide_with_areas = true
 	raycast.collide_with_bodies = true
 	raycast.collision_mask = INTERACTION_RAY_MASK
+	raycast.add_exception(player_components.player)
 
 func _physics_process(_delta: float) -> void:
 	_update_interactable()
@@ -34,19 +39,31 @@ func _update_interactable() -> void:
 		previous = current_interactable
 	else:
 		current_interactable = null
+
+	var previous_revive_target: PlayerController = null
+	if is_instance_valid(current_revive_target):
+		previous_revive_target = current_revive_target
+	else:
+		current_revive_target = null
 	
 	var next_interactable: Interactable = null
+	var next_revive_target: PlayerController = null
 	if raycast.is_colliding():
 		var collider = raycast.get_collider()
-		next_interactable = _find_interactable_on_node(collider)
+		next_revive_target = _find_revive_target_on_node(collider)
+		if not next_revive_target:
+			next_interactable = _find_interactable_on_node(collider)
 
 	if not is_instance_valid(next_interactable):
 		next_interactable = null
+	if not is_instance_valid(next_revive_target):
+		next_revive_target = null
 
 	current_interactable = next_interactable
+	current_revive_target = next_revive_target
 	
-	if current_interactable != previous:
-		_on_interactable_changed(previous, current_interactable)
+	if current_interactable != previous or current_revive_target != previous_revive_target:
+		_on_focus_target_changed(previous, current_interactable, previous_revive_target, current_revive_target)
 
 func _find_interactable_on_node(node: Node) -> Interactable:
 	if not is_instance_valid(node):
@@ -64,10 +81,29 @@ func _find_interactable_on_node(node: Node) -> Interactable:
 	
 	return null
 
-func _on_interactable_changed(previous: Interactable, new: Interactable) -> void:
+
+func _find_revive_target_on_node(node: Node) -> PlayerController:
+	var player := node as PlayerController
+	if not player:
+		player = node.get_parent() as PlayerController
+	if not player:
+		return null
+	if player == player_components.player:
+		return null
+	if not player.life_state.is_bleeding_out:
+		return null
+
+	return player
+
+
+func _on_focus_target_changed(previous: Interactable, new: Interactable, _previous_revive_target: PlayerController, new_revive_target: PlayerController) -> void:
 	if is_instance_valid(previous):
 		previous.focus_lost.emit()
 	
+	if is_instance_valid(new_revive_target):
+		focus_changed.emit("Revive %s" % new_revive_target.name)
+		return
+
 	if is_instance_valid(new):
 		new.focus_gained.emit()
 		focus_changed.emit(new.prompt)
@@ -76,6 +112,10 @@ func _on_interactable_changed(previous: Interactable, new: Interactable) -> void
 
 func try_interact() -> void:
 	if not player_components.player.can_act():
+		return
+
+	if current_revive_target and is_instance_valid(current_revive_target):
+		current_revive_target.life_state.revive()
 		return
 
 	if current_interactable and is_instance_valid(current_interactable):

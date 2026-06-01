@@ -175,6 +175,13 @@ These are durable truths about how we build Blackspire.
   - `InteractionScanner` emits `focus_changed(prompt)` when that player's raycast focus changes.
   - Each slot UI host owns a prompt label driven by that slot player's scanner.
   - Manual local co-op verification passed at the equipment stash: both players see their own pickup prompt, pickup toast, hotbar binding feedback, and potion-use feedback without crossing panes.
+- Hardened the local co-op downed/revive lifecycle.
+  - Downed/dead players cannot open the paper-doll inventory or activate hotbar items.
+  - If a player is downed while inventory is open, the paper doll closes safely.
+  - Held backpack items return to their source slot when forced closed; held unequipped items drop into the world.
+  - `PlayerHotbar` now reports that items cannot be used while downed instead of the misleading full-health potion message.
+  - `InteractionScanner` now includes the player layer, ignores its own player, recognizes another bleeding-out player as a revive target, shows `Revive PlayerX`, and calls `PlayerLifeState.revive()`.
+  - Manual local co-op verification passed: player 2 can revive downed player 1 to 25 HP, one player down does not fail the run, both players down fails the run, revive-then-extract works, and downed inventory/hotbar use is blocked.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -198,7 +205,8 @@ These are durable truths about how we build Blackspire.
   - Player inventory components are smoke-verified as separate instances; adding coins to player 1 does not mutate player 2.
   - Simultaneous paper-doll inventory ownership is now manually verified for player 1 mouse and player 2 controller.
   - Slot-owned prompt and feedback path is now manually verified for pickup prompts, item pickup toasts, hotbar binding feedback, and potion-use feedback.
-  - Remaining local co-op risks: dropped-item behavior in live split-screen rooms, damage HUD/hit feedback, combat readability, extraction, death/bleedout, and the broader two-player run loop still need manual split-screen hardening.
+  - Dropped backpack items, damage HUD/hit feedback, revive, all-down failure, revive-then-extract, and full two-player extraction have been manually verified.
+  - The full local co-op prototype spine is validated enough to move on: menu -> local co-op -> spawn -> fight -> loot -> inventory/equip/hotbar/drop -> down/revive -> extract -> run-complete gold readout.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -242,18 +250,19 @@ These are durable truths about how we build Blackspire.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Manual simultaneous local co-op inventory playtest passed: with both paper dolls open, player 1 mouse and player 2 controller can independently use backpack/equipment/hotbar/drop and close their own inventories.
   - Manual slot-owned local co-op UI host playtest passed: both players see their own pickup prompt, pickup toast, hotbar feedback, and potion-use feedback.
+  - Manual local co-op downed/revive lifecycle playtest passed: one player down does not fail, both players down fails, revive restores to 25 HP, downed players cannot use inventory/hotbar, and revive-then-extract works.
+  - Manual full two-player run passed through extraction and run-complete gold readout.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals:**
-- Start next session by continuing local co-op full-run hardening now that simultaneous inventory ownership is working.
-  1. Re-test dropped backpack items in live rooms: toss direction, pickup ownership, and cross-player sharing.
-  2. Re-test damage HUD, hit feedback, health labels, death/bleedout, and run-fail state with both players active.
-  3. Re-test combat readability and enemy targeting with both players moving/fighting.
-  4. Re-test extraction countdown/readiness/completion with two local players.
-  5. Decide which remaining global overlays should move into slot-owned UI hosts versus stay run-global.
-- Decide later whether Local Co-op needs a fuller slot-owned UI host scene; the current explicit selection model is sufficient for the inventory milestone.
+- Start next session by building the temporary hub / repeatable run loop.
+  1. Add a crude hub scene that can launch the current dungeon run.
+  2. Change successful extraction from a terminal pause overlay into returning to the hub with a simple run summary.
+  3. Decide whether run failure returns to hub or menu for the prototype.
+  4. Keep stash/economy/vendors as placeholders until the hub loop exists.
+- Defer polish and deeper refactors unless they block the hub/run loop.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 
 ---
