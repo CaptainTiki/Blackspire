@@ -201,19 +201,28 @@ These are durable truths about how we build Blackspire.
   - Moving an item from backpack to stash clears hotbar bindings for that item instance.
   - Deploy is blocked while any stash UI is open so no held item can be lost during a world transition.
   - Manual local co-op verification passed: both players can open their own stash UI at the same time, stash changes update live in both open panels, and stash contents persist through multiple hub/run loops.
+- Started session/host multiplayer planning and the first slot prep slice.
+  - Added `docs/session_host_multiplayer_plan.md` as the working host-authoritative multiplayer blueprint.
+  - `PlayerSlot` now represents a session participant, with `session_player_id`, `peer_id`, `local_player_index`, `is_local`, and `input_device`.
+  - Local input, camera, viewport, and UI references remain on `PlayerSlot`, but are now clearly local ownership details rather than the slot's identity.
+  - `PlayerSlotManager` now exposes `create_local_session_slots()`, `spawn_slot_players()`, and `spawn_or_move_slot_players()` while preserving compatibility wrappers for the old local naming.
+  - `PlayerSlotManager.add_remote_slot(peer_id)` now creates a non-local placeholder slot, giving the next networking slice a concrete target shape.
+  - `Game` now calls the participant-shaped slot/spawn methods and skips non-local slots when creating or syncing local split-screen viewports.
+  - Single-player and local co-op behavior should be unchanged by this prep slice.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
   - `system/main.tscn` is the app root and opens the main menu.
   - `system/menu/main_menu.tscn` routes Single Player into a `GameSessionConfig`.
-  - `system/game/game.tscn` owns `PlayerSlotManager`, creates configured local slots, and loads the temporary hub world.
+  - `system/game/game.tscn` owns `PlayerSlotManager`, creates configured local session slots, and loads the temporary hub world.
   - `world/hub/hub.tscn` is the crude crew room for proving the repeatable loop.
   - Hub interaction can deploy into `world/levels/test_level.tscn`.
   - Extraction or all-down failure returns to the hub and updates the summary board.
   - `world/levels/test_level.tscn` still owns the deterministic generated dungeon chain through `LevelGenerator`.
   - Single Player now flows through `Main -> Menu -> Game -> Hub -> Level -> Rooms -> Hub`.
   - `system/quick_entry.tscn` skips the menu for fast iteration while still using the same `Game` session path.
-  - `PlayerSlotManager` now owns local player spawning once `Game` receives `Level.level_ready`.
+  - `PlayerSlotManager` now owns slot player spawning once `Game` receives `Level.level_ready`.
+  - `PlayerSlot` is now a session participant record; local co-op input/camera/UI ownership is attached to local slots through `is_local`, `local_player_index`, and `input_device`.
   - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
   - Local Co-op spawns two local players. Slot 0 uses keyboard/mouse and owns mouse look; slot 1 uses controller device 0 and does not receive mouse or unassigned joypad input.
   - Local Co-op now creates a two-row split-screen overlay using shared-world `SubViewport`s.
@@ -280,14 +289,18 @@ These are durable truths about how we build Blackspire.
   - Manual local co-op hub summary verification passed: the board shows total crew gold plus per-player gold lines, including player 2's gold.
   - Hub summary board/sign orientation has been corrected and manually verified.
   - Manual local co-op stash verification passed: player 1 deposited gold, player 2 removed it while player 1's stash UI was still open, player 1 saw the live removal, and stash contents persisted through multiple runs.
+  - Session slot shape smoke passed: two local session slots preserve keyboard/mouse + controller ownership, and a remote placeholder slot increments total slots without incrementing local slots.
   - Godot check-only exited 0.
+  - Quick-entry hub boot exited 0 after the slot participant refactor.
   - `git diff --check` exited 0.
-  - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
+  - Remaining Godot shutdown output is the known cleanup/leak-warning noise plus the Windows root certificate warning seen during headless runs.
 
 **Next Steps / Pickup Goals:**
-- Once the stash pass is verified, start host/client planning from the current session-owned slot/stash/world-transition shape.
+- Add `MULTIPLAYER_HOST` and `MULTIPLAYER_CLIENT` to `GameSessionConfig`.
+- Add a tiny `NetworkSession` scaffold under `system/network/` with host/client placeholders and no gameplay behavior changes yet.
+- Keep local co-op working after every session/slot/networking prep slice.
 - Defer polish and deeper refactors unless they block the hub/run loop.
-- Keep online/host flow as menu-only placeholder until local co-op is proven.
+- Keep the first real network milestone focused on two-instance hub -> run -> hub lifecycle, not combat prediction or internet polish.
 
 ---
 
@@ -306,6 +319,7 @@ It should feel like early MMO raiding before everything was known.
 - This handoff file
 
 **Key Systems (current focus areas):**
+- `docs/session_host_multiplayer_plan.md`
 - `world/components/interactable/interactable.gd`
 - `world/components/combat/health_component.gd`
 - `world/components/combat/damage_request.gd`

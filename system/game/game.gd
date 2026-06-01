@@ -31,8 +31,7 @@ func start_session(config: GameSessionConfig) -> void:
 	current_session = config
 	print("Game: Starting session of type ", GameSessionConfig.SessionType.keys()[config.session_type])
 
-	# Create player slots (even if we don't fully use them yet)
-	player_slot_manager.create_local_slots(config.local_player_count)
+	player_slot_manager.create_local_session_slots(config.local_player_count)
 	_create_crew_stash_inventory()
 
 	_load_hub(last_run_summary)
@@ -56,7 +55,7 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 	hub.stash_requested.connect(_on_hub_stash_requested)
 	hub.show_run_summary(summary)
 
-	var players := player_slot_manager.spawn_or_move_local_players(hub, hub.get_player_spawns(), player_scene)
+	var players := player_slot_manager.spawn_or_move_slot_players(hub, hub.get_player_spawns(), player_scene)
 	if players.is_empty():
 		push_error("Game: PlayerSlotManager did not place any local players in the hub.")
 		return
@@ -94,7 +93,7 @@ func _load_starting_world() -> void:
 
 func _on_level_ready() -> void:
 	var level := current_world as Level
-	var players := player_slot_manager.spawn_local_players(level, player_scene)
+	var players := player_slot_manager.spawn_slot_players(level, player_scene)
 	if players.is_empty():
 		push_error("Game: PlayerSlotManager did not spawn any local players.")
 		return
@@ -307,6 +306,8 @@ func _create_local_coop_viewports() -> void:
 
 	var shared_world := get_viewport().world_3d
 	for slot in player_slot_manager.slots:
+		if not slot.is_local:
+			continue
 		_create_slot_viewport(slot, shared_world)
 
 	print("Game: Created 2-player local co-op split-screen viewports.")
@@ -351,6 +352,8 @@ func _sync_split_screen_cameras() -> void:
 		return
 
 	for slot in player_slot_manager.slots:
+		if not slot.is_local:
+			continue
 		if not slot.camera or not slot.viewport_camera:
 			continue
 

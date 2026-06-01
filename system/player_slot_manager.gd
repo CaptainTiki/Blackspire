@@ -5,22 +5,38 @@ extends Node
 ## Lives under the Game node.
 
 const LOCAL_COOP_SPAWN_SPACING := 1.25
+const OFFLINE_PEER_ID := 1
 
 var slots: Array[PlayerSlot] = []
 
 ## Creates the requested number of local player slots.
 ## This is the main entry point when starting a new session.
 func create_local_slots(count: int) -> Array[PlayerSlot]:
+	return create_local_session_slots(count)
+
+
+## Creates locally controlled session participants for single-player/local co-op.
+func create_local_session_slots(count: int, peer_id: int = OFFLINE_PEER_ID) -> Array[PlayerSlot]:
 	slots.clear()
 
 	for i in count:
-		var slot := PlayerSlot.new()
-		slot.slot_index = i
-		slot.is_local = true
+		var slot := _create_slot(i, peer_id, i, true)
 		slots.append(slot)
 
-	print("PlayerSlotManager: Created %d local player slot(s)" % count)
+	print("PlayerSlotManager: Created %d local session slot(s)" % count)
 	return slots
+
+
+func _create_slot(slot_index: int, peer_id: int, local_player_index: int, is_local: bool) -> PlayerSlot:
+	var slot := PlayerSlot.new()
+	slot.slot_index = slot_index
+	slot.session_player_id = slot_index
+	slot.peer_id = peer_id
+	slot.local_player_index = local_player_index
+	slot.is_local = is_local
+	slot.input_device = _get_local_input_device(local_player_index) if is_local else -1
+	return slot
+
 
 func get_slot(index: int) -> PlayerSlot:
 	if index < 0 or index >= slots.size():
@@ -29,32 +45,48 @@ func get_slot(index: int) -> PlayerSlot:
 	return slots[index]
 
 func get_local_player_count() -> int:
+	var count := 0
+	for slot in slots:
+		if slot.is_local:
+			count += 1
+	return count
+
+
+func get_slot_count() -> int:
 	return slots.size()
 
 
 func spawn_local_players(level: Level, player_scene: PackedScene) -> Array[PlayerController]:
+	return spawn_slot_players(level, player_scene)
+
+
+func spawn_slot_players(level: Level, player_scene: PackedScene) -> Array[PlayerController]:
 	if not level:
-		push_error("PlayerSlotManager.spawn_local_players requires a Level.")
+		push_error("PlayerSlotManager.spawn_slot_players requires a Level.")
 		return []
-	return spawn_or_move_local_players(level, level.get_player_spawns(), player_scene, level)
+	return spawn_or_move_slot_players(level, level.get_player_spawns(), player_scene, level)
 
 
 func spawn_or_move_local_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null) -> Array[PlayerController]:
+	return spawn_or_move_slot_players(world_root, spawns, player_scene, level)
+
+
+func spawn_or_move_slot_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null) -> Array[PlayerController]:
 	if not world_root:
-		push_error("PlayerSlotManager.spawn_or_move_local_players requires a world_root.")
+		push_error("PlayerSlotManager.spawn_or_move_slot_players requires a world_root.")
 		return []
 	if not player_scene:
-		push_error("PlayerSlotManager.spawn_or_move_local_players requires a player_scene.")
+		push_error("PlayerSlotManager.spawn_or_move_slot_players requires a player_scene.")
 		return []
 	if slots.is_empty():
-		push_error("PlayerSlotManager.spawn_or_move_local_players requires local slots first.")
+		push_error("PlayerSlotManager.spawn_or_move_slot_players requires slots first.")
 		return []
 	if spawns.is_empty():
 		push_error("No player spawn points found in '%s'." % world_root.name)
 		return []
 
 	var players: Array[PlayerController] = []
-	var allow_single_player_controller := slots.size() == 1
+	var allow_single_player_controller := get_local_player_count() == 1
 
 	for slot in slots:
 		var player := slot.player
@@ -88,10 +120,11 @@ func _assign_slot_player(slot: PlayerSlot, player: PlayerController, allow_singl
 	slot.input = player.input_reader
 	slot.camera = player.camera
 
-	slot.input.device = _get_local_input_device(slot.slot_index)
-	slot.input.owns_mouse = slot.slot_index == 0
-	slot.input.accepts_unassigned_joypads = allow_single_player_controller
-	slot.camera.current = slot.slot_index == 0
+	slot.input.device = slot.input_device
+	slot.input.owns_mouse = slot.is_local and slot.local_player_index == 0
+	slot.input.accepts_unassigned_joypads = slot.is_local and allow_single_player_controller
+	slot.input.set_process_input(slot.is_local)
+	slot.camera.current = slot.is_local and slot.local_player_index == 0
 
 
 func _get_local_input_device(slot_index: int) -> int:
@@ -114,7 +147,9 @@ func _get_spawn_transform(spawns: Array[Marker3D], slot_index: int) -> Transform
 
 	return spawn_transform
 
-## Placeholder for future remote player support
-func add_remote_slot(_peer_id: int) -> PlayerSlot:
-	push_warning("Remote player slots not implemented yet.")
-	return null
+## Placeholder shape for future remote player support.
+func add_remote_slot(peer_id: int) -> PlayerSlot:
+	var slot := _create_slot(slots.size(), peer_id, 0, false)
+	slots.append(slot)
+	print("PlayerSlotManager: Added remote session slot %d for peer %d" % [slot.slot_index, peer_id])
+	return slot

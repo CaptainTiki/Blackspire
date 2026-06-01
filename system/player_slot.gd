@@ -2,17 +2,27 @@ class_name PlayerSlot
 extends Resource
 
 ## Represents one participant in the current game session.
-## For local players this will eventually own:
-## - A PlayerInput (device ownership)
-## - A PlayerController
-## - A Camera3D
-## - Viewport / HUD references (when we do split-screen)
-##
-## For future multiplayer, remote players will also be represented by PlayerSlots
-## but without local input/camera/viewport ownership.
+## Local input, camera, viewport, and UI references are present only on the
+## machine that owns this participant locally.
 
 var slot_index: int = -1
+
+## Durable identity for this participant within a session.
+var session_player_id: int = -1
+
+## Network peer that owns this participant. The offline/local placeholder is 1,
+## matching Godot's usual server peer id once online play is introduced.
+var peer_id: int = 1
+
+## Which local player this participant is on its owning peer.
+## This keeps couch co-op compatible with future online sessions.
+var local_player_index: int = 0
+
+## True only when this machine owns local presentation/input for this slot.
 var is_local: bool = true
+
+## Local input device assignment. -1 means keyboard/mouse, 0+ means joypad.
+var input_device: int = -1
 
 ## The actual player actor once spawned.
 var player: PlayerController = null
@@ -32,5 +42,3 @@ var split_screen_hud_label: Label = null
 var split_screen_prompt_label: Label = null
 var stash_ui: Control = null
 var stash_canvas_layer: CanvasLayer = null
-
-## Future: camera, viewport, hud references will live here too.

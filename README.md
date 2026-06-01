@@ -84,6 +84,8 @@
   - `system/menu/main_menu.tscn` offers Single Player, Local Co-op, Host Game placeholder, and Exit.
   - Single Player creates a `GameSessionConfig`, instantiates `system/game/game.tscn`, creates one local `PlayerSlot`, loads `world/hub/hub.tscn`, then deploys into `world/levels/test_level.tscn`.
   - Local Co-op now creates two local slots and spawns two players into the hub/run flow.
+  - `PlayerSlot` now represents a session participant with `session_player_id`, `peer_id`, `local_player_index`, local ownership, and input-device fields, preparing the same slot path for future host/client players.
+  - `PlayerSlotManager` now exposes participant-shaped slot/spawn methods while preserving the current single-player and local co-op behavior.
   - The temporary hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
   - Successful extraction and all-down failure now return to the hub with a summary instead of ending the session on the old terminal overlay.
   - The hub summary board shows crew gold plus per-player gold lines, and is manually verified in local co-op.
@@ -113,6 +115,7 @@
 - [Handoff Notes](docs/handoff_notes.md) — Start here for the next session
 - [Architecture Document](docs/project_blackspire_architecture.md)
 - [Prototype GDD](docs/project_blackspire_prototype_gdd.md)
+- [Session and Host Multiplayer Plan](docs/session_host_multiplayer_plan.md)
 
 ## Quick Start for Development
 
