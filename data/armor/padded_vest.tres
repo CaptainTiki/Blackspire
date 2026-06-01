@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="EquipmentDefinition" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="EquipmentDefinition" format=3 uid="uid://cavfkoaiv30s8"]
 
-[ext_resource type="Script" path="res://data/items/equipment_definition.gd" id="1_equipment_definition"]
-[ext_resource type="Script" path="res://data/items/stat_modifier_definition.gd" id="2_stat_modifier_definition"]
+[ext_resource type="Script" uid="uid://bivyq3ajfqtw1" path="res://data/items/equipment_definition.gd" id="1_equipment_definition"]
+[ext_resource type="Script" uid="uid://jwqf1aodsimo" path="res://data/items/stat_modifier_definition.gd" id="2_stat_modifier_definition"]
 
 [sub_resource type="Resource" id="StatModifierDefinition_armor"]
 script = ExtResource("2_stat_modifier_definition")
@@ -15,11 +15,9 @@ value = -0.1
 
 [resource]
 script = ExtResource("1_equipment_definition")
+equipment_slot = 3
+stat_modifiers = Array[Resource]([SubResource("StatModifierDefinition_armor"), SubResource("StatModifierDefinition_move_speed")])
 id = &"padded_vest"
 display_name = "Padded Vest"
 world_pickup_scene_path = "res://world/entities/pickups/padded_vest_pickup.tscn"
-stackable = false
-max_stack = 1
 item_type = 3
-equipment_slot = 3
-stat_modifiers = Array[Resource]([SubResource("StatModifierDefinition_armor"), SubResource("StatModifierDefinition_move_speed")])

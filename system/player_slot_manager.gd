@@ -36,36 +36,49 @@ func spawn_local_players(level: Level, player_scene: PackedScene) -> Array[Playe
 	if not level:
 		push_error("PlayerSlotManager.spawn_local_players requires a Level.")
 		return []
+	return spawn_or_move_local_players(level, level.get_player_spawns(), player_scene, level)
+
+
+func spawn_or_move_local_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null) -> Array[PlayerController]:
+	if not world_root:
+		push_error("PlayerSlotManager.spawn_or_move_local_players requires a world_root.")
+		return []
 	if not player_scene:
-		push_error("PlayerSlotManager.spawn_local_players requires a player_scene.")
+		push_error("PlayerSlotManager.spawn_or_move_local_players requires a player_scene.")
 		return []
 	if slots.is_empty():
-		push_error("PlayerSlotManager.spawn_local_players requires local slots first.")
+		push_error("PlayerSlotManager.spawn_or_move_local_players requires local slots first.")
 		return []
-
-	var spawns := level.get_player_spawns()
 	if spawns.is_empty():
-		push_error("No player spawn points found in level '%s'. Make sure an info_player_start exists in the TrenchBroom map." % level.level_name)
+		push_error("No player spawn points found in '%s'." % world_root.name)
 		return []
 
 	var players: Array[PlayerController] = []
 	var allow_single_player_controller := slots.size() == 1
 
 	for slot in slots:
-		var player := player_scene.instantiate() as PlayerController
-		if not player:
-			push_error("PlayerSlotManager: player_scene must instantiate a PlayerController.")
-			return players
+		var player := slot.player
+		if not is_instance_valid(player):
+			player = player_scene.instantiate() as PlayerController
+			if not player:
+				push_error("PlayerSlotManager: player_scene must instantiate a PlayerController.")
+				return players
+			player.name = "Player%d" % (slot.slot_index + 1)
+			world_root.add_child(player)
+		elif player.get_parent() != world_root:
+			var previous_parent := player.get_parent()
+			if previous_parent:
+				previous_parent.remove_child(player)
+			world_root.add_child(player)
 
-		player.name = "Player%d" % (slot.slot_index + 1)
-		level.add_child(player)
 		player.global_transform = _get_spawn_transform(spawns, slot.slot_index)
-		level.register_player(player)
+		if level:
+			level.register_player(player)
 
 		_assign_slot_player(slot, player, allow_single_player_controller)
 		players.append(player)
 
-		print("PlayerSlotManager: Spawned slot %d player at %s" % [slot.slot_index, player.global_position])
+		print("PlayerSlotManager: Placed slot %d player at %s" % [slot.slot_index, player.global_position])
 
 	return players
 

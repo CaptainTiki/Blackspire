@@ -9,6 +9,8 @@ static var current_level: Level
 @export var level_name: String = "Unnamed Level"
 @export var basic_enemy_scene: PackedScene = preload("res://world/actors/enemies/basic_enemy.tscn")
 @export var elite_enemy_scene: PackedScene = preload("res://world/actors/enemies/elite_enemy.tscn")
+@export var show_run_end_overlays := true
+@export var pause_on_run_end := true
 
 var entity_registry: MapEntityRegistry
 var spawned_enemies: Array[Node3D] = []
@@ -195,8 +197,10 @@ func exit_level(player: PlayerController) -> void:
 	player_exited_level.emit(player)
 	run_completed.emit(player)
 	print("Level: Player exited level - ", run_complete_message)
-	_show_run_complete_overlay(run_complete_message)
-	get_tree().paused = true
+	if show_run_end_overlays:
+		_show_run_complete_overlay(run_complete_message)
+	if pause_on_run_end:
+		get_tree().paused = true
 
 
 func fail_level(reason: String = "All Players Are Down") -> void:
@@ -209,8 +213,10 @@ func fail_level(reason: String = "All Players Are Down") -> void:
 	_remove_extraction_countdown_overlay()
 	run_failed.emit(reason)
 	print("Level: Run failed - ", reason)
-	_show_run_failed_overlay(reason)
-	get_tree().paused = true
+	if show_run_end_overlays:
+		_show_run_failed_overlay(reason)
+	if pause_on_run_end:
+		get_tree().paused = true
 
 
 func complete_run(actor: Node, _message: String = "Run Complete") -> void:

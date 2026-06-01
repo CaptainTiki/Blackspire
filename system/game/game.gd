@@ -12,7 +12,7 @@ extends Node
 
 @onready var player_slot_manager: PlayerSlotManager = $PlayerSlotManager
 
-## Temporary stand-in until we have a real Hub scene.
+@export var hub_scene: PackedScene = preload("res://world/hub/hub.tscn")
 @export var test_level_scene: PackedScene = preload("res://world/levels/test_level.tscn")
 @export var player_scene: PackedScene = preload("res://world/actors/player/Player.tscn")
 
@@ -20,6 +20,7 @@ var current_session: GameSessionConfig
 var current_world: Node = null   # Will hold Hub or Level later
 var split_screen_layer: CanvasLayer
 var split_screen_root: Control
+var last_run_summary := "No run completed yet"
 
 
 func start_session(config: GameSessionConfig) -> void:
@@ -29,12 +30,43 @@ func start_session(config: GameSessionConfig) -> void:
 	# Create player slots (even if we don't fully use them yet)
 	player_slot_manager.create_local_slots(config.local_player_count)
 
-	_load_starting_world()
+	_load_hub(last_run_summary)
+
+
+func _load_hub(summary: String = "No run completed yet") -> void:
+	if not hub_scene:
+		push_error("Game: No hub_scene assigned!")
+		return
+
+	_clear_current_world()
+
+	var hub := hub_scene.instantiate()
+	if not hub or not hub.has_method("get_player_spawns"):
+		push_error("Game: hub_scene must instantiate a Hub.")
+		return
+
+	current_world = hub
+	add_child(current_world)
+	hub.deploy_requested.connect(_on_hub_deploy_requested)
+	hub.show_run_summary(summary)
+
+	var players := player_slot_manager.spawn_or_move_local_players(hub, hub.get_player_spawns(), player_scene)
+	if players.is_empty():
+		push_error("Game: PlayerSlotManager did not place any local players in the hub.")
+		return
+
+	_restore_players_for_hub()
+	_ensure_local_coop_viewports()
+
+	print("Game: Loaded hub with %d local player(s)." % players.size())
+
 
 func _load_starting_world() -> void:
 	if not test_level_scene:
 		push_error("Game: No test_level_scene assigned!")
 		return
+
+	_clear_current_world()
 
 	var level := test_level_scene.instantiate() as Level
 	if not level:
@@ -43,6 +75,10 @@ func _load_starting_world() -> void:
 
 	current_world = level
 	add_child(current_world)
+	level.show_run_end_overlays = false
+	level.pause_on_run_end = false
+	level.run_completed.connect(_on_run_completed)
+	level.run_failed.connect(_on_run_failed)
 
 	print("Game: Loaded test level as temporary world for session type: ", 
 		GameSessionConfig.SessionType.keys()[current_session.session_type])
@@ -57,14 +93,98 @@ func _on_level_ready() -> void:
 		push_error("Game: PlayerSlotManager did not spawn any local players.")
 		return
 
-	if current_session.session_type == GameSessionConfig.SessionType.LOCAL_COOP:
-		_create_local_coop_viewports()
+	_ensure_local_coop_viewports()
 
 	print("Game: Spawned %d local player(s)." % players.size())
 
 
 func _process(_delta: float) -> void:
 	_sync_split_screen_cameras()
+
+
+func _on_hub_deploy_requested(_actor: PlayerController) -> void:
+	_load_starting_world()
+
+
+func _on_run_completed(actor: Node) -> void:
+	last_run_summary = _build_crew_exit_summary(actor)
+	call_deferred("_load_hub", last_run_summary)
+
+
+func _on_run_failed(reason: String) -> void:
+	last_run_summary = "Failed: %s" % reason
+	call_deferred("_load_hub", last_run_summary)
+
+
+func _build_crew_exit_summary(actor: Node) -> String:
+	var crew_gold := 0
+	var player_lines: Array[String] = []
+
+	for slot in player_slot_manager.slots:
+		var player := slot.player
+		if not is_instance_valid(player):
+			continue
+
+		var inventory := player.inventory as PlayerInventory
+		if not inventory:
+			continue
+
+		var player_gold := inventory.get_coin_count()
+		crew_gold += player_gold
+		player_lines.append("P%d: %d gold" % [slot.slot_index + 1, player_gold])
+
+	if not player_lines.is_empty():
+		return "Crew Loot: %d gold\n%s" % [crew_gold, "\n".join(player_lines)]
+
+	if actor is PlayerController:
+		return (actor as PlayerController).get_level_exit_summary()
+
+	return "Extracted"
+
+
+func _clear_current_world() -> void:
+	_detach_slot_players_from_current_world()
+	if current_world:
+		current_world.queue_free()
+		current_world = null
+
+
+func _detach_slot_players_from_current_world() -> void:
+	if not current_world:
+		return
+
+	for slot in player_slot_manager.slots:
+		var player := slot.player
+		if not is_instance_valid(player):
+			continue
+		if player.get_parent() != current_world:
+			continue
+
+		current_world.remove_child(player)
+		add_child(player)
+
+
+func _restore_players_for_hub() -> void:
+	for slot in player_slot_manager.slots:
+		var player := slot.player
+		if not is_instance_valid(player):
+			continue
+
+		var life_state := player.life_state as PlayerLifeState
+		var health := player.health as HealthComponent
+		if life_state and life_state.is_bleeding_out_or_dead():
+			life_state.revive(health.max_health if health else -1)
+		elif health:
+			health.heal(maxi(health.max_health - health.current_health, 1))
+
+
+func _ensure_local_coop_viewports() -> void:
+	if current_session.session_type != GameSessionConfig.SessionType.LOCAL_COOP:
+		return
+	if split_screen_layer:
+		return
+
+	_create_local_coop_viewports()
 
 
 func _create_local_coop_viewports() -> void:

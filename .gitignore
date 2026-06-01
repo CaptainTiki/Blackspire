@@ -13,3 +13,4 @@ trenchbroom/autosave/
 .build/
 
 .tests/
+godot-headless*.log

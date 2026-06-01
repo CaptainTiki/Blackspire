@@ -1,0 +1,210 @@
+[gd_scene format=3 uid="uid://k2d1yvkoeka4"]
+
+[ext_resource type="Script" uid="uid://ceg765led42f3" path="res://world/hub/hub.gd" id="1_hub"]
+[ext_resource type="Script" uid="uid://d21tj3xvj6m3o" path="res://world/hub/hub_deploy_portal.gd" id="2_deploy"]
+[ext_resource type="Script" uid="uid://ckhqc2x7febx7" path="res://world/hub/hub_stash_chest.gd" id="3_stash"]
+[ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="4_interactable"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.18, 0.18, 0.17, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector3(12, 0.2, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(12, 0.2, 12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.11, 0.13, 0.15, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(12, 3, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+size = Vector3(12, 3, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.3, 3, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
+size = Vector3(0.3, 3, 12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_portal"]
+transparency = 1
+albedo_color = Color(0.1, 0.62, 0.95, 0.5)
+emission_enabled = true
+emission = Color(0.1, 0.62, 1, 1)
+emission_energy_multiplier = 1.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_portal"]
+material = SubResource("StandardMaterial3D_portal")
+top_radius = 0.55
+bottom_radius = 0.55
+radial_segments = 24
+rings = 2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_portal"]
+radius = 0.65
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stash"]
+albedo_color = Color(0.34, 0.22, 0.11, 1)
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_chest"]
+material = SubResource("StandardMaterial3D_stash")
+size = Vector3(1.4, 0.8, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_chest"]
+size = Vector3(1.4, 0.8, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_board"]
+albedo_color = Color(0.04, 0.045, 0.05, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_board"]
+material = SubResource("StandardMaterial3D_board")
+size = Vector3(2.9, 1.7, 0.12)
+
+[node name="PrototypeHub" type="Node3D" unique_id=525516668]
+script = ExtResource("1_hub")
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=889870071]
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1501679456]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1887708227]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="NorthWall" type="StaticBody3D" parent="." unique_id=1263628036]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -6)
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NorthWall" unique_id=681861212]
+mesh = SubResource("BoxMesh_wall_long")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NorthWall" unique_id=1112629058]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="SouthWall" type="StaticBody3D" parent="." unique_id=786005134]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 6)
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SouthWall" unique_id=1437222622]
+mesh = SubResource("BoxMesh_wall_long")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SouthWall" unique_id=1550499025]
+shape = SubResource("BoxShape3D_wall_long")
+
+[node name="WestWall" type="StaticBody3D" parent="." unique_id=1212082835]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, 0)
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WestWall" unique_id=74460191]
+mesh = SubResource("BoxMesh_wall_short")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WestWall" unique_id=550766758]
+shape = SubResource("BoxShape3D_wall_short")
+
+[node name="EastWall" type="StaticBody3D" parent="." unique_id=1001232653]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, 0)
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EastWall" unique_id=614236863]
+mesh = SubResource("BoxMesh_wall_short")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EastWall" unique_id=727331369]
+shape = SubResource("BoxShape3D_wall_short")
+
+[node name="PlayerStart1" type="Marker3D" parent="." unique_id=2135075777]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -0.75, 0.05, 2.75)
+
+[node name="PlayerStart2" type="Marker3D" parent="." unique_id=801381960]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.75, 0.05, 2.75)
+
+[node name="DeployPortal" type="StaticBody3D" parent="." unique_id=1967899209]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.8)
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("2_deploy")
+
+[node name="GlowColumn" type="MeshInstance3D" parent="DeployPortal" unique_id=10981541]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+mesh = SubResource("CylinderMesh_portal")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DeployPortal" unique_id=48668980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_portal")
+
+[node name="Label3D" type="Label3D" parent="DeployPortal" unique_id=2092870641]
+transform = Transform3D(1, 0, 0, 0, 0.9396926, -0.34202015, 0, 0.34202015, 0.9396926, 0, 2.35, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(0.64, 0.9, 1, 1)
+outline_modulate = Color(0, 0.04, 0.08, 1)
+text = "DEPLOY"
+font_size = 42
+outline_size = 8
+
+[node name="Components" type="Node3D" parent="DeployPortal" unique_id=161176231]
+
+[node name="Interactable" type="Node" parent="DeployPortal/Components" unique_id=327834663]
+script = ExtResource("4_interactable")
+prompt = "Deploy To Run"
+
+[node name="StashChest" type="StaticBody3D" parent="." unique_id=50640349]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -4, 0.4, -0.5)
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("3_stash")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StashChest" unique_id=730246616]
+mesh = SubResource("BoxMesh_chest")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StashChest" unique_id=1626813114]
+shape = SubResource("BoxShape3D_chest")
+
+[node name="Label3D" type="Label3D" parent="StashChest" unique_id=500813358]
+transform = Transform3D(1, 0, 0, 0, 0.9396926, -0.34202015, 0, 0.34202015, 0.9396926, 0, 1, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.86, 0.56, 1)
+outline_modulate = Color(0.05, 0.03, 0.01, 1)
+text = "STASH"
+outline_size = 6
+
+[node name="Components" type="Node3D" parent="StashChest" unique_id=1041885465]
+
+[node name="Interactable" type="Node" parent="StashChest/Components" unique_id=1603782340]
+script = ExtResource("4_interactable")
+prompt = "Open Stash"
+
+[node name="SummaryBoard" type="Node3D" parent="." unique_id=1251390607]
+transform = Transform3D(8.742278e-08, 0, -1, 0, 1, 0, 1, 0, 8.742278e-08, 4, 1.35, -1.4)
+
+[node name="BoardMesh" type="MeshInstance3D" parent="SummaryBoard" unique_id=681978097]
+mesh = SubResource("BoxMesh_board")
+
+[node name="SummaryLabel" type="Label3D" parent="SummaryBoard" unique_id=141131632]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.08)
+pixel_size = 0.006
+no_depth_test = true
+modulate = Color(0.88, 0.96, 0.86, 1)
+text = "LAST RUN"
+font_size = 38
+outline_size = 5
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1587777671]
+transform = Transform3D(0.70710677, -0.35355338, 0.61237246, 0, 0.8660254, 0.5, -0.70710677, -0.35355338, 0.61237246, 0, 5, 0)
+light_energy = 1.2
+
+[node name="PortalLight" type="OmniLight3D" parent="." unique_id=19455784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -3.8)
+light_color = Color(0.2, 0.72, 1, 1)
+light_energy = 1.2

@@ -182,14 +182,26 @@ These are durable truths about how we build Blackspire.
   - `PlayerHotbar` now reports that items cannot be used while downed instead of the misleading full-health potion message.
   - `InteractionScanner` now includes the player layer, ignores its own player, recognizes another bleeding-out player as a revive target, shows `Revive PlayerX`, and calls `PlayerLifeState.revive()`.
   - Manual local co-op verification passed: player 2 can revive downed player 1 to 25 HP, one player down does not fail the run, both players down fails the run, revive-then-extract works, and downed inventory/hotbar use is blocked.
+- Started the temporary hub / repeatable run loop foundation.
+  - `Game` now loads `world/hub/hub.tscn` before the current dungeon run.
+  - The hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
+  - `PlayerSlotManager` can now spawn or move existing slot players into a new world root, preserving player-owned inventory/equipment/hotbar state between hub and run worlds.
+  - Deploying from the hub loads the current generated `test_level`.
+  - Successful extraction and all-down run failure now return to the hub with a summary instead of using the old terminal pause overlays during session flow.
+  - `Level` still defaults to the old overlay/pause behavior, but `Game` disables that behavior for hub-based sessions.
+  - The hub summary aggregates crew gold across all local player slots and shows per-player gold lines.
+  - Headless runtime logging now writes to ignored local `godot-headless*.log` files instead of Godot's default `user://logs` path, avoiding the Windows native crash popup during console smoke tests.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
   - `system/main.tscn` is the app root and opens the main menu.
   - `system/menu/main_menu.tscn` routes Single Player into a `GameSessionConfig`.
-  - `system/game/game.tscn` owns `PlayerSlotManager`, creates configured local slots, and loads the temporary test level world.
+  - `system/game/game.tscn` owns `PlayerSlotManager`, creates configured local slots, and loads the temporary hub world.
+  - `world/hub/hub.tscn` is the crude crew room for proving the repeatable loop.
+  - Hub interaction can deploy into `world/levels/test_level.tscn`.
+  - Extraction or all-down failure returns to the hub and updates the summary board.
   - `world/levels/test_level.tscn` still owns the deterministic generated dungeon chain through `LevelGenerator`.
-  - Single Player is restored through `Main -> Menu -> Game -> Level -> Rooms`.
+  - Single Player now flows through `Main -> Menu -> Game -> Hub -> Level -> Rooms -> Hub`.
   - `system/quick_entry.tscn` skips the menu for fast iteration while still using the same `Game` session path.
   - `PlayerSlotManager` now owns local player spawning once `Game` receives `Level.level_ready`.
   - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
@@ -252,16 +264,17 @@ These are durable truths about how we build Blackspire.
   - Manual slot-owned local co-op UI host playtest passed: both players see their own pickup prompt, pickup toast, hotbar feedback, and potion-use feedback.
   - Manual local co-op downed/revive lifecycle playtest passed: one player down does not fail, both players down fails, revive restores to 25 HP, downed players cannot use inventory/hotbar, and revive-then-extract works.
   - Manual full two-player run passed through extraction and run-complete gold readout.
+  - Quick-entry hub boot smoke passed: `quick_entry.tscn` created `Game`, loaded `Hub`, and placed the local player at the hub spawn.
+  - Quick-entry no-explicit-log smoke passed without the native Windows memory-read crash popup after redirecting Godot file logging.
+  - Manual local co-op hub loop passed: both players spawned in the hub, deployed, completed a full run, returned to hub, kept equipment/inventory/hotbar state, redeployed with that state intact, completed a second run, and returned with accumulated loot intact.
+  - Manual local co-op hub summary verification passed: the board shows total crew gold plus per-player gold lines, including player 2's gold.
+  - Hub summary board/sign orientation has been corrected and manually verified.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals:**
-- Start next session by building the temporary hub / repeatable run loop.
-  1. Add a crude hub scene that can launch the current dungeon run.
-  2. Change successful extraction from a terminal pause overlay into returning to the hub with a simple run summary.
-  3. Decide whether run failure returns to hub or menu for the prototype.
-  4. Keep stash/economy/vendors as placeholders until the hub loop exists.
+- After the hub loop is fully locked, decide whether the stash placeholder becomes a real minimal shared stash or remains a marker while we build the next prototype system.
 - Defer polish and deeper refactors unless they block the hub/run loop.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 

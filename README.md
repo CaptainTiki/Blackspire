@@ -82,8 +82,12 @@
 - **Session bootstrap foundation**: The app now boots through the future co-op-shaped flow.
   - `system/main.tscn` is the application root and opens the main menu.
   - `system/menu/main_menu.tscn` offers Single Player, Local Co-op, Host Game placeholder, and Exit.
-  - Single Player creates a `GameSessionConfig`, instantiates `system/game/game.tscn`, creates one local `PlayerSlot`, loads `world/levels/test_level.tscn`, then enters the generated room chain.
-  - Local Co-op now creates two local slots and spawns two players into the level.
+  - Single Player creates a `GameSessionConfig`, instantiates `system/game/game.tscn`, creates one local `PlayerSlot`, loads `world/hub/hub.tscn`, then deploys into `world/levels/test_level.tscn`.
+  - Local Co-op now creates two local slots and spawns two players into the hub/run flow.
+  - The temporary hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
+  - Successful extraction and all-down failure now return to the hub with a summary instead of ending the session on the old terminal overlay.
+  - The hub summary board shows crew gold plus per-player gold lines, and is manually verified in local co-op.
+  - `PlayerSlotManager` can move existing slot players between hub and run worlds, preserving player-owned inventory/equipment/hotbar state across the loop.
   - Local Co-op creates the first two-player split-screen layout using shared-world `SubViewport`s.
   - Slot 0 is keyboard/mouse, owns mouse look, and renders through the top viewport.
   - Slot 1 is assigned to controller device 0 and does not receive mouse or unassigned joypad input.
@@ -97,7 +101,7 @@
   - `PlayerEquipmentUI` uses an explicit per-player selection model for controller navigation instead of Godot's single native `Control` focus.
   - The full two-player local co-op prototype loop has been manually completed through extraction, including fight, loot, inventory/equip/hotbar/drop, down/revive, and run-complete gold readout.
   - `system/quick_entry.tscn` bypasses the menu for fast iteration while still using the same `Game` session path.
-  - `PlayerSlotManager` now owns local player spawning; next systems target is a temporary hub / repeatable run loop.
+  - The repeatable local co-op hub/run loop is manually verified through two consecutive runs with inventory, equipment, hotbar bindings, gold, and HP restore behaving correctly.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
