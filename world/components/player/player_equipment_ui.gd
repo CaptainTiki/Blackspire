@@ -36,6 +36,11 @@ const HOTBAR_INPUT_ACTIONS := [
 	"hotbar_slot_4",
 ]
 
+const FULL_SCREEN_PANEL_SIZE := Vector2(1080, 460)
+const SPLIT_SCREEN_PANEL_SIZE := Vector2(1060, 300)
+const SPLIT_SCREEN_BUTTON_SIZE := Vector2(214, 28)
+const SPLIT_SCREEN_HOTBAR_SIZE := Vector2(62, 30)
+
 const STAT_NAMES := {
 	StatModifierDefinitionScript.StatType.ATTACK_DAMAGE: "Attack Damage",
 	StatModifierDefinitionScript.StatType.ARMOR: "Armor",
@@ -63,15 +68,21 @@ var is_controller_holding_item := false
 var previous_mouse_mode := Input.MOUSE_MODE_CAPTURED
 var feedback_tween: Tween
 var player: PlayerController
+var is_split_screen_layout := false
 
 @onready var root_control: Control = $Root
 @onready var paper_doll_panel: PanelContainer = $Root/PaperDollPanel
+@onready var layout_container: HBoxContainer = $Root/PaperDollPanel/Layout
 @onready var feedback_label: Label = $Root/FeedbackLabel
 @onready var stats_label: Label = $Root/PaperDollPanel/Layout/StatsPanel/StatsLabel
+@onready var stats_panel: VBoxContainer = $Root/PaperDollPanel/Layout/StatsPanel
+@onready var slots_panel: VBoxContainer = $Root/PaperDollPanel/Layout/SlotsPanel
 @onready var slots_container: VBoxContainer = $Root/PaperDollPanel/Layout/SlotsPanel/SlotButtons
+@onready var backpack_panel: VBoxContainer = $Root/PaperDollPanel/Layout/BackpackPanel
 @onready var backpack_slots_container: GridContainer = $Root/PaperDollPanel/Layout/BackpackPanel/BackpackSlots
 @onready var hotbar_slots_container: HBoxContainer = $Root/PaperDollPanel/Layout/BackpackPanel/HotbarSlots
 @onready var drop_button: Button = $Root/PaperDollPanel/Layout/BackpackPanel/DropButton
+@onready var details_panel: VBoxContainer = $Root/PaperDollPanel/Layout/DetailsPanel
 @onready var item_name_label: Label = $Root/PaperDollPanel/Layout/DetailsPanel/ItemNameLabel
 @onready var item_details_label: Label = $Root/PaperDollPanel/Layout/DetailsPanel/ItemDetailsLabel
 @onready var held_item_label: Label = Label.new()
@@ -105,22 +116,25 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if not player.input_reader.owns_input_event(event):
+		return
+
 	if event.is_action_pressed("toggle_equipment"):
 		_toggle_paper_doll(_should_show_mouse_for_toggle(event))
-		get_viewport().set_input_as_handled()
+		_set_ui_input_handled()
 		return
 	if paper_doll_panel.visible and event.is_action_pressed("inventory_pick_place") and not event is InputEventMouseButton:
 		_activate_focused_control(true)
-		get_viewport().set_input_as_handled()
+		_set_ui_input_handled()
 		return
 	if event.is_action_pressed("inventory_cancel_drag") and held_item_instance:
 		_show_feedback("Place held item in a slot")
-		get_viewport().set_input_as_handled()
+		_set_ui_input_handled()
 		return
 	for index in HOTBAR_INPUT_ACTIONS.size():
 		if event.is_action_pressed(HOTBAR_INPUT_ACTIONS[index]):
 			hotbar.activate_slot(index)
-			get_viewport().set_input_as_handled()
+			_set_ui_input_handled()
 			return
 
 
@@ -165,7 +179,7 @@ func _create_slot_buttons() -> void:
 	for slot in SLOT_ORDER:
 		var button := Button.new()
 		button.text = _get_slot_button_text(slot)
-		button.custom_minimum_size = Vector2(230, 34)
+		button.custom_minimum_size = _get_button_size()
 		button.focus_mode = Control.FOCUS_ALL
 		button.toggle_mode = true
 		button.mouse_entered.connect(_select_slot.bind(slot))
@@ -188,7 +202,7 @@ func _sync_backpack_slots() -> void:
 
 	for index in slot_count:
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(230, 38)
+		button.custom_minimum_size = _get_button_size()
 		button.focus_mode = Control.FOCUS_ALL
 		button.toggle_mode = true
 		button.mouse_entered.connect(_select_backpack_slot.bind(index))
@@ -210,7 +224,7 @@ func _sync_hotbar_slots() -> void:
 
 	for index in slot_count:
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(70, 38)
+		button.custom_minimum_size = _get_hotbar_button_size()
 		button.focus_mode = Control.FOCUS_ALL
 		button.pressed.connect(_activate_hotbar_slot.bind(index, false))
 		hotbar_slots_container.add_child(button)
@@ -272,7 +286,7 @@ func _activate_hotbar_slot(index: int, _from_controller: bool = false) -> void:
 
 
 func _activate_focused_control(from_controller: bool = false) -> void:
-	var focused_control := get_viewport().gui_get_focus_owner()
+	var focused_control := _get_ui_viewport().gui_get_focus_owner()
 	if not focused_control:
 		_show_feedback("Select an inventory slot")
 		return
@@ -562,3 +576,66 @@ func _format_number(value: float) -> String:
 func _format_signed_number(value: float) -> String:
 	var prefix := "+" if value >= 0.0 else ""
 	return "%s%s" % [prefix, _format_number(value)]
+
+
+func _get_ui_viewport() -> Viewport:
+	if custom_viewport:
+		return custom_viewport
+
+	return get_viewport()
+
+
+func _set_ui_input_handled() -> void:
+	_get_ui_viewport().set_input_as_handled()
+
+
+func configure_for_split_screen() -> void:
+	is_split_screen_layout = true
+	paper_doll_panel.custom_minimum_size = SPLIT_SCREEN_PANEL_SIZE
+	paper_doll_panel.anchor_left = 0.5
+	paper_doll_panel.anchor_top = 0.0
+	paper_doll_panel.anchor_right = 0.5
+	paper_doll_panel.anchor_bottom = 0.0
+	paper_doll_panel.offset_left = -SPLIT_SCREEN_PANEL_SIZE.x * 0.5
+	paper_doll_panel.offset_top = 10.0
+	paper_doll_panel.offset_right = SPLIT_SCREEN_PANEL_SIZE.x * 0.5
+	paper_doll_panel.offset_bottom = SPLIT_SCREEN_PANEL_SIZE.y + 10.0
+
+	feedback_label.offset_top = 18.0
+	feedback_label.offset_bottom = 48.0
+	layout_container.add_theme_constant_override("separation", 8)
+	slots_container.add_theme_constant_override("separation", 2)
+	backpack_panel.add_theme_constant_override("separation", 2)
+	backpack_slots_container.add_theme_constant_override("v_separation", 2)
+	hotbar_slots_container.add_theme_constant_override("separation", 2)
+
+	stats_panel.custom_minimum_size = Vector2(210, 0)
+	slots_panel.custom_minimum_size = Vector2(245, 0)
+	backpack_panel.custom_minimum_size = Vector2(245, 0)
+	details_panel.custom_minimum_size = Vector2(245, 0)
+	drop_button.custom_minimum_size = _get_button_size()
+
+	_refresh_button_sizes()
+
+
+func _refresh_button_sizes() -> void:
+	for button in slot_buttons.values():
+		button.custom_minimum_size = _get_button_size()
+	for button in backpack_slot_buttons:
+		button.custom_minimum_size = _get_button_size()
+	for button in hotbar_slot_buttons:
+		button.custom_minimum_size = _get_hotbar_button_size()
+
+
+func _get_button_size() -> Vector2:
+	if is_split_screen_layout:
+		return SPLIT_SCREEN_BUTTON_SIZE
+
+	return Vector2(230, 34)
+
+
+func _get_hotbar_button_size() -> Vector2:
+	if is_split_screen_layout:
+		return SPLIT_SCREEN_HOTBAR_SIZE
+
+	return Vector2(70, 38)

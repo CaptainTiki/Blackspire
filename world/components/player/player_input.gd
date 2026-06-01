@@ -93,7 +93,7 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not _event_belongs_to_this_player(event):
+	if not owns_input_event(event):
 		return
 
 	# Mouse motion is special — only the owner should ever see it.
@@ -113,7 +113,7 @@ func _input(event: InputEvent) -> void:
 		_handle_digital_event(event)
 
 
-func _event_belongs_to_this_player(event: InputEvent) -> bool:
+func owns_input_event(event: InputEvent) -> bool:
 	if device == -1:
 		if event is InputEventKey or event is InputEventMouse:
 			return true

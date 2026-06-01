@@ -178,7 +178,20 @@ These are durable truths about how we build Blackspire.
   - Local Co-op now creates a two-row split-screen overlay using shared-world `SubViewport`s.
   - Slot 0 renders through the top viewport; slot 1 renders through the bottom viewport.
   - Each slot gets a viewport-local camera that mirrors that player's real camera every frame.
-  - Per-player HUD/UI is not correctly scoped per viewport yet; expect UI polish to be the next local co-op slice.
+  - Player-owned CanvasLayers (`PlayerHUD`, `PlayerHitFeedback`, `PlayerEquipmentUI`) are bound to the owning slot's viewport.
+  - `PlayerEquipmentUI` filters input through the owning `PlayerInput`, so keyboard/mouse UI controls player 1 and controller UI controls player 2.
+  - `PlayerEquipmentUI` now enters compact split-screen layout when bound to a local co-op viewport.
+  - The original player-owned `PlayerHUD` is hidden in Local Co-op; split-screen HP now uses slot-owned labels drawn directly over each split-screen pane.
+  - The paper-doll panel is top-aligned and shortened to fit the half-height viewport.
+  - Player inventory components are smoke-verified as separate instances; adding coins to player 1 does not mutate player 2.
+  - Manual split-screen playtest found the next real blocker: simultaneous paper-doll panels still cross-wire hover/focus/controller state.
+    - When both inventories are open, mouse hover on player 1 can appear on player 2's inventory.
+    - Controller movement can affect player 1 inventory, and the last inventory panel opened appears to become the active panel for controller stick navigation.
+    - Player 1 inventory is usable as-is.
+    - Player 2 inventory receives pickups, but item movement is broken: picking up a sword from player 2 backpack and clicking Primary Weapon fails after prompting for an inventory slot.
+    - Player 2 cannot directly move potions to player 2 hotbar.
+    - Cross-panel workaround observed: clicking an empty player 1 slot, then player 1 hotbar, can place player 2's potion into player 2 hotbar; the potion is then usable.
+  - Remaining UI risk: local co-op inventory ownership/focus, pickup prompts, hotbar use, drops, and damage feedback still need manual split-screen hardening.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -215,18 +228,23 @@ These are durable truths about how we build Blackspire.
   - Targeted single-player player-slot boot smoke passed: one slot, one player, slot 0 camera/input assigned.
   - Targeted local co-op player-slot boot smoke passed: two slots, two players, slot 0 keyboard/mouse, slot 1 controller device 0, only slot 0 camera current.
   - Targeted local co-op split-screen boot smoke passed: two slots, two players, two shared-world `SubViewport`s, and two current viewport cameras.
+  - Targeted local co-op slot UI ownership smoke passed: player CanvasLayers bind to the correct slot viewport, keyboard Tab opens only player 1 paper doll, controller Y opens only player 2 paper doll, and player inventories are distinct.
+  - Targeted split-screen HUD/paper-doll layout smoke passed: both HUDs and equipment UIs enter split-screen layout, HP labels use compact bottom offsets, and paper-doll panels are top-aligned and short enough for half-height viewports.
+  - Targeted split-screen HP labels smoke passed: both slot-owned labels exist, initialize independently, and damaging player 2 updates only player 2's HP label.
+  - Manual local co-op viewport/input test passed: player 1 keyboard/mouse movement only moves the player-1/top camera, and player 2 controller movement only moves the player-2/bottom camera.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals:**
-- Manual play-test the restored menu path in the editor: launch `main.tscn`, choose Single Player, confirm mouse capture, movement/combat/loot/paper-doll/hotbar/extraction still feel correct.
-- Manual play-test Local Co-op from `main.tscn`: confirm both viewports render, player 1 responds to keyboard/mouse in the top view, player 2 responds to controller 0 in the bottom view, and controller input no longer moves player 1.
-- Add the next split-screen UI slice:
-  1. Scope player HUD, hit feedback, interaction prompts, and paper-doll UI per slot/viewport.
-  2. Verify player 2 can see health/feedback and open their own UI without stealing player 1 input.
-  3. Decide whether the long-term UI should be duplicated under viewport-local CanvasLayers or routed through a slot-owned UI host.
+- Start next session by fixing local co-op inventory ownership/focus:
+  1. Audit `PlayerEquipmentUI` for any shared/static/global focus, hover, held-item, active-panel, or viewport state.
+  2. Make mouse hover and click handling ignore controls outside the owning `PlayerEquipmentUI` / owning viewport.
+  3. Make controller focus/navigation route only through the `PlayerEquipmentUI` owned by that player's `PlayerInput`.
+  4. Re-test both inventories open at once: player 1 mouse inventory, player 2 controller inventory, player 2 sword equip, player 2 potion-to-hotbar, and potion use.
+- After inventory ownership is fixed, continue manual local co-op checks for pickup prompts, drops, damage HUD, and hit feedback in both viewports.
+- Decide whether the current hybrid approach is enough or whether Local Co-op needs a fuller slot-owned UI host scene.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 
 ---

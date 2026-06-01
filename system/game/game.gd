@@ -102,13 +102,21 @@ func _create_local_coop_viewports() -> void:
 
 
 func _create_slot_viewport(slot: PlayerSlot, shared_world: World3D) -> void:
+	var slot_root := Control.new()
+	slot_root.name = "Player%dSplitScreenPane" % (slot.slot_index + 1)
+	slot_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slot_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split_screen_root.add_child(slot_root)
+
 	var container := SubViewportContainer.new()
 	container.name = "Player%dViewportContainer" % (slot.slot_index + 1)
+	container.set_anchors_preset(Control.PRESET_FULL_RECT)
 	container.stretch = true
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	split_screen_root.add_child(container)
+	slot_root.add_child(container)
 
 	var viewport := SubViewport.new()
 	viewport.name = "Player%dViewport" % (slot.slot_index + 1)
@@ -123,6 +131,8 @@ func _create_slot_viewport(slot: PlayerSlot, shared_world: World3D) -> void:
 
 	slot.viewport = viewport
 	slot.viewport_camera = camera
+	_bind_slot_canvas_layers(slot)
+	_create_slot_hud(slot, slot_root)
 
 
 func _sync_split_screen_cameras() -> void:
@@ -137,3 +147,47 @@ func _sync_split_screen_cameras() -> void:
 		slot.viewport_camera.fov = slot.camera.fov
 		slot.viewport_camera.near = slot.camera.near
 		slot.viewport_camera.far = slot.camera.far
+
+
+func _bind_slot_canvas_layers(slot: PlayerSlot) -> void:
+	if not slot.player:
+		push_error("Game: Cannot bind UI without a slot player.")
+		return
+	if not slot.viewport:
+		push_error("Game: Cannot bind UI without a slot viewport.")
+		return
+
+	for child in slot.player.get_children():
+		if child is CanvasLayer:
+			var canvas_layer := child as CanvasLayer
+			if canvas_layer is PlayerHUD:
+				canvas_layer.visible = false
+			canvas_layer.custom_viewport = slot.viewport
+			if canvas_layer.has_method("configure_for_split_screen"):
+				canvas_layer.configure_for_split_screen()
+
+
+func _create_slot_hud(slot: PlayerSlot, slot_root: Control) -> void:
+	var label := Label.new()
+	label.name = "Player%dHPLabel" % (slot.slot_index + 1)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	label.offset_left = 12.0
+	label.offset_top = -34.0
+	label.offset_right = 170.0
+	label.offset_bottom = -8.0
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", Color(0.95, 0.92, 0.82, 1.0))
+	slot_root.add_child(label)
+	slot.split_screen_hud_label = label
+
+	var health := slot.player.health as HealthComponent
+	_update_slot_hud(health.current_health, health.max_health, slot)
+	health.health_changed.connect(_update_slot_hud.bind(slot))
+
+
+func _update_slot_hud(current_health: int, max_health: int, slot: PlayerSlot) -> void:
+	if not slot.split_screen_hud_label:
+		return
+
+	slot.split_screen_hud_label.text = "P%d HP %d/%d" % [slot.slot_index + 1, current_health, max_health]

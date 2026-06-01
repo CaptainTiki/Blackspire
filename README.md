@@ -87,8 +87,12 @@
   - Slot 0 is keyboard/mouse, owns mouse look, and renders through the top viewport.
   - Slot 1 is assigned to controller device 0 and does not receive mouse or unassigned joypad input.
   - Slot 1 renders through the bottom viewport using a mirrored viewport camera.
+  - Player HUD, hit feedback, paper-doll UI, hotbar input, and inventory UI input are now bound to their owning slot/viewport.
+  - Local co-op HUD and paper-doll UI now use a compact split-screen layout that fits inside each half-screen viewport.
+  - Local co-op HP readouts now use slot-owned split-screen overlay labels so each viewport shows and updates its own player's health.
+  - Current known limitation: simultaneous local co-op inventory panels still share hover/focus/controller state in places. Player 1 inventory is usable, but player 2 item movement/equip/hotbar placement is unreliable and can be affected by the player 1 panel.
   - `system/quick_entry.tscn` bypasses the menu for fast iteration while still using the same `Game` session path.
-  - `PlayerSlotManager` now owns local player spawning; per-slot HUD/UI binding is still next.
+  - `PlayerSlotManager` now owns local player spawning; local co-op UI/inventory now needs manual playtest hardening.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -127,8 +131,11 @@ Latest equipment milestones:
 - `v0.0.0032` Main Menu / Game Session Bootstrap.
 - `v0.0.0033` Local Co-op Player Slot Spawning.
 - `v0.0.0034` Local Co-op Split-Screen Viewports.
+- `v0.0.0035` Per-Slot HUD / UI / Inventory Ownership.
+- `v0.0.0036` Compact Split-Screen HUD / Paper-Doll Layout.
+- `v0.0.0037` Slot-Owned Split-Screen HP Labels.
 
-Current focus: Manual local co-op playtest, then per-slot HUD/UI binding inside the split-screen layout.
+Current focus: Fix local co-op inventory focus/ownership so both players can use paper-doll, equipment, and hotbar at the same time.
 
 ---
 

@@ -929,9 +929,11 @@ system/main.tscn
 
 `PlayerSlotManager` now owns local player spawning and slot input assignment. Single Player spawns one slot/player and keeps controller-friendly solo play by letting slot 0 accept unassigned joypads. Local Co-op spawns two slots/players: slot 0 uses keyboard/mouse and owns mouse look, while slot 1 uses controller device 0.
 
-The first split-screen pass lives in `Game`: Local Co-op creates a full-screen two-row `SubViewportContainer` layout, gives each slot a shared-world `SubViewport`, and mirrors each player's source camera into a viewport-local camera. This proves two-player visibility without moving the dungeon world under a viewport.
+The first split-screen pass lives in `Game`: Local Co-op creates a full-screen two-row split-screen layout, gives each slot a shared-world `SubViewport`, and mirrors each player's source camera into a viewport-local camera. This proves two-player visibility without moving the dungeon world under a viewport.
 
-The next local co-op milestone is per-slot UI ownership: move or duplicate HUD, hit feedback, interaction prompts, and paper-doll UI into the correct viewport context.
+Per-slot UI and inventory ownership is now partially proven: player-owned CanvasLayers bind to the owning slot's `SubViewport`, `PlayerEquipmentUI` filters input through the owning `PlayerInput`, and inventory component instances are separate per spawned player. The current HP readout is intentionally slot-owned: `Game` hides the player-owned `PlayerHUD` during Local Co-op and draws a lightweight HP label directly over each split-screen pane.
+
+The known architecture risk is UI focus ownership. Manual two-player testing shows that two simultaneous `PlayerEquipmentUI` panels can still cross-wire hover, held-item, equipment-slot, hotbar, and controller navigation state. The next local co-op UI pass should either make every `PlayerEquipmentUI` interaction strictly instance-local and viewport/input-owned, or introduce explicit slot-owned UI host scenes under each split-screen pane.
 
 ## 30. UI Architecture
 
