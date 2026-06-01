@@ -2,6 +2,7 @@ extends Node3D
 class_name Hub
 
 signal deploy_requested(actor: PlayerController)
+signal stash_requested(actor: PlayerController)
 
 @export var hub_name := "Prototype Hub"
 
@@ -20,6 +21,10 @@ func get_player_spawns() -> Array[Marker3D]:
 
 func request_deploy(actor: PlayerController) -> void:
 	deploy_requested.emit(actor)
+
+
+func request_stash(actor: PlayerController) -> void:
+	stash_requested.emit(actor)
 
 
 func show_run_summary(summary: String) -> void:

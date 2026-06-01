@@ -87,6 +87,8 @@
   - The temporary hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
   - Successful extraction and all-down failure now return to the hub with a summary instead of ending the session on the old terminal overlay.
   - The hub summary board shows crew gold plus per-player gold lines, and is manually verified in local co-op.
+  - `Game` now owns a session-lifetime crew stash inventory, and the hub stash chest opens a minimal per-slot backpack/stash transfer UI.
+  - The crew stash is manually verified in local co-op: both players can open separate stash panels, shared stash changes update live in both panels, and stash contents persist across repeat runs.
   - `PlayerSlotManager` can move existing slot players between hub and run worlds, preserving player-owned inventory/equipment/hotbar state across the loop.
   - Local Co-op creates the first two-player split-screen layout using shared-world `SubViewport`s.
   - Slot 0 is keyboard/mouse, owns mouse look, and renders through the top viewport.

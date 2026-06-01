@@ -3,7 +3,6 @@ extends Entity
 class_name HubStashChest
 
 @export var prompt := "Open Stash"
-@export var placeholder_message := "Stash placeholder ready"
 
 @onready var interactable: Interactable = $Components/Interactable
 @onready var label: Label3D = $Label3D
@@ -19,10 +18,23 @@ func _on_interact(_interactable: Interactable, actor: Node) -> void:
 		push_error("HubStashChest %s can only be used by a PlayerController." % get_path())
 		return
 
-	if player.inventory:
-		player.inventory.inventory_toast.emit(placeholder_message)
+	var hub := _find_parent_hub()
+	if not hub:
+		push_error("HubStashChest %s could not find a parent Hub." % get_path())
+		return
+
+	hub.request_stash(player)
 
 
 func _apply_display_state() -> void:
 	interactable.prompt = prompt
 	label.text = "STASH"
+
+
+func _find_parent_hub() -> Node:
+	var current := get_parent()
+	while current:
+		if current.has_method("request_stash"):
+			return current
+		current = current.get_parent()
+	return null

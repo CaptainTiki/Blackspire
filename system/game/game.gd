@@ -1,6 +1,9 @@
 class_name Game
 extends Node
 
+const CrewStashInventoryScript := preload("res://system/crew_stash_inventory.gd")
+const CrewStashUIScript := preload("res://system/ui/crew_stash_ui.gd")
+
 ## The central "session" container.
 ## Main creates one of these and tells it what kind of game to run.
 ##
@@ -18,6 +21,7 @@ extends Node
 
 var current_session: GameSessionConfig
 var current_world: Node = null   # Will hold Hub or Level later
+var crew_stash_inventory: Node
 var split_screen_layer: CanvasLayer
 var split_screen_root: Control
 var last_run_summary := "No run completed yet"
@@ -29,6 +33,7 @@ func start_session(config: GameSessionConfig) -> void:
 
 	# Create player slots (even if we don't fully use them yet)
 	player_slot_manager.create_local_slots(config.local_player_count)
+	_create_crew_stash_inventory()
 
 	_load_hub(last_run_summary)
 
@@ -48,6 +53,7 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 	current_world = hub
 	add_child(current_world)
 	hub.deploy_requested.connect(_on_hub_deploy_requested)
+	hub.stash_requested.connect(_on_hub_stash_requested)
 	hub.show_run_summary(summary)
 
 	var players := player_slot_manager.spawn_or_move_local_players(hub, hub.get_player_spawns(), player_scene)
@@ -103,7 +109,21 @@ func _process(_delta: float) -> void:
 
 
 func _on_hub_deploy_requested(_actor: PlayerController) -> void:
+	if _has_any_open_stash_ui():
+		if _actor and _actor.inventory:
+			_actor.inventory.inventory_toast.emit("Close the stash before deploying")
+		return
+
 	_load_starting_world()
+
+
+func _on_hub_stash_requested(actor: PlayerController) -> void:
+	var player := actor as PlayerController
+	if not player:
+		push_error("Game._on_hub_stash_requested requires a PlayerController.")
+		return
+
+	_open_stash_ui(player)
 
 
 func _on_run_completed(actor: Node) -> void:
@@ -114,6 +134,76 @@ func _on_run_completed(actor: Node) -> void:
 func _on_run_failed(reason: String) -> void:
 	last_run_summary = "Failed: %s" % reason
 	call_deferred("_load_hub", last_run_summary)
+
+
+func _create_crew_stash_inventory() -> void:
+	if crew_stash_inventory:
+		crew_stash_inventory.queue_free()
+
+	crew_stash_inventory = CrewStashInventoryScript.new()
+	crew_stash_inventory.name = "CrewStashInventory"
+	add_child(crew_stash_inventory)
+
+
+func _open_stash_ui(player: PlayerController) -> void:
+	var slot := _get_slot_for_player(player)
+	if not slot:
+		push_error("Game._open_stash_ui could not find a PlayerSlot for %s." % player.name)
+		return
+
+	_close_stash_ui_for_slot(slot)
+
+	var ui: Control = CrewStashUIScript.new()
+	ui.name = "CrewStashUI"
+	ui.closed.connect(_on_stash_ui_closed.bind(slot))
+	slot.stash_ui = ui
+
+	if slot.split_screen_ui_root:
+		slot.split_screen_ui_root.add_child(ui)
+	else:
+		slot.stash_canvas_layer = CanvasLayer.new()
+		slot.stash_canvas_layer.name = "Player%dCrewStashLayer" % (slot.slot_index + 1)
+		add_child(slot.stash_canvas_layer)
+		slot.stash_canvas_layer.add_child(ui)
+
+	ui.configure(player, crew_stash_inventory, not player.input_reader.owns_mouse)
+
+
+func _close_stash_ui_for_slot(slot: PlayerSlot) -> void:
+	if slot.stash_ui and is_instance_valid(slot.stash_ui):
+		slot.stash_ui.queue_free()
+	slot.stash_ui = null
+	if slot.stash_canvas_layer and is_instance_valid(slot.stash_canvas_layer):
+		slot.stash_canvas_layer.queue_free()
+	slot.stash_canvas_layer = null
+
+
+func _on_stash_ui_closed(slot: PlayerSlot) -> void:
+	slot.stash_ui = null
+	if slot.stash_canvas_layer and is_instance_valid(slot.stash_canvas_layer):
+		slot.stash_canvas_layer.queue_free()
+	slot.stash_canvas_layer = null
+
+
+func _has_any_open_stash_ui() -> bool:
+	for slot in player_slot_manager.slots:
+		if slot.stash_ui and is_instance_valid(slot.stash_ui):
+			return true
+
+	return false
+
+
+func _close_all_stash_ui() -> void:
+	for slot in player_slot_manager.slots:
+		_close_stash_ui_for_slot(slot)
+
+
+func _get_slot_for_player(player: PlayerController) -> PlayerSlot:
+	for slot in player_slot_manager.slots:
+		if slot.player == player:
+			return slot
+
+	return null
 
 
 func _build_crew_exit_summary(actor: Node) -> String:
@@ -143,6 +233,7 @@ func _build_crew_exit_summary(actor: Node) -> String:
 
 
 func _clear_current_world() -> void:
+	_close_all_stash_ui()
 	_detach_slot_players_from_current_world()
 	if current_world:
 		current_world.queue_free()

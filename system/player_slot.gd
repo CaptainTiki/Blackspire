@@ -30,5 +30,7 @@ var viewport_camera: Camera3D = null
 var split_screen_ui_root: Control = null
 var split_screen_hud_label: Label = null
 var split_screen_prompt_label: Label = null
+var stash_ui: Control = null
+var stash_canvas_layer: CanvasLayer = null
 
 ## Future: camera, viewport, hud references will live here too.

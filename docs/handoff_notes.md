@@ -191,6 +191,16 @@ These are durable truths about how we build Blackspire.
   - `Level` still defaults to the old overlay/pause behavior, but `Game` disables that behavior for hub-based sessions.
   - The hub summary aggregates crew gold across all local player slots and shows per-player gold lines.
   - Headless runtime logging now writes to ignored local `godot-headless*.log` files instead of Godot's default `user://logs` path, avoiding the Windows native crash popup during console smoke tests.
+- Added the minimal crew stash foundation.
+  - `Game` owns a session-lifetime `CrewStashInventory`, so stash contents survive hub/run scene reloads.
+  - `HubStashChest` now asks the hub/game session to open the stash UI instead of showing placeholder feedback.
+  - `CrewStashUI` shows the interacting player's backpack beside the crew stash.
+  - Mouse and controller-owned selection paths are both supported for basic slot movement.
+  - Stash UI is owned per `PlayerSlot` and attaches to that slot's split-screen UI host when available, matching the existing local co-op inventory/HUD pattern.
+  - The stash panel centers through a full-rect `CenterContainer` and uses compact slot buttons so it fits inside a split-screen pane.
+  - Moving an item from backpack to stash clears hotbar bindings for that item instance.
+  - Deploy is blocked while any stash UI is open so no held item can be lost during a world transition.
+  - Manual local co-op verification passed: both players can open their own stash UI at the same time, stash changes update live in both open panels, and stash contents persist through multiple hub/run loops.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -269,12 +279,13 @@ These are durable truths about how we build Blackspire.
   - Manual local co-op hub loop passed: both players spawned in the hub, deployed, completed a full run, returned to hub, kept equipment/inventory/hotbar state, redeployed with that state intact, completed a second run, and returned with accumulated loot intact.
   - Manual local co-op hub summary verification passed: the board shows total crew gold plus per-player gold lines, including player 2's gold.
   - Hub summary board/sign orientation has been corrected and manually verified.
+  - Manual local co-op stash verification passed: player 1 deposited gold, player 2 removed it while player 1's stash UI was still open, player 1 saw the live removal, and stash contents persisted through multiple runs.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals:**
-- After the hub loop is fully locked, decide whether the stash placeholder becomes a real minimal shared stash or remains a marker while we build the next prototype system.
+- Once the stash pass is verified, start host/client planning from the current session-owned slot/stash/world-transition shape.
 - Defer polish and deeper refactors unless they block the hub/run loop.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 
