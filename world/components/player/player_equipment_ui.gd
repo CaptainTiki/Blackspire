@@ -36,10 +36,20 @@ const HOTBAR_INPUT_ACTIONS := [
 	"hotbar_slot_4",
 ]
 
+enum SelectionKind {
+	EQUIPMENT,
+	BACKPACK,
+	HOTBAR,
+	DROP,
+}
+
 const FULL_SCREEN_PANEL_SIZE := Vector2(1080, 460)
 const SPLIT_SCREEN_PANEL_SIZE := Vector2(1060, 300)
 const SPLIT_SCREEN_BUTTON_SIZE := Vector2(214, 28)
 const SPLIT_SCREEN_HOTBAR_SIZE := Vector2(62, 30)
+const CONTROLLER_NAV_DEADZONE := 0.55
+const CONTROLLER_NAV_INITIAL_DELAY := 0.32
+const CONTROLLER_NAV_REPEAT_DELAY := 0.13
 
 const STAT_NAMES := {
 	StatModifierDefinitionScript.StatType.ATTACK_DAMAGE: "Attack Damage",
@@ -55,7 +65,7 @@ const STAT_NAMES := {
 @export var hotbar: Node
 @export var melee_attack: Node
 
-var selected_slot := EquipmentDefinitionScript.EquipmentSlot.PRIMARY_WEAPON
+var selected_equipment_slot := EquipmentDefinitionScript.EquipmentSlot.PRIMARY_WEAPON
 var selected_backpack_slot := -1
 var slot_buttons: Dictionary[EquipmentDefinitionScript.EquipmentSlot, Button] = {}
 var backpack_slot_buttons: Array[Button] = []
@@ -69,6 +79,11 @@ var previous_mouse_mode := Input.MOUSE_MODE_CAPTURED
 var feedback_tween: Tween
 var player: PlayerController
 var is_split_screen_layout := false
+var is_controller_selection_mode := false
+var selected_kind := SelectionKind.EQUIPMENT
+var selected_hotbar_slot := 0
+var controller_nav_direction := Vector2i.ZERO
+var controller_nav_repeat_timer := 0.0
 
 @onready var root_control: Control = $Root
 @onready var paper_doll_panel: PanelContainer = $Root/PaperDollPanel
@@ -108,11 +123,13 @@ func _ready() -> void:
 	inventory.inventory_toast.connect(_show_feedback)
 	hotbar.hotbar_changed.connect(_on_hotbar_changed)
 	hotbar.hotbar_toast.connect(_show_feedback)
-	drop_button.pressed.connect(_drop_held_item)
+	drop_button.toggle_mode = true
+	drop_button.mouse_entered.connect(_select_drop)
+	drop_button.pressed.connect(_on_drop_button_pressed)
 	_create_held_item_label()
 	_create_slot_buttons()
 	_refresh()
-	set_process(false)
+	set_process(true)
 
 
 func _input(event: InputEvent) -> void:
@@ -124,7 +141,7 @@ func _input(event: InputEvent) -> void:
 		_set_ui_input_handled()
 		return
 	if paper_doll_panel.visible and event.is_action_pressed("inventory_pick_place") and not event is InputEventMouseButton:
-		_activate_focused_control(true)
+		_activate_selected_control(true)
 		_set_ui_input_handled()
 		return
 	if event.is_action_pressed("inventory_cancel_drag") and held_item_instance:
@@ -138,8 +155,11 @@ func _input(event: InputEvent) -> void:
 			return
 
 
-func _process(_delta: float) -> void:
-	held_item_label.global_position = root_control.get_global_mouse_position() + Vector2(16, 16)
+func _process(delta: float) -> void:
+	if held_item_instance and not is_controller_holding_item:
+		held_item_label.global_position = root_control.get_global_mouse_position() + Vector2(16, 16)
+	if paper_doll_panel.visible and is_controller_selection_mode:
+		_process_controller_navigation(delta)
 
 
 func _toggle_paper_doll(show_mouse_cursor: bool = true) -> void:
@@ -147,18 +167,22 @@ func _toggle_paper_doll(show_mouse_cursor: bool = true) -> void:
 
 	if paper_doll_panel.visible:
 		previous_mouse_mode = Input.get_mouse_mode()
+		is_controller_selection_mode = not show_mouse_cursor
+		controller_nav_direction = Vector2i.ZERO
+		controller_nav_repeat_timer = 0.0
 		if show_mouse_cursor:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		player.set_gameplay_input_enabled(false)
 		player.set_controller_look_enabled(false)
+		_refresh_mouse_filters()
 		_refresh()
-		var selected_button := slot_buttons[selected_slot] as Button
-		selected_button.grab_focus()
 	else:
 		if held_item_instance:
 			_show_feedback("Place held item before closing")
 			paper_doll_panel.visible = true
 			return
+		is_controller_selection_mode = false
+		_refresh_mouse_filters()
 		player.set_gameplay_input_enabled(true)
 		player.set_controller_look_enabled(true)
 		Input.set_mouse_mode(previous_mouse_mode)
@@ -180,11 +204,10 @@ func _create_slot_buttons() -> void:
 		var button := Button.new()
 		button.text = _get_slot_button_text(slot)
 		button.custom_minimum_size = _get_button_size()
-		button.focus_mode = Control.FOCUS_ALL
+		button.focus_mode = Control.FOCUS_NONE
 		button.toggle_mode = true
-		button.mouse_entered.connect(_select_slot.bind(slot))
-		button.focus_entered.connect(_select_slot.bind(slot))
-		button.pressed.connect(_activate_equipment_slot.bind(slot, false))
+		button.mouse_entered.connect(_on_slot_mouse_entered.bind(slot))
+		button.pressed.connect(_on_equipment_slot_pressed.bind(slot))
 		slots_container.add_child(button)
 		slot_buttons[slot] = button
 
@@ -198,16 +221,15 @@ func _sync_backpack_slots() -> void:
 		button.queue_free()
 	backpack_slot_buttons.clear()
 	current_backpack_slot_count = slot_count
-	selected_backpack_slot = -1
+	selected_backpack_slot = _clamp_backpack_slot(selected_backpack_slot)
 
 	for index in slot_count:
 		var button := Button.new()
 		button.custom_minimum_size = _get_button_size()
-		button.focus_mode = Control.FOCUS_ALL
+		button.focus_mode = Control.FOCUS_NONE
 		button.toggle_mode = true
-		button.mouse_entered.connect(_select_backpack_slot.bind(index))
-		button.focus_entered.connect(_select_backpack_slot.bind(index))
-		button.pressed.connect(_activate_backpack_slot.bind(index, false))
+		button.mouse_entered.connect(_on_backpack_slot_mouse_entered.bind(index))
+		button.pressed.connect(_on_backpack_slot_pressed.bind(index))
 		backpack_slots_container.add_child(button)
 		backpack_slot_buttons.append(button)
 
@@ -225,25 +247,98 @@ func _sync_hotbar_slots() -> void:
 	for index in slot_count:
 		var button := Button.new()
 		button.custom_minimum_size = _get_hotbar_button_size()
-		button.focus_mode = Control.FOCUS_ALL
-		button.pressed.connect(_activate_hotbar_slot.bind(index, false))
+		button.focus_mode = Control.FOCUS_NONE
+		button.toggle_mode = true
+		button.mouse_entered.connect(_on_hotbar_slot_mouse_entered.bind(index))
+		button.pressed.connect(_on_hotbar_slot_pressed.bind(index))
 		hotbar_slots_container.add_child(button)
 		hotbar_slot_buttons.append(button)
 
+	selected_hotbar_slot = _clamp_hotbar_slot(selected_hotbar_slot)
+	_refresh_mouse_filters()
+
+
+func _on_slot_mouse_entered(slot: int) -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_set_selection(SelectionKind.EQUIPMENT, slot)
+
+
+func _on_equipment_slot_pressed(slot: int) -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_activate_equipment_slot(slot, false)
+
+
+func _on_backpack_slot_mouse_entered(index: int) -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_set_selection(SelectionKind.BACKPACK, index)
+
+
+func _on_backpack_slot_pressed(index: int) -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_activate_backpack_slot(index, false)
+
+
+func _on_hotbar_slot_mouse_entered(index: int) -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_set_selection(SelectionKind.HOTBAR, index)
+
+
+func _on_hotbar_slot_pressed(index: int) -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_activate_hotbar_slot(index, false)
+
+
+func _select_drop() -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_set_selection(SelectionKind.DROP, 0)
+
+
+func _on_drop_button_pressed() -> void:
+	if not _accepts_mouse_interaction():
+		return
+
+	_drop_held_item()
+
+
+func _set_selection(kind: int, value: int = 0) -> void:
+	selected_kind = kind
+	match selected_kind:
+		SelectionKind.EQUIPMENT:
+			selected_equipment_slot = value
+		SelectionKind.BACKPACK:
+			selected_backpack_slot = _clamp_backpack_slot(value)
+		SelectionKind.HOTBAR:
+			selected_hotbar_slot = _clamp_hotbar_slot(value)
+		SelectionKind.DROP:
+			pass
+	_refresh()
+
 
 func _select_slot(slot: int) -> void:
-	selected_slot = slot
-	selected_backpack_slot = -1
-	_refresh()
+	_set_selection(SelectionKind.EQUIPMENT, slot)
 
 
 func _select_backpack_slot(index: int) -> void:
-	selected_backpack_slot = index
-	_refresh()
+	_set_selection(SelectionKind.BACKPACK, index)
 
 
 func _activate_backpack_slot(index: int, from_controller: bool = false) -> void:
-	selected_backpack_slot = index
+	selected_kind = SelectionKind.BACKPACK
+	selected_backpack_slot = _clamp_backpack_slot(index)
 	if held_item_instance:
 		held_item_instance = inventory.place_item_at(index, held_item_instance)
 		held_backpack_slot_index = index if held_item_instance else -1
@@ -261,8 +356,8 @@ func _activate_backpack_slot(index: int, from_controller: bool = false) -> void:
 
 
 func _activate_equipment_slot(slot: int, from_controller: bool = false) -> void:
-	selected_slot = slot
-	selected_backpack_slot = -1
+	selected_kind = SelectionKind.EQUIPMENT
+	selected_equipment_slot = slot
 
 	if held_item_instance:
 		_place_held_item_in_equipment_slot(slot)
@@ -275,6 +370,8 @@ func _activate_equipment_slot(slot: int, from_controller: bool = false) -> void:
 
 
 func _activate_hotbar_slot(index: int, _from_controller: bool = false) -> void:
+	selected_kind = SelectionKind.HOTBAR
+	selected_hotbar_slot = _clamp_hotbar_slot(index)
 	if held_item_instance:
 		var item_instance_to_bind := _return_held_item_to_backpack()
 		if item_instance_to_bind and hotbar.bind_item(index, item_instance_to_bind):
@@ -285,32 +382,106 @@ func _activate_hotbar_slot(index: int, _from_controller: bool = false) -> void:
 	_refresh()
 
 
-func _activate_focused_control(from_controller: bool = false) -> void:
-	var focused_control := _get_ui_viewport().gui_get_focus_owner()
-	if not focused_control:
-		_show_feedback("Select an inventory slot")
+func _activate_selected_control(from_controller: bool = false) -> void:
+	match selected_kind:
+		SelectionKind.EQUIPMENT:
+			_activate_equipment_slot(selected_equipment_slot, from_controller)
+		SelectionKind.BACKPACK:
+			_activate_backpack_slot(selected_backpack_slot, from_controller)
+		SelectionKind.HOTBAR:
+			_activate_hotbar_slot(selected_hotbar_slot, from_controller)
+		SelectionKind.DROP:
+			_drop_held_item()
+
+
+func _process_controller_navigation(delta: float) -> void:
+	var direction := _get_controller_navigation_direction()
+	if direction == Vector2i.ZERO:
+		controller_nav_direction = Vector2i.ZERO
+		controller_nav_repeat_timer = 0.0
 		return
 
-	for slot in SLOT_ORDER:
-		if slot_buttons[slot] == focused_control:
-			_activate_equipment_slot(slot, from_controller)
-			return
-
-	var backpack_index := backpack_slot_buttons.find(focused_control)
-	if backpack_index >= 0:
-		_activate_backpack_slot(backpack_index, from_controller)
+	if direction != controller_nav_direction:
+		controller_nav_direction = direction
+		controller_nav_repeat_timer = CONTROLLER_NAV_INITIAL_DELAY
+		_move_controller_selection(direction)
 		return
 
-	var hotbar_index := hotbar_slot_buttons.find(focused_control)
-	if hotbar_index >= 0:
-		_activate_hotbar_slot(hotbar_index, from_controller)
+	controller_nav_repeat_timer -= delta
+	if controller_nav_repeat_timer <= 0.0:
+		controller_nav_repeat_timer = CONTROLLER_NAV_REPEAT_DELAY
+		_move_controller_selection(direction)
+
+
+func _get_controller_navigation_direction() -> Vector2i:
+	var movement := player.input_reader.get_movement_vector()
+	if absf(movement.x) >= absf(movement.y):
+		if movement.x > CONTROLLER_NAV_DEADZONE:
+			return Vector2i.RIGHT
+		if movement.x < -CONTROLLER_NAV_DEADZONE:
+			return Vector2i.LEFT
+	else:
+		if movement.y > CONTROLLER_NAV_DEADZONE:
+			return Vector2i.DOWN
+		if movement.y < -CONTROLLER_NAV_DEADZONE:
+			return Vector2i.UP
+
+	return Vector2i.ZERO
+
+
+func _move_controller_selection(direction: Vector2i) -> void:
+	if direction.x != 0:
+		_move_selection_horizontal(direction.x)
+	else:
+		_move_selection_vertical(direction.y)
+
+
+func _move_selection_horizontal(direction: int) -> void:
+	var column := _get_selection_column()
+	var next_column := clampi(column + direction, 0, 2)
+	if next_column == column:
 		return
 
-	if focused_control == drop_button:
-		_drop_held_item()
-		return
+	match next_column:
+		0:
+			_set_selection(SelectionKind.EQUIPMENT, selected_equipment_slot)
+		1:
+			_set_selection(SelectionKind.BACKPACK, selected_backpack_slot)
+		2:
+			if inventory.get_hotbar_slot_count() > 0:
+				_set_selection(SelectionKind.HOTBAR, selected_hotbar_slot)
+			else:
+				_set_selection(SelectionKind.DROP, 0)
 
-	_show_feedback("Select an inventory slot")
+
+func _move_selection_vertical(direction: int) -> void:
+	match selected_kind:
+		SelectionKind.EQUIPMENT:
+			var slot_index := SLOT_ORDER.find(selected_equipment_slot)
+			slot_index = clampi(slot_index + direction, 0, SLOT_ORDER.size() - 1)
+			_set_selection(SelectionKind.EQUIPMENT, SLOT_ORDER[slot_index])
+		SelectionKind.BACKPACK:
+			_set_selection(SelectionKind.BACKPACK, selected_backpack_slot + direction)
+		SelectionKind.HOTBAR:
+			var hotbar_count: int = inventory.get_hotbar_slot_count()
+			var next_hotbar_slot: int = selected_hotbar_slot + direction
+			if direction > 0 and next_hotbar_slot >= hotbar_count:
+				_set_selection(SelectionKind.DROP, 0)
+			else:
+				_set_selection(SelectionKind.HOTBAR, next_hotbar_slot)
+		SelectionKind.DROP:
+			if direction < 0 and inventory.get_hotbar_slot_count() > 0:
+				_set_selection(SelectionKind.HOTBAR, inventory.get_hotbar_slot_count() - 1)
+
+
+func _get_selection_column() -> int:
+	match selected_kind:
+		SelectionKind.EQUIPMENT:
+			return 0
+		SelectionKind.BACKPACK:
+			return 1
+		_:
+			return 2
 
 
 func _drop_held_item() -> void:
@@ -338,6 +509,8 @@ func _drop_held_item() -> void:
 func _refresh() -> void:
 	_sync_backpack_slots()
 	_sync_hotbar_slots()
+	selected_backpack_slot = _clamp_backpack_slot(selected_backpack_slot)
+	selected_hotbar_slot = _clamp_hotbar_slot(selected_hotbar_slot)
 	_refresh_slot_buttons()
 	_refresh_backpack_slots()
 	_refresh_hotbar_slots()
@@ -349,14 +522,14 @@ func _refresh_slot_buttons() -> void:
 	for slot in SLOT_ORDER:
 		var button := slot_buttons[slot] as Button
 		button.text = _get_slot_button_text(slot)
-		button.button_pressed = slot == selected_slot
+		button.button_pressed = selected_kind == SelectionKind.EQUIPMENT and slot == selected_equipment_slot
 
 
 func _refresh_backpack_slots() -> void:
 	for index in backpack_slot_buttons.size():
 		var button := backpack_slot_buttons[index]
 		button.text = _get_backpack_slot_text(index)
-		button.button_pressed = index == selected_backpack_slot
+		button.button_pressed = selected_kind == SelectionKind.BACKPACK and index == selected_backpack_slot
 		if is_controller_holding_item and held_backpack_slot_index == index:
 			button.text = "%d: [Held] %s" % [index + 1, held_item_instance.get_display_name()]
 
@@ -365,6 +538,8 @@ func _refresh_hotbar_slots() -> void:
 	for index in hotbar_slot_buttons.size():
 		var button := hotbar_slot_buttons[index]
 		button.text = _get_hotbar_slot_text(index)
+		button.button_pressed = selected_kind == SelectionKind.HOTBAR and index == selected_hotbar_slot
+	drop_button.button_pressed = selected_kind == SelectionKind.DROP
 
 
 func _refresh_stats() -> void:
@@ -384,21 +559,31 @@ func _refresh_stats() -> void:
 
 
 func _refresh_item_details() -> void:
-	if selected_backpack_slot >= 0:
-		var item_instance: Resource = inventory.get_item_at(selected_backpack_slot)
-		if not item_instance:
-			item_name_label.text = "Backpack Slot %d" % (selected_backpack_slot + 1)
-			item_details_label.text = "Empty slot"
+	match selected_kind:
+		SelectionKind.BACKPACK:
+			var item_instance: Resource = inventory.get_item_at(selected_backpack_slot)
+			if not item_instance:
+				item_name_label.text = "Backpack Slot %d" % (selected_backpack_slot + 1)
+				item_details_label.text = "Empty slot"
+				return
+
+			var item_definition: Resource = item_instance.item_definition
+			item_name_label.text = item_instance.get_display_name()
+			item_details_label.text = _get_item_instance_detail_text(item_instance, item_definition)
+			return
+		SelectionKind.HOTBAR:
+			var binding: Resource = hotbar.get_binding(selected_hotbar_slot)
+			item_name_label.text = "Hotbar Slot %d" % (selected_hotbar_slot + 1)
+			item_details_label.text = binding.get_display_name() if binding else "Empty hotbar slot"
+			return
+		SelectionKind.DROP:
+			item_name_label.text = "Drop"
+			item_details_label.text = "Hold a backpack item, then activate Drop to toss it into the world."
 			return
 
-		var item_definition: Resource = item_instance.item_definition
-		item_name_label.text = item_instance.get_display_name()
-		item_details_label.text = _get_item_instance_detail_text(item_instance, item_definition)
-		return
-
-	var equipped_item: Resource = equipment.get_equipped(selected_slot)
+	var equipped_item: Resource = equipment.get_equipped(selected_equipment_slot)
 	if not equipped_item:
-		item_name_label.text = SLOT_NAMES[selected_slot]
+		item_name_label.text = SLOT_NAMES[selected_equipment_slot]
 		item_details_label.text = "Empty slot"
 		return
 
@@ -513,14 +698,12 @@ func _return_held_item_to_backpack() -> Resource:
 func _update_held_item_label() -> void:
 	if not held_item_instance or is_controller_holding_item:
 		held_item_label.visible = false
-		set_process(false)
 		return
 
 	held_item_label.text = held_item_instance.get_display_name()
 	if held_item_instance.quantity > 1:
 		held_item_label.text += " x%d" % held_item_instance.quantity
 	held_item_label.visible = true
-	set_process(true)
 
 
 func _get_modifier_text(equipment_definition: Resource) -> String:
@@ -537,8 +720,8 @@ func _get_modifier_text(equipment_definition: Resource) -> String:
 
 
 func _on_equipment_changed(slot: int, equipment_definition: Resource) -> void:
-	selected_slot = slot
-	selected_backpack_slot = -1
+	selected_kind = SelectionKind.EQUIPMENT
+	selected_equipment_slot = slot
 	if equipment_definition:
 		_show_feedback("Equipped %s" % equipment_definition.display_name)
 	_refresh()
@@ -576,6 +759,25 @@ func _format_number(value: float) -> String:
 func _format_signed_number(value: float) -> String:
 	var prefix := "+" if value >= 0.0 else ""
 	return "%s%s" % [prefix, _format_number(value)]
+
+
+func _accepts_mouse_interaction() -> bool:
+	if not paper_doll_panel.visible:
+		return false
+	if is_controller_selection_mode:
+		return false
+	if not player or not player.input_reader:
+		return false
+
+	return player.input_reader.owns_mouse
+
+
+func _clamp_backpack_slot(index: int) -> int:
+	return clampi(index, 0, maxi(inventory.get_backpack_slot_count() - 1, 0))
+
+
+func _clamp_hotbar_slot(index: int) -> int:
+	return clampi(index, 0, maxi(inventory.get_hotbar_slot_count() - 1, 0))
 
 
 func _get_ui_viewport() -> Viewport:
@@ -616,6 +818,7 @@ func configure_for_split_screen() -> void:
 	drop_button.custom_minimum_size = _get_button_size()
 
 	_refresh_button_sizes()
+	_refresh_mouse_filters()
 
 
 func _refresh_button_sizes() -> void:
@@ -625,6 +828,31 @@ func _refresh_button_sizes() -> void:
 		button.custom_minimum_size = _get_button_size()
 	for button in hotbar_slot_buttons:
 		button.custom_minimum_size = _get_hotbar_button_size()
+
+
+func _refresh_mouse_filters() -> void:
+	var mouse_filter := Control.MOUSE_FILTER_STOP if _accepts_mouse_interaction() else Control.MOUSE_FILTER_IGNORE
+	root_control.mouse_filter = mouse_filter
+	paper_doll_panel.mouse_filter = mouse_filter
+	layout_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slots_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slots_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backpack_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backpack_slots_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hotbar_slots_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	details_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stats_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	item_name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	item_details_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	drop_button.mouse_filter = mouse_filter
+	for button in slot_buttons.values():
+		button.mouse_filter = mouse_filter
+	for button in backpack_slot_buttons:
+		button.mouse_filter = mouse_filter
+	for button in hotbar_slot_buttons:
+		button.mouse_filter = mouse_filter
 
 
 func _get_button_size() -> Vector2:

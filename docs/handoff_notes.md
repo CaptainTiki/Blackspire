@@ -1,6 +1,6 @@
 # Handoff Notes
 
-**Last Updated:** 2026-05-31
+**Last Updated:** 2026-06-01
 
 ---
 
@@ -163,6 +163,12 @@ These are durable truths about how we build Blackspire.
   - Opening the paper doll from controller keeps the mouse cursor hidden; keyboard/mouse toggles still show the cursor.
   - Controller inventory movement uses focus + A-button hold/place/equip/bind/drop.
   - Controller-held items mark the source slot as `[Held]` instead of using the mouse-follow drag label.
+- Reworked local co-op paper-doll inventory selection so simultaneous inventories work.
+  - `PlayerEquipmentUI` no longer uses Godot's single native `Control` focus as the source of truth for controller inventory actions.
+  - Each player-owned paper-doll UI now tracks explicit selection across equipment slots, backpack slots, hotbar slots, and Drop.
+  - Player 1 mouse hover/click is accepted only by the mouse-owning UI.
+  - Player 2 controller navigation and A-button activation are routed through that player's own `PlayerInput` and `PlayerEquipmentUI` selection state.
+  - Manual local co-op verification passed with both inventories open: both players can navigate their own inventory, pick up equipment, equip from backpack, bind items to their own hotbar, drop backpack items, and close inventory without cross-panel mutation.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -184,14 +190,8 @@ These are durable truths about how we build Blackspire.
   - The original player-owned `PlayerHUD` is hidden in Local Co-op; split-screen HP now uses slot-owned labels drawn directly over each split-screen pane.
   - The paper-doll panel is top-aligned and shortened to fit the half-height viewport.
   - Player inventory components are smoke-verified as separate instances; adding coins to player 1 does not mutate player 2.
-  - Manual split-screen playtest found the next real blocker: simultaneous paper-doll panels still cross-wire hover/focus/controller state.
-    - When both inventories are open, mouse hover on player 1 can appear on player 2's inventory.
-    - Controller movement can affect player 1 inventory, and the last inventory panel opened appears to become the active panel for controller stick navigation.
-    - Player 1 inventory is usable as-is.
-    - Player 2 inventory receives pickups, but item movement is broken: picking up a sword from player 2 backpack and clicking Primary Weapon fails after prompting for an inventory slot.
-    - Player 2 cannot directly move potions to player 2 hotbar.
-    - Cross-panel workaround observed: clicking an empty player 1 slot, then player 1 hotbar, can place player 2's potion into player 2 hotbar; the potion is then usable.
-  - Remaining UI risk: local co-op inventory ownership/focus, pickup prompts, hotbar use, drops, and damage feedback still need manual split-screen hardening.
+  - Simultaneous paper-doll inventory ownership is now manually verified for player 1 mouse and player 2 controller.
+  - Remaining local co-op risks: pickup prompts, dropped-item behavior in live split-screen rooms, damage HUD/hit feedback, combat readability, extraction, and the broader two-player run loop still need manual split-screen hardening.
 - The deterministic generated dungeon now supports the full rough loop:
   - Player spawns in the authored spawn room.
   - Combat rooms spawn basic enemies from `info_enemy_spawn`.
@@ -233,18 +233,19 @@ These are durable truths about how we build Blackspire.
   - Targeted split-screen HP labels smoke passed: both slot-owned labels exist, initialize independently, and damaging player 2 updates only player 2's HP label.
   - Manual local co-op viewport/input test passed: player 1 keyboard/mouse movement only moves the player-1/top camera, and player 2 controller movement only moves the player-2/bottom camera.
   - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
+  - Manual simultaneous local co-op inventory playtest passed: with both paper dolls open, player 1 mouse and player 2 controller can independently use backpack/equipment/hotbar/drop and close their own inventories.
   - Godot check-only exited 0.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise.
 
 **Next Steps / Pickup Goals:**
-- Start next session by fixing local co-op inventory ownership/focus:
-  1. Audit `PlayerEquipmentUI` for any shared/static/global focus, hover, held-item, active-panel, or viewport state.
-  2. Make mouse hover and click handling ignore controls outside the owning `PlayerEquipmentUI` / owning viewport.
-  3. Make controller focus/navigation route only through the `PlayerEquipmentUI` owned by that player's `PlayerInput`.
-  4. Re-test both inventories open at once: player 1 mouse inventory, player 2 controller inventory, player 2 sword equip, player 2 potion-to-hotbar, and potion use.
-- After inventory ownership is fixed, continue manual local co-op checks for pickup prompts, drops, damage HUD, and hit feedback in both viewports.
-- Decide whether the current hybrid approach is enough or whether Local Co-op needs a fuller slot-owned UI host scene.
+- Start next session by continuing local co-op full-run hardening now that simultaneous inventory ownership is working.
+  1. Re-test pickup prompts and interactable focus in both split-screen viewports.
+  2. Re-test dropped backpack items in live rooms: toss direction, pickup ownership, and cross-player sharing.
+  3. Re-test damage HUD, hit feedback, health labels, death/bleedout, and run-fail state with both players active.
+  4. Re-test combat readability and enemy targeting with both players moving/fighting.
+  5. Re-test extraction countdown/readiness/completion with two local players.
+- Decide later whether Local Co-op needs a fuller slot-owned UI host scene; the current explicit selection model is sufficient for the inventory milestone.
 - Keep online/host flow as menu-only placeholder until local co-op is proven.
 
 ---

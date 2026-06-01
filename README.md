@@ -2,7 +2,7 @@
 
 **Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.** It recreates the feeling of early MMO raiding before every answer was known.
 
-## Current Status (as of 2026-05-31)
+## Current Status (as of 2026-06-01)
 
 - **Core authoring pipeline**: Fully TrenchBroom + FuncGodot. Everything placeable comes through the FGD.
 - **Interaction system**: Thin `Interactable` component + `Entity` owns real behavior (proven pattern).
@@ -90,9 +90,10 @@
   - Player HUD, hit feedback, paper-doll UI, hotbar input, and inventory UI input are now bound to their owning slot/viewport.
   - Local co-op HUD and paper-doll UI now use a compact split-screen layout that fits inside each half-screen viewport.
   - Local co-op HP readouts now use slot-owned split-screen overlay labels so each viewport shows and updates its own player's health.
-  - Current known limitation: simultaneous local co-op inventory panels still share hover/focus/controller state in places. Player 1 inventory is usable, but player 2 item movement/equip/hotbar placement is unreliable and can be affected by the player 1 panel.
+  - Simultaneous local co-op inventory ownership is now manually verified: player 1 mouse and player 2 controller can use their own paper-doll, backpack, equipment, hotbar, and Drop controls at the same time without cross-panel mutation.
+  - `PlayerEquipmentUI` uses an explicit per-player selection model for controller navigation instead of Godot's single native `Control` focus.
   - `system/quick_entry.tscn` bypasses the menu for fast iteration while still using the same `Game` session path.
-  - `PlayerSlotManager` now owns local player spawning; local co-op UI/inventory now needs manual playtest hardening.
+  - `PlayerSlotManager` now owns local player spawning; local co-op now needs broader full-run manual hardening beyond inventory.
 - **Level context**: `Level` owns the active dungeon context and explicit `MapEntityRegistry`.
 - **Philosophy**: Strong emphasis on short focused scripts, "fail loudly" (minimal defensive fallbacks in single-player code), direct references, and lightweight diagnostics (`.tests/` + headless runs).
 
@@ -134,8 +135,10 @@ Latest equipment milestones:
 - `v0.0.0035` Per-Slot HUD / UI / Inventory Ownership.
 - `v0.0.0036` Compact Split-Screen HUD / Paper-Doll Layout.
 - `v0.0.0037` Slot-Owned Split-Screen HP Labels.
+- `v0.0.0038` Manual Local Co-op Inventory Focus Bug Capture.
+- `v0.0.0039` Simultaneous Local Co-op Inventory Ownership.
 
-Current focus: Fix local co-op inventory focus/ownership so both players can use paper-doll, equipment, and hotbar at the same time.
+Current focus: Continue local co-op full-run hardening now that simultaneous inventory ownership is working.
 
 ---
 
