@@ -217,6 +217,7 @@ func _assign_slot_player(slot: PlayerSlot, player: PlayerController, allow_singl
 	slot.input.accepts_unassigned_joypads = slot.is_local and allow_single_player_controller
 	slot.input.set_process_input(slot.is_local)
 	slot.camera.current = slot.is_local and slot.local_player_index == 0
+	player.set_uses_replicated_transform(not slot.is_local)
 
 
 func _get_local_input_device(slot_index: int) -> int:

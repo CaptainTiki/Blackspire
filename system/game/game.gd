@@ -7,6 +7,8 @@ const NetworkSessionScript := preload("res://system/network/network_session.gd")
 
 const SESSION_WORLD_HUB := "hub"
 const SESSION_WORLD_RUN := "run"
+const NETWORK_TRANSFORM_SEND_INTERVAL := 0.05
+const PLAYER_ACTION_PRIMARY := "primary_action"
 
 ## The central "session" container.
 ## Main creates one of these and tells it what kind of game to run.
@@ -30,6 +32,7 @@ var crew_stash_inventory: Node
 var split_screen_layer: CanvasLayer
 var split_screen_root: Control
 var last_run_summary := "No run completed yet"
+var _network_transform_send_elapsed := 0.0
 
 
 func start_session(config: GameSessionConfig) -> void:
@@ -84,6 +87,7 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 
 	_restore_players_for_hub()
 	_apply_slot_presence_debug_to_all()
+	_bind_player_action_events_to_all()
 	_ensure_local_coop_viewports()
 
 	print("Game: Loaded hub with %d session player(s)." % players.size())
@@ -161,6 +165,7 @@ func _place_slot_in_current_world(slot: PlayerSlot) -> void:
 
 	_restore_player_for_session_presence(player)
 	_apply_slot_presence_debug(slot, player)
+	_bind_player_action_events(slot)
 	_ensure_local_coop_viewports()
 
 
@@ -321,6 +326,7 @@ func _on_level_ready() -> void:
 		return
 
 	_apply_slot_presence_debug_to_all()
+	_bind_player_action_events_to_all()
 	_ensure_local_coop_viewports()
 
 	print("Game: Spawned %d session player(s)." % players.size())
@@ -328,6 +334,203 @@ func _on_level_ready() -> void:
 
 func _process(_delta: float) -> void:
 	_sync_split_screen_cameras()
+
+
+func _physics_process(delta: float) -> void:
+	_process_network_transform_sync(delta)
+
+
+func _process_network_transform_sync(delta: float) -> void:
+	if not network_session.is_online_session():
+		return
+
+	_network_transform_send_elapsed += delta
+	if _network_transform_send_elapsed < NETWORK_TRANSFORM_SEND_INTERVAL:
+		return
+
+	_network_transform_send_elapsed = 0.0
+	if network_session.is_host:
+		_broadcast_player_transform_snapshot()
+	else:
+		if not network_session.is_connected_to_host():
+			return
+		_send_local_player_transforms_to_host()
+
+
+func _send_local_player_transforms_to_host() -> void:
+	for slot in player_slot_manager.slots:
+		if not slot.is_local:
+			continue
+		if not is_instance_valid(slot.player):
+			continue
+
+		var state := slot.player.get_network_transform_state()
+		_server_receive_player_transform.rpc_id(
+			NetworkSessionScript.HOST_PEER_ID,
+			slot.session_player_id,
+			state["position"],
+			state["body_yaw"],
+			state["camera_pitch"]
+		)
+
+
+@rpc("any_peer", "call_remote", "unreliable")
+func _server_receive_player_transform(session_player_id: int, position: Vector3, body_yaw: float, camera_pitch: float) -> void:
+	if not network_session.is_host:
+		push_error("Game: Non-host received player transform update.")
+		return
+
+	var sender_id := multiplayer.get_remote_sender_id()
+	var slot := player_slot_manager.get_slot_for_session_player(session_player_id)
+	if not slot:
+		push_error("Game: Transform update for unknown session player %d." % session_player_id)
+		return
+	if slot.peer_id != sender_id:
+		push_error("Game: Peer %d tried to update session player %d owned by peer %d." % [sender_id, session_player_id, slot.peer_id])
+		return
+	if not is_instance_valid(slot.player):
+		return
+
+	slot.player.apply_network_transform_state(position, body_yaw, camera_pitch)
+
+
+func _broadcast_player_transform_snapshot() -> void:
+	if not network_session.is_host:
+		return
+
+	var snapshot: Array[Dictionary] = []
+	for slot in player_slot_manager.slots:
+		if not is_instance_valid(slot.player):
+			continue
+
+		var state := slot.player.get_network_transform_state()
+		snapshot.append({
+			"session_player_id": slot.session_player_id,
+			"position": state["position"],
+			"body_yaw": state["body_yaw"],
+			"camera_pitch": state["camera_pitch"],
+		})
+
+	if snapshot.is_empty():
+		return
+
+	_client_apply_player_transform_snapshot.rpc(snapshot)
+
+
+@rpc("authority", "call_remote", "unreliable")
+func _client_apply_player_transform_snapshot(snapshot: Array) -> void:
+	if not network_session.is_client():
+		return
+
+	for raw_entry in snapshot:
+		if not raw_entry is Dictionary:
+			push_error("Game: Player transform snapshot entries must be dictionaries.")
+			return
+
+		var entry := raw_entry as Dictionary
+		var slot := player_slot_manager.get_slot_for_session_player(int(entry["session_player_id"]))
+		if not slot:
+			continue
+		if slot.is_local:
+			continue
+		if not is_instance_valid(slot.player):
+			continue
+
+		slot.player.apply_network_transform_state(
+			entry["position"],
+			float(entry["body_yaw"]),
+			float(entry["camera_pitch"])
+		)
+
+
+func _bind_player_action_events_to_all() -> void:
+	for slot in player_slot_manager.slots:
+		_bind_player_action_events(slot)
+
+
+func _bind_player_action_events(slot: PlayerSlot) -> void:
+	if not slot:
+		return
+	if not is_instance_valid(slot.player):
+		return
+
+	var melee_attack := slot.player.get_node("Components/PlayerMeleeAttack") as PlayerMeleeAttack
+	var callback := Callable(self, "_on_player_primary_action_started")
+	if not melee_attack.primary_action_started.is_connected(callback):
+		melee_attack.primary_action_started.connect(callback)
+
+
+func _on_player_primary_action_started(player: PlayerController) -> void:
+	var slot := _get_slot_for_player(player)
+	if not slot:
+		push_error("Game: Primary action started by a player with no slot.")
+		return
+	if not network_session.is_online_session():
+		return
+
+	if network_session.is_host:
+		_broadcast_player_action_event(slot.session_player_id, PLAYER_ACTION_PRIMARY)
+		return
+
+	if not network_session.is_connected_to_host():
+		return
+
+	_server_receive_player_action.rpc_id(
+		NetworkSessionScript.HOST_PEER_ID,
+		slot.session_player_id,
+		PLAYER_ACTION_PRIMARY
+	)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _server_receive_player_action(session_player_id: int, action_key: String) -> void:
+	if not network_session.is_host:
+		push_error("Game: Non-host received player action event.")
+		return
+
+	var sender_id := multiplayer.get_remote_sender_id()
+	var slot := player_slot_manager.get_slot_for_session_player(session_player_id)
+	if not slot:
+		push_error("Game: Action event for unknown session player %d." % session_player_id)
+		return
+	if slot.peer_id != sender_id:
+		push_error("Game: Peer %d tried to send action for session player %d owned by peer %d." % [sender_id, session_player_id, slot.peer_id])
+		return
+
+	_play_player_action_presentation(slot, action_key)
+	_broadcast_player_action_event(session_player_id, action_key)
+
+
+func _broadcast_player_action_event(session_player_id: int, action_key: String) -> void:
+	if not network_session.is_host:
+		return
+
+	_client_apply_player_action_event.rpc(session_player_id, action_key)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _client_apply_player_action_event(session_player_id: int, action_key: String) -> void:
+	if not network_session.is_client():
+		return
+
+	var slot := player_slot_manager.get_slot_for_session_player(session_player_id)
+	if not slot:
+		return
+	if slot.is_local:
+		return
+
+	_play_player_action_presentation(slot, action_key)
+
+
+func _play_player_action_presentation(slot: PlayerSlot, action_key: String) -> void:
+	if action_key != PLAYER_ACTION_PRIMARY:
+		push_error("Game: Unknown player action key '%s'." % action_key)
+		return
+	if not is_instance_valid(slot.player):
+		return
+
+	var melee_attack := slot.player.get_node("Components/PlayerMeleeAttack") as PlayerMeleeAttack
+	melee_attack.play_attack_presentation()
 
 
 func _on_hub_deploy_requested(_actor: PlayerController) -> void:

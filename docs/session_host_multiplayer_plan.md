@@ -25,7 +25,7 @@ The current architecture is already close to the right outline:
 - Player input is already isolated behind `PlayerInput`.
 - Damage, interaction, pickups, stash movement, health, down/revive, and extraction are explicit enough to become host-owned actions.
 
-The first slot identity mismatch has been addressed: a slot no longer only means "a local input device." Host-authored membership snapshots now assign peers and create visible remote slots on clients. The remaining work is to feed remote players through network commands and replicated state instead of local `PlayerInput`.
+The first slot identity mismatch has been addressed: a slot no longer only means "a local input device." Host-authored membership snapshots now assign peers and create visible remote slots on clients. The first transform and primary-action event replication pass is also in place, so remote players can visibly translate, rotate, jump, and show temporary sword-swing presentation. The remaining work is to harden world transitions, then move into host-owned gameplay outcomes.
 
 ## Completed Prep
 
@@ -40,6 +40,9 @@ The first slot identity mismatch has been addressed: a slot no longer only means
 - Added host-sent membership snapshots. Clients reconcile slot identity from the host snapshot, preserve their local input slot, create non-local host/peer slots, and place visible remote actors in the current world.
 - Added temporary overhead `SessionDebugLabel` labels showing display name and peer id for manual remote-presence verification.
 - Verified membership/presence with session-slot smoke coverage, two-process localhost host/client smoke, and manual two-instance laptop testing.
+- Added first player transform replication: local owners publish `session_player_id`, position, body yaw, and camera pitch; clients send their owned transform to the host; the host validates peer ownership, applies it, and broadcasts snapshots for clients to apply to non-local actors.
+- Added first semantic primary-action replication: local attacks emit `primary_action_started`; clients send the action event to the host; the host validates ownership and broadcasts it; remote peers play presentation-only sword swings on non-local actors.
+- Verified transform/action replication with two-process localhost smokes and manual two-instance laptop testing.
 
 ## Authority Model
 
@@ -162,15 +165,16 @@ Completed within this milestone:
 
 - Steps 1-9 have first-pass implementations.
 - Host/client join and visible hub presence are proven.
-- Full hub -> run -> hub two-instance lifecycle still needs another pass after movement/world transition verification.
+- Player transform and primary-action presentation replication are proven in the hub.
+- Full hub -> run -> hub two-instance lifecycle still needs another pass after world transition verification.
 
 ## Milestone 2: Networked Player Presence
 
 Definition of done:
 
-- each peer controls only its own player
-- remote players move visibly on other peers
-- remote camera/weapon presentation can be crude
+- each peer controls only its own player - first pass done
+- remote players move visibly on other peers - first pass done
+- remote camera/weapon presentation can be crude - first pass done for camera pitch and primary-action sword presentation
 - disconnect during hub removes or marks the slot
 - reconnect/late join policy is explicit, even if late join is "hub only"
 
@@ -178,11 +182,16 @@ Recommended path:
 
 - Keep the real player actor scene for all players.
 - Continue disabling local `PlayerInput` processing for remote slots.
-- Add a first movement replication slice before combat:
+- First movement/action presentation replication slice:
   - client sends movement/look intent or a temporary transform update for its owned slot
   - host applies/accepts the client-owned player movement
   - host broadcasts slot transforms
   - clients apply received transforms only to non-local player actors
+- First action presentation slice:
+  - client sends a semantic primary-action event for its owned slot
+  - host validates ownership
+  - host broadcasts the event
+  - remote peers play presentation only, not damage/results
 - Split `PlayerController` into local input application and replicated state application only where necessary once the temporary path proves the shape.
 - Host replicates health, life state, and basic animation/combat state after transform visibility is boringly reliable.
 - Clients can locally apply their own camera/look for feel later; do not start there.
@@ -248,4 +257,4 @@ Client quick entry/menu Join -> ENet client -> joins localhost -> host creates r
 Host deploy -> both load run -> both spawn -> host exits -> both return hub
 ```
 
-Keep gameplay shallow until that exact loop is boringly reliable. The immediate next slice is visible movement replication, not combat prediction.
+Keep gameplay shallow until that exact loop is boringly reliable. The immediate next slice is host/client hub-to-level transition synchronization with replicated player state intact, not combat damage prediction.

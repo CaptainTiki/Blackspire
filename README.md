@@ -90,9 +90,11 @@
   - Host-authored membership snapshots now synchronize slot identity to clients.
   - Clients reconcile membership snapshots, preserve their own local input slot, create non-local host/peer slots, and place visible remote actors in the current hub/run world.
   - Temporary overhead debug labels show each session player's display name and peer id.
+  - Player transform replication is now working across host/client sessions: translation, body rotation, camera pitch, and jump movement are visible remotely.
+  - Primary-action replication is now working as a semantic action event: remote peers play the temporary sword swing presentation when the owning player attacks.
   - Host-owned world transition RPCs can now push clients through crude `hub` / `run` loads for the first two-instance lifecycle skeleton.
-  - Manual two-instance testing confirmed host/client connection, visible remote presence on both copies, stable connection until manual client disconnect, and clean host-side removal.
-  - Current online limitation: remote actors do not move or show combat yet; movement, transform replication, interaction, combat, inventory, and stash authority are next networking slices.
+  - Manual two-instance testing confirmed host/client connection, visible remote presence on both copies, replicated translation/rotation/jump, replicated sword-swing presentation, stable connection until manual client disconnect, and clean host-side removal.
+  - Current online limitation: combat damage/results, enemy state, interaction, inventory, stash authority, and robust hub-to-level lifecycle sync are not replicated yet.
   - `PlayerSlot` now represents a session participant with `session_player_id`, `peer_id`, `local_player_index`, local ownership, and input-device fields, preparing the same slot path for future host/client players.
   - `PlayerSlotManager` now exposes participant-shaped slot/spawn methods while preserving the current single-player and local co-op behavior.
   - The temporary hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
@@ -166,7 +168,7 @@ Latest equipment milestones:
 - `v0.0.0044` Session / Host Multiplayer Planning and Slot Prep.
 - `v0.0.0045` First Host / Client Session Skeleton.
 
-Current focus: prove visible host/client player presence with a host-sent membership snapshot and debug-visible remote bodies.
+Current focus: sync the two-instance hub -> level transition cleanly now that peer presence, movement, rotation, jump, and primary-action presentation replicate.
 
 ---
 

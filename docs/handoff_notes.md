@@ -230,7 +230,19 @@ These are durable truths about how we build Blackspire.
   - Player actors now get temporary overhead `SessionDebugLabel` labels showing display name and peer id, making remote presence obvious during manual tests.
   - Automated two-process localhost smoke passed on port `24547`: host saw the client remote slot, client received the host membership snapshot, and client treated host slot 0 as remote.
   - Manual two-instance laptop test passed on port `24545`: host and client each saw the other peer appear, stayed connected, and disconnect/removal was clean.
-  - Current expected limitation: remote actors do not move or show combat yet because player command submission and transform/combat replication are not implemented.
+- Added the first networked player transform and primary-action presentation slice.
+  - Local owners publish stable transform facts: `session_player_id`, position, body yaw, and camera pitch.
+  - Clients send their locally owned player transforms to the host over unreliable RPC.
+  - The host validates peer ownership before applying incoming transforms to host-side remote actors.
+  - The host broadcasts player transform snapshots; clients apply them only to non-local player actors.
+  - Remote player actors disable local physics and act as replicated presentation bodies.
+  - `PlayerMeleeAttack` now emits semantic `primary_action_started` events.
+  - `Game` sends client primary-action events to the host, validates ownership, and broadcasts action events to peers.
+  - Remote peers play the current temporary sword-swing presentation for non-local actors without implying host-resolved damage yet.
+  - Automated two-process localhost transform smoke passed on port `24548`.
+  - Automated two-process localhost primary-action smoke passed on port `24549`.
+  - Manual two-instance laptop test passed on port `24545`: both players translated, rotated, jumped, and showed sword-swing presentation on the other peer; connection stayed stable until manual disconnect/shutdown.
+  - Current expected limitation: combat damage/results, enemy state, interaction, inventory, stash authority, and robust hub-to-level lifecycle sync are not replicated yet.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -251,7 +263,9 @@ These are durable truths about how we build Blackspire.
   - `PlayerSlotManager` now owns slot player spawning once `Game` receives `Level.level_ready`.
   - `PlayerSlot` is now a session participant record; local co-op input/camera/UI ownership is attached to local slots through `is_local`, `local_player_index`, and `input_device`.
   - Online host/client sessions currently spawn visible remote player actors with overhead peer labels in the hub.
-  - Online movement, combat, interaction, inventory, and stash authority are still not replicated; remote actors are presence markers until the next networking slice.
+  - Online player transform replication currently covers translation, body yaw, camera pitch, and jump movement.
+  - Online primary-action event replication currently shows the temporary sword-swing presentation on remote peers.
+  - Online combat damage/results, enemies, interaction, inventory, stash authority, and robust world-transition synchronization are still not replicated.
   - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
   - Local Co-op spawns two local players. Slot 0 uses keyboard/mouse and owns mouse look; slot 1 uses controller device 0 and does not receive mouse or unassigned joypad input.
   - Local Co-op now creates a two-row split-screen overlay using shared-world `SubViewport`s.
@@ -328,6 +342,9 @@ These are durable truths about how we build Blackspire.
   - Session membership snapshot smoke passed: host snapshot serialization and client reconciliation preserve the client's local slot while creating remote host/peer slots.
   - Two-process localhost membership smoke passed: host/client connected on `127.0.0.1:24547`, host created the remote client slot, client received the membership snapshot, and both processes exited cleanly.
   - Manual two-instance laptop presence test passed: host and client each saw the other peer appear and stay connected until manual client disconnect.
+  - Two-process localhost transform smoke passed: client moved its local player to a known position, host received and applied the transform to the remote actor.
+  - Two-process localhost action smoke passed: client primary-action event reached the host and started attack presentation on the host-side remote actor.
+  - Manual two-instance laptop transform/action test passed: both players translated, rotated, jumped, and showed sword-swing presentation remotely.
   - Godot check-only exited 0.
   - Quick-entry hub boot exited 0 after the slot participant refactor.
   - Headless app boot exited 0 after the network-session scaffold and menu join popup.
@@ -335,10 +352,11 @@ These are durable truths about how we build Blackspire.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise plus the Windows root certificate warning seen during headless runs.
 
 **Next Steps / Pickup Goals:**
-- Add the first networked player movement presence slice.
-- Send client-owned movement/look intent or a temporary transform update to the host.
-- Have the host apply/accept remote player movement and broadcast transforms.
-- Have clients apply replicated transforms to non-local player actors.
+- Sync the host/client transition from hub to level.
+- Ensure host deploy loads the run on both peers in the right order.
+- Ensure membership snapshots and player spawning are correct after `hub -> level`.
+- Verify replicated player transforms/actions still work after entering the level.
+- Keep level-load sync focused on lifecycle; do not start combat damage or enemy replication until the two-instance world transition is reliable.
 - Keep debug-visible overhead labels until remote identity is obvious without them.
 - Keep the current host/join/manual test path: host one instance, join from a second instance with `127.0.0.1:24545`.
 - Keep local co-op working after every session/slot/networking prep slice.

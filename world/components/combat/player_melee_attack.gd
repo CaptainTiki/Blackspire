@@ -1,6 +1,9 @@
 extends Node
 class_name PlayerMeleeAttack
 
+signal primary_action_started(player: PlayerController)
+signal attack_presentation_started(player: PlayerController)
+
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
 const StatModifierDefinitionScript := preload("res://data/items/stat_modifier_definition.gd")
 
@@ -35,18 +38,28 @@ func _unhandled_input(_event: InputEvent) -> void:
 	# Input must come through the per-player PlayerInput component.
 	# Missing wiring will cause a hard error here — this is intentional ("fail loudly").
 	if player_components.input.is_primary_action_just_pressed():
+		if can_attack():
+			primary_action_started.emit(player_components.player)
 		attack()
 
 
-func attack() -> void:
+func can_attack() -> bool:
 	if _is_attacking:
-		return
+		return false
 	if not player_components.player.can_act():
+		return false
+
+	return true
+
+
+func attack() -> void:
+	if not can_attack():
 		return
 
 	_is_attacking = true
 	_hit_targets.clear()
 	animation_player.play("attack")
+	attack_presentation_started.emit(player_components.player)
 
 	await get_tree().create_timer(active_delay).timeout
 	hitbox.monitoring = true
@@ -58,6 +71,17 @@ func attack() -> void:
 	await get_tree().create_timer(active_duration).timeout
 	hitbox.monitoring = false
 
+	await animation_player.animation_finished
+	_is_attacking = false
+
+
+func play_attack_presentation() -> void:
+	if _is_attacking:
+		return
+
+	_is_attacking = true
+	animation_player.play("attack")
+	attack_presentation_started.emit(player_components.player)
 	await animation_player.animation_finished
 	_is_attacking = false
 

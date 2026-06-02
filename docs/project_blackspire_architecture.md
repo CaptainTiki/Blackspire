@@ -944,7 +944,7 @@ The split-screen pass lives in `Game`: Local Co-op creates a full-screen two-row
 
 Per-slot UI and inventory ownership is now proven for the local co-op prototype loop: player-owned CanvasLayers bind to the owning slot's `SubViewport`, `PlayerEquipmentUI` filters input through the owning `PlayerInput`, inventory component instances are separate per spawned player, and slot-owned UI hosts own split-screen HP/prompt/feedback/stash UI. The current split-screen HP readout is intentionally slot-owned: `Game` hides the player-owned `PlayerHUD` during Local Co-op and draws a lightweight HP label directly over each split-screen pane.
 
-Host/client sessions now use `NetworkSession` for ENet setup/teardown, peer ids, and peer join/leave signals. The host creates remote slots on peer join and broadcasts membership snapshots; clients reconcile those snapshots, create non-local host/peer slots, and spawn visible remote player actors with temporary overhead peer labels. Remote movement, combat, interaction, inventory, and stash replication are still future slices.
+Host/client sessions now use `NetworkSession` for ENet setup/teardown, peer ids, and peer join/leave signals. The host creates remote slots on peer join and broadcasts membership snapshots; clients reconcile those snapshots, create non-local host/peer slots, and spawn visible remote player actors with temporary overhead peer labels. The first player transform and primary-action presentation replication pass is in place: remote peers can see translation, rotation, jump movement, and temporary sword-swing presentation. Combat damage/results, enemy state, interaction, inventory, stash replication, and robust hub/run transition timing are still future slices.
 
 ## 30. UI Architecture
 
@@ -1041,7 +1041,8 @@ Current implemented foundation:
 - `Game` owns host/client session flow and crude host-authored `hub` / `run` world transition RPCs.
 - `PlayerSlotManager` serializes and applies host-authored membership snapshots.
 - Clients create non-local slots and visible remote player actors from those snapshots.
-- Remote bodies are presence markers until movement and combat replication are added.
+- Remote player actors are replicated presentation bodies for transform and semantic primary-action events.
+- Combat damage/results are not replicated yet.
 
 ### Online-Friendly Rules Now
 

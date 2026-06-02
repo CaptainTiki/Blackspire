@@ -88,6 +88,10 @@ func is_online_session() -> bool:
 	return has_active_peer()
 
 
+func is_connected_to_host() -> bool:
+	return is_client() and connected_peers.has(host_peer_id)
+
+
 func _on_peer_connected(peer_id: int) -> void:
 	if not connected_peers.has(peer_id):
 		connected_peers.append(peer_id)

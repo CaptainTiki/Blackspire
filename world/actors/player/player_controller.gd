@@ -41,6 +41,7 @@ var _life_state_tween: Tween
 var _standing_camera_position := Vector3.ZERO
 var _standing_camera_rotation := Vector3.ZERO
 var _controller_look_enabled := true
+var _uses_replicated_transform := false
 
 func _ready() -> void:
 	add_to_group("players")
@@ -153,6 +154,31 @@ func set_gameplay_input_enabled(is_enabled: bool) -> void:
 
 func set_controller_look_enabled(is_enabled: bool) -> void:
 	_controller_look_enabled = is_enabled
+
+
+func set_uses_replicated_transform(is_enabled: bool) -> void:
+	_uses_replicated_transform = is_enabled
+	if is_enabled:
+		velocity = Vector3.ZERO
+		set_physics_process(false)
+	else:
+		set_physics_process(true)
+
+
+func get_network_transform_state() -> Dictionary:
+	return {
+		"position": global_position,
+		"body_yaw": rotation.y,
+		"camera_pitch": camera.rotation.x,
+	}
+
+
+func apply_network_transform_state(position: Vector3, body_yaw: float, camera_pitch: float) -> void:
+	global_position = position
+	rotation.y = body_yaw
+	if camera:
+		camera.rotation.x = clampf(camera_pitch, -1.5, 1.5)
+	velocity = Vector3.ZERO
 
 
 func is_bleeding_out_or_dead() -> bool:
