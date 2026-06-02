@@ -113,7 +113,7 @@ Known gaps to revisit after the gameplay rebuild:
 - `Movement`: grounded/idle/moving/running/sprinting/airborne/jumping
 - `Posture`: standing/crouching
 - `Life`: deploying/alive/downed/dead
-- `Action`: ready/primary attack
+- `Action`: ready/primary attack/interact/revive/extract
 
 The chart owns active states and transitions. Mirrored state scripts own entry
 points and per-state processing, and call `PlayerController` verbs such as
@@ -130,6 +130,8 @@ controller.
 
 Manual runtime testing after the refactor confirmed movement, sprint, crouch,
 jump, primary attack, interact pickup, urn breaking, and extraction back to hub.
+Interaction input now routes through the player `Action` branch; the scanner owns
+focus/target classification and execution verbs, but no longer polls input.
 
 ## Key Files And Systems
 

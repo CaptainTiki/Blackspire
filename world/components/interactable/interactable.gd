@@ -22,7 +22,7 @@ signal interacted(actor: Node)
 func interact(actor: Node) -> void:
 	interacted.emit(actor)
 
-	var entity := _find_parent_entity()
+	var entity := get_parent_entity()
 	if entity:
 		entity._on_interact(self, actor)
 	else:
@@ -31,7 +31,7 @@ func interact(actor: Node) -> void:
 
 ## Walks up the tree to find the owning Entity.
 ## This keeps the Interactable component decoupled from exact scene structure.
-func _find_parent_entity() -> Entity:
+func get_parent_entity() -> Entity:
 	var current := get_parent()
 	while current:
 		if current is Entity:

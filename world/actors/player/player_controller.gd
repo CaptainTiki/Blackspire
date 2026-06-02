@@ -97,6 +97,38 @@ func primary_attack() -> bool:
 	return melee_attack.attack()
 
 
+func get_interaction_action_kind() -> StringName:
+	return interaction_scanner.get_current_interaction_kind()
+
+
+func can_interact() -> bool:
+	return interaction_scanner.can_interact()
+
+
+func can_standard_interact() -> bool:
+	return interaction_scanner.can_standard_interact()
+
+
+func can_revive_interaction() -> bool:
+	return interaction_scanner.can_revive()
+
+
+func can_extract_interaction() -> bool:
+	return interaction_scanner.can_extract()
+
+
+func interact() -> void:
+	interaction_scanner.try_standard_interact()
+
+
+func revive_interaction() -> void:
+	interaction_scanner.try_revive()
+
+
+func extract_interaction() -> void:
+	interaction_scanner.try_extract()
+
+
 func crouch() -> void:
 	_is_crouching = true
 	_target_eye_height = crouch_eye_height

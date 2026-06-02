@@ -15,7 +15,7 @@ into `PlayerController` verbs.
   `CrouchingState`, and `DownedState`.
 - `Components/PlayerInput` owns per-player input device state.
 - `Components/PlayerLook` owns mouse capture, mouse look, and controller look.
-- `Components/InteractionScanner` owns per-player interaction focus and interact calls.
+- `Components/InteractionScanner` owns per-player interaction focus, target routing, and interaction execution.
 - `Components/PlayerLifeState` bridges health/death/revive events into the Life chart.
 
 ## Controller Contract
@@ -62,6 +62,9 @@ Action:
 
 - `Ready`
 - `PrimaryAttack`
+- `Interact`
+- `Revive`
+- `Extract`
 
 `Deploying` currently auto-completes to `Alive`. It exists as the future hook for
 spawn setup, networking handshakes, and ready checks.

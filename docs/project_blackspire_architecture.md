@@ -675,7 +675,8 @@ Each local player needs their own interaction scanner.
 - Raycast or shape check from the player's camera/view
 - Find focused interactable
 - Ask interactable for prompt
-- Send interact command when player presses interact
+- Classify the focused target for the player `Action` branch
+- Execute interact/revive/extract requests when the active action state asks
 - Emit local focus changed signal for that player's HUD
 
 ### Thin Interactable Component Pattern
@@ -822,6 +823,9 @@ Player
       Action
         Ready
         PrimaryAttack
+        Interact
+        Revive
+        Extract
   StateMachine
     Root
       MovementState
@@ -830,9 +834,12 @@ Player
       ActionState
 ```
 
-Movement, posture, and life state scripts call intent-level methods on
+Movement, posture, life, and action state scripts call intent-level methods on
 `PlayerController`. The controller applies shared movement physics and owns the
 physical implementation details, such as collider swapping for crouch/stand.
+The `Action` branch owns primary attack and interaction routing; the interaction
+scanner owns focus, target classification, and execution helpers, but does not
+poll input directly.
 
 Player look is deliberately not in the controller motor. `PlayerLook` owns mouse
 capture, mouse look, and controller look so UI and future networking code can

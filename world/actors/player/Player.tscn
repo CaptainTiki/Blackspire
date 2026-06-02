@@ -36,6 +36,9 @@
 [ext_resource type="Script" path="res://world/actors/player/states/player_dead_state.gd" id="34_dead"]
 [ext_resource type="Script" path="res://world/actors/player/states/player_ready_state.gd" id="35_ready"]
 [ext_resource type="Script" path="res://world/actors/player/states/player_primary_attack_state.gd" id="36_primary_attack"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_interact_state.gd" id="37_interact"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_revive_state.gd" id="38_revive"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_extract_state.gd" id="39_extract"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_83pgd"]
 radius = 0.4
@@ -570,11 +573,65 @@ event = &"onPrimaryAttack"
 delay_in_seconds = "0.0"
 metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
 
+[node name="OnInteract" type="Node" parent="StateChart/Root/Action/Ready"]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Interact")
+event = &"onInteract"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnRevive" type="Node" parent="StateChart/Root/Action/Ready"]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Revive")
+event = &"onRevive"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnExtract" type="Node" parent="StateChart/Root/Action/Ready"]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Extract")
+event = &"onExtract"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
 [node name="PrimaryAttack" type="Node" parent="StateChart/Root/Action" unique_id=1259703976]
 script = ExtResource("18_k7toq")
 metadata/_custom_type_script = "uid://cytafq8i1y8qm"
 
 [node name="OnReady" type="Node" parent="StateChart/Root/Action/PrimaryAttack" unique_id=165484971]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Ready")
+event = &"onReady"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Interact" type="Node" parent="StateChart/Root/Action"]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnReady" type="Node" parent="StateChart/Root/Action/Interact"]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Ready")
+event = &"onReady"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Revive" type="Node" parent="StateChart/Root/Action"]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnReady" type="Node" parent="StateChart/Root/Action/Revive"]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Ready")
+event = &"onReady"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Extract" type="Node" parent="StateChart/Root/Action"]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnReady" type="Node" parent="StateChart/Root/Action/Extract"]
 script = ExtResource("19_akwv5")
 to = NodePath("../../Ready")
 event = &"onReady"
@@ -641,6 +698,15 @@ script = ExtResource("35_ready")
 [node name="PrimaryAttackState" type="Node" parent="StateMachine/Root/ActionState" unique_id=1366683583]
 script = ExtResource("36_primary_attack")
 
+[node name="InteractState" type="Node" parent="StateMachine/Root/ActionState"]
+script = ExtResource("37_interact")
+
+[node name="ReviveState" type="Node" parent="StateMachine/Root/ActionState"]
+script = ExtResource("38_revive")
+
+[node name="ExtractState" type="Node" parent="StateMachine/Root/ActionState"]
+script = ExtResource("39_extract")
+
 [connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded" to="StateMachine/Root/MovementState/GroundedState" method="_on_grounded_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded/Idle" to="StateMachine/Root/MovementState/GroundedState/IdleState" method="_on_idle_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded/Moving" to="StateMachine/Root/MovementState/GroundedState/MovingState" method="_on_moving_state_physics_processing"]
@@ -661,3 +727,6 @@ script = ExtResource("36_primary_attack")
 [connection signal="state_entered" from="StateChart/Root/Life/Dead" to="StateMachine/Root/LifeState/DeadState" method="_on_dead_state_entered"]
 [connection signal="state_physics_processing" from="StateChart/Root/Action/Ready" to="StateMachine/Root/ActionState/ReadyState" method="_on_ready_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/Action/PrimaryAttack" to="StateMachine/Root/ActionState/PrimaryAttackState" method="_on_primary_attack_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Action/Interact" to="StateMachine/Root/ActionState/InteractState" method="_on_interact_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Action/Revive" to="StateMachine/Root/ActionState/ReviveState" method="_on_revive_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Action/Extract" to="StateMachine/Root/ActionState/ExtractState" method="_on_extract_state_entered"]
