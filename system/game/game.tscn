@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://game_session"]
+[gd_scene load_steps=5 format=3 uid="uid://game_session"]
 
 [ext_resource type="Script" path="res://system/game/game.gd" id="1"]
 [ext_resource type="Script" path="res://system/player_slot_manager.gd" id="2"]
 [ext_resource type="PackedScene" path="res://world/levels/test_level.tscn" id="3"]
+[ext_resource type="Script" path="res://system/network/network_session.gd" id="4"]
 
 [node name="Game" type="Node"]
 script = ExtResource("1")
@@ -10,3 +11,6 @@ test_level_scene = ExtResource("3")
 
 [node name="PlayerSlotManager" type="Node" parent="."]
 script = ExtResource("2")
+
+[node name="NetworkSession" type="Node" parent="."]
+script = ExtResource("4")

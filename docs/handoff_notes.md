@@ -209,6 +209,19 @@ These are durable truths about how we build Blackspire.
   - `PlayerSlotManager.add_remote_slot(peer_id)` now creates a non-local placeholder slot, giving the next networking slice a concrete target shape.
   - `Game` now calls the participant-shaped slot/spawn methods and skips non-local slots when creating or syncing local split-screen viewports.
   - Single-player and local co-op behavior should be unchanged by this prep slice.
+- Added the first host/client session skeleton.
+  - `GameSessionConfig` now includes `MULTIPLAYER_HOST` and `MULTIPLAYER_CLIENT`.
+  - Session config now carries `host_address`, `host_port`, `max_player_count`, and `local_player_count`.
+  - The main menu has `Host Game` and `Join Game`; Join opens an address/port popup defaulting to `127.0.0.1:24545`.
+  - `QuickEntry` exposes the same network fields for fast test sessions.
+  - Added `system/network/network_session.gd` as the focused ENet wrapper for host/client startup, close, peer ids, connected peer tracking, and peer joined/left/connection signals.
+  - `Game` starts host/client peers from the session config.
+  - On host peer join, `Game` creates a non-local remote `PlayerSlot`, places its actor in the current hub/level, and removes it on disconnect.
+  - Host-owned world transition RPCs now broadcast crude `hub` / `run` loads so clients can follow host deploy and hub return.
+  - Client deploy requests now go to the host instead of locally loading a private run.
+  - Manual two-instance test confirmed the client joins the host, the host sees the real peer id, remote slot 1 is created, and the remote player is placed at the second hub spawn.
+  - The observed peer-left log came from closing/restarting sessions, not from an immediate disconnect.
+  - Current expected limitation: client-side membership/visible remote bodies are not synchronized yet, so visible player presence is not proven on either side.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -221,6 +234,10 @@ These are durable truths about how we build Blackspire.
   - `world/levels/test_level.tscn` still owns the deterministic generated dungeon chain through `LevelGenerator`.
   - Single Player now flows through `Main -> Menu -> Game -> Hub -> Level -> Rooms -> Hub`.
   - `system/quick_entry.tscn` skips the menu for fast iteration while still using the same `Game` session path.
+  - Host Game starts an ENet host on the configured port, currently default `24545`.
+  - Join Game opens an IP/port popup and creates a `MULTIPLAYER_CLIENT` session config.
+  - `NetworkSession` is the only node that should own raw ENet setup/teardown.
+  - Multiplayer world transitions are currently string-keyed (`hub` / `run`) RPCs owned by `Game`.
   - `PlayerSlotManager` now owns slot player spawning once `Game` receives `Level.level_ready`.
   - `PlayerSlot` is now a session participant record; local co-op input/camera/UI ownership is attached to local slots through `is_local`, `local_player_index`, and `input_device`.
   - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
@@ -290,14 +307,23 @@ These are durable truths about how we build Blackspire.
   - Hub summary board/sign orientation has been corrected and manually verified.
   - Manual local co-op stash verification passed: player 1 deposited gold, player 2 removed it while player 1's stash UI was still open, player 1 saw the live removal, and stash contents persisted through multiple runs.
   - Session slot shape smoke passed: two local session slots preserve keyboard/mouse + controller ownership, and a remote placeholder slot increments total slots without incrementing local slots.
+  - Session config smoke passed: host/client enum values and host/client fields are present and writable.
+  - Join menu smoke passed: Join popup opens, address/port entry emits the expected payload, and the popup closes on confirm.
+  - NetworkSession smoke passed: ENet host startup, active-peer state, connected host peer tracking, and close/reset behavior are valid.
+  - Remote slot smoke passed: host local slot plus remote peer slot keeps local count correct, duplicate remote slots are rejected loudly, and disconnect removal works.
+  - Session transition smoke passed: the new host transition helpers can load hub -> run -> hub through the existing `Game` spine.
+  - Manual two-instance host/join test passed for network membership on the host: host created remote slot 1 for peer `482473802` and placed it at the second hub spawn.
   - Godot check-only exited 0.
   - Quick-entry hub boot exited 0 after the slot participant refactor.
+  - Headless app boot exited 0 after the network-session scaffold and menu join popup.
   - `git diff --check` exited 0.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise plus the Windows root certificate warning seen during headless runs.
 
 **Next Steps / Pickup Goals:**
-- Add `MULTIPLAYER_HOST` and `MULTIPLAYER_CLIENT` to `GameSessionConfig`.
-- Add a tiny `NetworkSession` scaffold under `system/network/` with host/client placeholders and no gameplay behavior changes yet.
+- Add a host-sent session membership snapshot.
+- On clients, create non-local slots for the host and any already-connected peers.
+- Add obvious debug-visible remote bodies/name labels so host/client player presence can be visually confirmed.
+- Keep the current host/join/manual test path: host one instance, join from a second instance with `127.0.0.1:24545`.
 - Keep local co-op working after every session/slot/networking prep slice.
 - Defer polish and deeper refactors unless they block the hub/run loop.
 - Keep the first real network milestone focused on two-instance hub -> run -> hub lifecycle, not combat prediction or internet polish.

@@ -4,6 +4,9 @@ extends Node
 const CrewStashInventoryScript := preload("res://system/crew_stash_inventory.gd")
 const CrewStashUIScript := preload("res://system/ui/crew_stash_ui.gd")
 
+const SESSION_WORLD_HUB := "hub"
+const SESSION_WORLD_RUN := "run"
+
 ## The central "session" container.
 ## Main creates one of these and tells it what kind of game to run.
 ##
@@ -14,6 +17,7 @@ const CrewStashUIScript := preload("res://system/ui/crew_stash_ui.gd")
 ## - Owning the current world content
 
 @onready var player_slot_manager: PlayerSlotManager = $PlayerSlotManager
+@onready var network_session: NetworkSession = $NetworkSession
 
 @export var hub_scene: PackedScene = preload("res://world/hub/hub.tscn")
 @export var test_level_scene: PackedScene = preload("res://world/levels/test_level.tscn")
@@ -31,10 +35,27 @@ func start_session(config: GameSessionConfig) -> void:
 	current_session = config
 	print("Game: Starting session of type ", GameSessionConfig.SessionType.keys()[config.session_type])
 
+	_configure_network_session(config)
 	player_slot_manager.create_local_session_slots(config.local_player_count)
 	_create_crew_stash_inventory()
 
 	_load_hub(last_run_summary)
+
+
+func _configure_network_session(config: GameSessionConfig) -> void:
+	network_session.peer_joined.connect(_on_network_peer_joined)
+	network_session.peer_left.connect(_on_network_peer_left)
+	network_session.connected_to_host.connect(_on_network_connected_to_host)
+	network_session.connection_failed.connect(_on_network_connection_failed)
+	network_session.host_disconnected.connect(_on_network_host_disconnected)
+
+	match config.session_type:
+		GameSessionConfig.SessionType.MULTIPLAYER_HOST:
+			network_session.start_host(config.host_port, config.max_player_count)
+		GameSessionConfig.SessionType.MULTIPLAYER_CLIENT:
+			network_session.join_host(config.host_address, config.host_port)
+		_:
+			network_session.close_session()
 
 
 func _load_hub(summary: String = "No run completed yet") -> void:
@@ -66,6 +87,75 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 	print("Game: Loaded hub with %d local player(s)." % players.size())
 
 
+func _on_network_peer_joined(peer_id: int) -> void:
+	print("Game: Network peer joined session: %d" % peer_id)
+	if not network_session.is_host:
+		return
+
+	var slot := player_slot_manager.add_remote_slot(peer_id)
+	_place_joined_remote_slot(slot)
+	_send_session_world_to_peer(peer_id)
+
+
+func _on_network_peer_left(peer_id: int) -> void:
+	print("Game: Network peer left session: %d" % peer_id)
+	if not network_session.is_host:
+		return
+
+	player_slot_manager.remove_remote_slot(peer_id)
+
+
+func _on_network_connected_to_host() -> void:
+	print("Game: Connected to multiplayer host.")
+
+
+func _on_network_connection_failed() -> void:
+	print("Game: Multiplayer connection failed.")
+
+
+func _on_network_host_disconnected() -> void:
+	print("Game: Multiplayer host disconnected.")
+
+
+func _place_joined_remote_slot(slot: PlayerSlot) -> void:
+	if not slot:
+		return
+	if not current_world:
+		return
+
+	var world_root := current_world as Node3D
+	if not world_root:
+		push_error("Game: Current world must be Node3D to place remote slots.")
+		return
+	if not world_root.has_method("get_player_spawns"):
+		push_error("Game: Current world cannot provide player spawns for remote slots.")
+		return
+
+	var level := current_world as Level
+	var player := player_slot_manager.spawn_or_move_slot_player(
+		slot,
+		world_root,
+		world_root.get_player_spawns(),
+		player_scene,
+		level,
+		player_slot_manager.get_local_player_count() == 1
+	)
+	if not player:
+		return
+
+	_restore_player_for_session_presence(player)
+	_ensure_local_coop_viewports()
+
+
+func _restore_player_for_session_presence(player: PlayerController) -> void:
+	var life_state := player.life_state as PlayerLifeState
+	var health := player.health as HealthComponent
+	if life_state and life_state.is_bleeding_out_or_dead():
+		life_state.revive(health.max_health if health else -1)
+	elif health:
+		health.heal(maxi(health.max_health - health.current_health, 1))
+
+
 func _load_starting_world() -> void:
 	if not test_level_scene:
 		push_error("Game: No test_level_scene assigned!")
@@ -91,6 +181,83 @@ func _load_starting_world() -> void:
 	level.level_ready.connect(_on_level_ready, CONNECT_ONE_SHOT)
 
 
+func _host_load_run() -> void:
+	if network_session.is_client():
+		push_error("Game: Clients cannot host-load the run.")
+		return
+
+	_broadcast_session_world(SESSION_WORLD_RUN, last_run_summary)
+	_load_starting_world()
+
+
+func _host_load_hub(summary: String = "No run completed yet") -> void:
+	if network_session.is_client():
+		push_error("Game: Clients cannot host-load the hub.")
+		return
+
+	_broadcast_session_world(SESSION_WORLD_HUB, summary)
+	_load_hub(summary)
+
+
+func _request_host_deploy() -> void:
+	if not network_session.is_client():
+		push_error("Game: Only multiplayer clients should request host deploy.")
+		return
+
+	print("Game: Requesting host deploy.")
+	_server_request_deploy.rpc_id(NetworkSession.HOST_PEER_ID)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _server_request_deploy() -> void:
+	if not network_session.is_host:
+		push_error("Game: Non-host received deploy request.")
+		return
+
+	var sender_id := multiplayer.get_remote_sender_id()
+	if not player_slot_manager.get_slot_for_peer(sender_id):
+		push_error("Game: Deploy request from unknown peer %d." % sender_id)
+		return
+	if _has_any_open_stash_ui():
+		push_error("Game: Deploy requested while stash UI is open.")
+		return
+
+	print("Game: Host accepted deploy request from peer %d." % sender_id)
+	_host_load_run()
+
+
+func _broadcast_session_world(world_key: String, summary: String = "") -> void:
+	if not network_session.is_host:
+		return
+
+	_client_load_session_world.rpc(world_key, summary)
+
+
+func _send_session_world_to_peer(peer_id: int) -> void:
+	if not network_session.is_host:
+		return
+	if current_world is Level:
+		_client_load_session_world.rpc_id(peer_id, SESSION_WORLD_RUN, last_run_summary)
+	else:
+		_client_load_session_world.rpc_id(peer_id, SESSION_WORLD_HUB, last_run_summary)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _client_load_session_world(world_key: String, summary: String = "") -> void:
+	if not network_session.is_client():
+		return
+
+	print("Game: Client loading session world: %s" % world_key)
+	match world_key:
+		SESSION_WORLD_HUB:
+			last_run_summary = summary
+			_load_hub(summary)
+		SESSION_WORLD_RUN:
+			_load_starting_world()
+		_:
+			push_error("Game: Unknown session world key '%s'." % world_key)
+
+
 func _on_level_ready() -> void:
 	var level := current_world as Level
 	var players := player_slot_manager.spawn_slot_players(level, player_scene)
@@ -113,7 +280,11 @@ func _on_hub_deploy_requested(_actor: PlayerController) -> void:
 			_actor.inventory.inventory_toast.emit("Close the stash before deploying")
 		return
 
-	_load_starting_world()
+	if network_session.is_client():
+		_request_host_deploy()
+		return
+
+	_host_load_run()
 
 
 func _on_hub_stash_requested(actor: PlayerController) -> void:
@@ -127,12 +298,12 @@ func _on_hub_stash_requested(actor: PlayerController) -> void:
 
 func _on_run_completed(actor: Node) -> void:
 	last_run_summary = _build_crew_exit_summary(actor)
-	call_deferred("_load_hub", last_run_summary)
+	call_deferred("_host_load_hub", last_run_summary)
 
 
 func _on_run_failed(reason: String) -> void:
 	last_run_summary = "Failed: %s" % reason
-	call_deferred("_load_hub", last_run_summary)
+	call_deferred("_host_load_hub", last_run_summary)
 
 
 func _create_crew_stash_inventory() -> void:
@@ -260,12 +431,7 @@ func _restore_players_for_hub() -> void:
 		if not is_instance_valid(player):
 			continue
 
-		var life_state := player.life_state as PlayerLifeState
-		var health := player.health as HealthComponent
-		if life_state and life_state.is_bleeding_out_or_dead():
-			life_state.revive(health.max_health if health else -1)
-		elif health:
-			health.heal(maxi(health.max_health - health.current_health, 1))
+		_restore_player_for_session_presence(player)
 
 
 func _ensure_local_coop_viewports() -> void:

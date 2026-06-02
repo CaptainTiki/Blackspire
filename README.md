@@ -81,9 +81,15 @@
   - Manual controller playtest verified the full current run loop has no missing controller-only blockers.
 - **Session bootstrap foundation**: The app now boots through the future co-op-shaped flow.
   - `system/main.tscn` is the application root and opens the main menu.
-  - `system/menu/main_menu.tscn` offers Single Player, Local Co-op, Host Game placeholder, and Exit.
+  - `system/menu/main_menu.tscn` offers Single Player, Local Co-op, Host Game, Join Game, and Exit.
+  - Join Game opens an IP/port popup, defaulting to `127.0.0.1:24545`.
   - Single Player creates a `GameSessionConfig`, instantiates `system/game/game.tscn`, creates one local `PlayerSlot`, loads `world/hub/hub.tscn`, then deploys into `world/levels/test_level.tscn`.
   - Local Co-op now creates two local slots and spawns two players into the hub/run flow.
+  - Host Game starts an ENet host through `NetworkSession`; Join Game creates a client session config and connects through the same `NetworkSession` node.
+  - Host-side peer join currently creates a non-local remote `PlayerSlot` and places its actor into the current hub/level.
+  - Host-owned world transition RPCs can now push clients through crude `hub` / `run` loads for the first two-instance lifecycle skeleton.
+  - Manual two-instance testing confirmed host/client connection, host-side remote slot creation, and host-side placement at the second hub spawn.
+  - Current online limitation: client-side membership and visible remote player bodies are not synchronized yet.
   - `PlayerSlot` now represents a session participant with `session_player_id`, `peer_id`, `local_player_index`, local ownership, and input-device fields, preparing the same slot path for future host/client players.
   - `PlayerSlotManager` now exposes participant-shaped slot/spawn methods while preserving the current single-player and local co-op behavior.
   - The temporary hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
@@ -152,8 +158,12 @@ Latest equipment milestones:
 - `v0.0.0039` Simultaneous Local Co-op Inventory Ownership.
 - `v0.0.0040` First Slot-Owned Local Co-op UI Host.
 - `v0.0.0041` Local Co-op Downed / Revive Lifecycle Hardening.
+- `v0.0.0042` Temporary Hub / Repeatable Run Loop.
+- `v0.0.0043` Minimal Crew Stash Foundation.
+- `v0.0.0044` Session / Host Multiplayer Planning and Slot Prep.
+- `v0.0.0045` First Host / Client Session Skeleton.
 
-Current focus: Build the temporary hub / repeatable run loop now that the local co-op prototype spine is validated.
+Current focus: prove visible host/client player presence with a host-sent membership snapshot and debug-visible remote bodies.
 
 ---
 

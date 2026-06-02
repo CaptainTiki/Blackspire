@@ -56,6 +56,14 @@ func get_slot_count() -> int:
 	return slots.size()
 
 
+func get_slot_for_peer(peer_id: int, local_player_index: int = 0) -> PlayerSlot:
+	for slot in slots:
+		if slot.peer_id == peer_id and slot.local_player_index == local_player_index:
+			return slot
+
+	return null
+
+
 func spawn_local_players(level: Level, player_scene: PackedScene) -> Array[PlayerController]:
 	return spawn_slot_players(level, player_scene)
 
@@ -89,30 +97,56 @@ func spawn_or_move_slot_players(world_root: Node3D, spawns: Array[Marker3D], pla
 	var allow_single_player_controller := get_local_player_count() == 1
 
 	for slot in slots:
-		var player := slot.player
-		if not is_instance_valid(player):
-			player = player_scene.instantiate() as PlayerController
-			if not player:
-				push_error("PlayerSlotManager: player_scene must instantiate a PlayerController.")
-				return players
-			player.name = "Player%d" % (slot.slot_index + 1)
-			world_root.add_child(player)
-		elif player.get_parent() != world_root:
-			var previous_parent := player.get_parent()
-			if previous_parent:
-				previous_parent.remove_child(player)
-			world_root.add_child(player)
-
-		player.global_transform = _get_spawn_transform(spawns, slot.slot_index)
-		if level:
-			level.register_player(player)
-
-		_assign_slot_player(slot, player, allow_single_player_controller)
+		var player := spawn_or_move_slot_player(slot, world_root, spawns, player_scene, level, allow_single_player_controller)
+		if not player:
+			return players
 		players.append(player)
 
-		print("PlayerSlotManager: Placed slot %d player at %s" % [slot.slot_index, player.global_position])
-
 	return players
+
+
+func spawn_or_move_slot_player(
+	slot: PlayerSlot,
+	world_root: Node3D,
+	spawns: Array[Marker3D],
+	player_scene: PackedScene,
+	level: Level = null,
+	allow_single_player_controller: bool = false
+) -> PlayerController:
+	if not slot:
+		push_error("PlayerSlotManager.spawn_or_move_slot_player requires a slot.")
+		return null
+	if not world_root:
+		push_error("PlayerSlotManager.spawn_or_move_slot_player requires a world_root.")
+		return null
+	if not player_scene:
+		push_error("PlayerSlotManager.spawn_or_move_slot_player requires a player_scene.")
+		return null
+	if spawns.is_empty():
+		push_error("No player spawn points found in '%s'." % world_root.name)
+		return null
+
+	var player := slot.player
+	if not is_instance_valid(player):
+		player = player_scene.instantiate() as PlayerController
+		if not player:
+			push_error("PlayerSlotManager: player_scene must instantiate a PlayerController.")
+			return null
+		player.name = "Player%d" % (slot.slot_index + 1)
+		world_root.add_child(player)
+	elif player.get_parent() != world_root:
+		var previous_parent := player.get_parent()
+		if previous_parent:
+			previous_parent.remove_child(player)
+		world_root.add_child(player)
+
+	player.global_transform = _get_spawn_transform(spawns, slot.slot_index)
+	if level:
+		level.register_player(player)
+
+	_assign_slot_player(slot, player, allow_single_player_controller)
+	print("PlayerSlotManager: Placed slot %d player at %s" % [slot.slot_index, player.global_position])
+	return player
 
 
 func _assign_slot_player(slot: PlayerSlot, player: PlayerController, allow_single_player_controller: bool) -> void:
@@ -149,7 +183,28 @@ func _get_spawn_transform(spawns: Array[Marker3D], slot_index: int) -> Transform
 
 ## Placeholder shape for future remote player support.
 func add_remote_slot(peer_id: int) -> PlayerSlot:
+	var existing_slot := get_slot_for_peer(peer_id)
+	if existing_slot:
+		push_error("PlayerSlotManager: Remote slot already exists for peer %d." % peer_id)
+		return existing_slot
+
 	var slot := _create_slot(slots.size(), peer_id, 0, false)
 	slots.append(slot)
 	print("PlayerSlotManager: Added remote session slot %d for peer %d" % [slot.slot_index, peer_id])
 	return slot
+
+
+func remove_remote_slot(peer_id: int) -> bool:
+	for i in slots.size():
+		var slot := slots[i]
+		if slot.is_local or slot.peer_id != peer_id:
+			continue
+
+		if is_instance_valid(slot.player):
+			slot.player.queue_free()
+		slots.remove_at(i)
+		print("PlayerSlotManager: Removed remote session slot for peer %d" % peer_id)
+		return true
+
+	push_error("PlayerSlotManager: No remote slot found for peer %d." % peer_id)
+	return false
