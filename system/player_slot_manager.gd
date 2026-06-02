@@ -31,11 +31,60 @@ func _create_slot(slot_index: int, peer_id: int, local_player_index: int, is_loc
 	var slot := PlayerSlot.new()
 	slot.slot_index = slot_index
 	slot.session_player_id = slot_index
+	slot.display_name = "Player%d" % (slot_index + 1)
 	slot.peer_id = peer_id
 	slot.local_player_index = local_player_index
 	slot.is_local = is_local
 	slot.input_device = _get_local_input_device(local_player_index) if is_local else -1
 	return slot
+
+
+func set_local_peer_id(peer_id: int) -> void:
+	for slot in slots:
+		if not slot.is_local:
+			continue
+
+		slot.peer_id = peer_id
+
+
+func get_session_snapshot() -> Array[Dictionary]:
+	var snapshot: Array[Dictionary] = []
+	for slot in slots:
+		snapshot.append(_slot_to_snapshot_entry(slot))
+
+	return snapshot
+
+
+func apply_session_snapshot(snapshot: Array, local_peer_id: int) -> void:
+	if snapshot.is_empty():
+		push_error("PlayerSlotManager.apply_session_snapshot requires at least one slot.")
+		return
+
+	var previous_slots := slots.duplicate()
+	var reconciled_slots: Array[PlayerSlot] = []
+
+	for raw_entry in snapshot:
+		if not raw_entry is Dictionary:
+			push_error("PlayerSlotManager: Session snapshot entries must be dictionaries.")
+			return
+
+		var entry := raw_entry as Dictionary
+		var slot := _take_matching_slot(previous_slots, entry, local_peer_id)
+		if not slot:
+			slot = PlayerSlot.new()
+
+		_apply_snapshot_entry(slot, entry, local_peer_id)
+		reconciled_slots.append(slot)
+
+	for old_slot in previous_slots:
+		if old_slot.is_local:
+			push_error("PlayerSlotManager: Local slot missing from session snapshot for peer %d." % old_slot.peer_id)
+			continue
+		if is_instance_valid(old_slot.player):
+			old_slot.player.queue_free()
+
+	slots = reconciled_slots
+	print("PlayerSlotManager: Applied session snapshot with %d slot(s)" % slots.size())
 
 
 func get_slot(index: int) -> PlayerSlot:
@@ -59,6 +108,14 @@ func get_slot_count() -> int:
 func get_slot_for_peer(peer_id: int, local_player_index: int = 0) -> PlayerSlot:
 	for slot in slots:
 		if slot.peer_id == peer_id and slot.local_player_index == local_player_index:
+			return slot
+
+	return null
+
+
+func get_slot_for_session_player(session_player_id: int) -> PlayerSlot:
+	for slot in slots:
+		if slot.session_player_id == session_player_id:
 			return slot
 
 	return null
@@ -154,6 +211,7 @@ func _assign_slot_player(slot: PlayerSlot, player: PlayerController, allow_singl
 	slot.input = player.input_reader
 	slot.camera = player.camera
 
+	player.name = "Player%d" % (slot.slot_index + 1)
 	slot.input.device = slot.input_device
 	slot.input.owns_mouse = slot.is_local and slot.local_player_index == 0
 	slot.input.accepts_unassigned_joypads = slot.is_local and allow_single_player_controller
@@ -208,3 +266,54 @@ func remove_remote_slot(peer_id: int) -> bool:
 
 	push_error("PlayerSlotManager: No remote slot found for peer %d." % peer_id)
 	return false
+
+
+func _slot_to_snapshot_entry(slot: PlayerSlot) -> Dictionary:
+	return {
+		"slot_index": slot.slot_index,
+		"session_player_id": slot.session_player_id,
+		"peer_id": slot.peer_id,
+		"local_player_index": slot.local_player_index,
+		"display_name": slot.display_name,
+	}
+
+
+func _take_matching_slot(previous_slots: Array, entry: Dictionary, local_peer_id: int) -> PlayerSlot:
+	var session_player_id := int(entry["session_player_id"])
+	var peer_id := int(entry["peer_id"])
+	var local_player_index := int(entry["local_player_index"])
+
+	for i in previous_slots.size():
+		var slot := previous_slots[i] as PlayerSlot
+		if slot.peer_id == peer_id and slot.local_player_index == local_player_index:
+			previous_slots.remove_at(i)
+			return slot
+
+	if peer_id == local_peer_id:
+		for i in previous_slots.size():
+			var slot := previous_slots[i] as PlayerSlot
+			if slot.is_local and slot.local_player_index == local_player_index:
+				previous_slots.remove_at(i)
+				return slot
+
+	for i in previous_slots.size():
+		var slot := previous_slots[i] as PlayerSlot
+		if slot.session_player_id == session_player_id and slot.peer_id == peer_id:
+			previous_slots.remove_at(i)
+			return slot
+
+	return null
+
+
+func _apply_snapshot_entry(slot: PlayerSlot, entry: Dictionary, local_peer_id: int) -> void:
+	var slot_index := int(entry["slot_index"])
+	var peer_id := int(entry["peer_id"])
+	var local_player_index := int(entry["local_player_index"])
+
+	slot.slot_index = slot_index
+	slot.session_player_id = int(entry["session_player_id"])
+	slot.display_name = str(entry.get("display_name", "Player%d" % (slot_index + 1)))
+	slot.peer_id = peer_id
+	slot.local_player_index = local_player_index
+	slot.is_local = peer_id == local_peer_id
+	slot.input_device = _get_local_input_device(local_player_index) if slot.is_local else -1

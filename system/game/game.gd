@@ -3,6 +3,7 @@ extends Node
 
 const CrewStashInventoryScript := preload("res://system/crew_stash_inventory.gd")
 const CrewStashUIScript := preload("res://system/ui/crew_stash_ui.gd")
+const NetworkSessionScript := preload("res://system/network/network_session.gd")
 
 const SESSION_WORLD_HUB := "hub"
 const SESSION_WORLD_RUN := "run"
@@ -17,7 +18,7 @@ const SESSION_WORLD_RUN := "run"
 ## - Owning the current world content
 
 @onready var player_slot_manager: PlayerSlotManager = $PlayerSlotManager
-@onready var network_session: NetworkSession = $NetworkSession
+@onready var network_session: Node = $NetworkSession
 
 @export var hub_scene: PackedScene = preload("res://world/hub/hub.tscn")
 @export var test_level_scene: PackedScene = preload("res://world/levels/test_level.tscn")
@@ -82,9 +83,10 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 		return
 
 	_restore_players_for_hub()
+	_apply_slot_presence_debug_to_all()
 	_ensure_local_coop_viewports()
 
-	print("Game: Loaded hub with %d local player(s)." % players.size())
+	print("Game: Loaded hub with %d session player(s)." % players.size())
 
 
 func _on_network_peer_joined(peer_id: int) -> void:
@@ -94,6 +96,7 @@ func _on_network_peer_joined(peer_id: int) -> void:
 
 	var slot := player_slot_manager.add_remote_slot(peer_id)
 	_place_joined_remote_slot(slot)
+	_broadcast_session_membership()
 	_send_session_world_to_peer(peer_id)
 
 
@@ -103,10 +106,12 @@ func _on_network_peer_left(peer_id: int) -> void:
 		return
 
 	player_slot_manager.remove_remote_slot(peer_id)
+	_broadcast_session_membership()
 
 
 func _on_network_connected_to_host() -> void:
 	print("Game: Connected to multiplayer host.")
+	player_slot_manager.set_local_peer_id(network_session.local_peer_id)
 
 
 func _on_network_connection_failed() -> void:
@@ -118,6 +123,17 @@ func _on_network_host_disconnected() -> void:
 
 
 func _place_joined_remote_slot(slot: PlayerSlot) -> void:
+	if not slot:
+		return
+	_place_slot_in_current_world(slot)
+
+
+func _place_all_slots_in_current_world() -> void:
+	for slot in player_slot_manager.slots:
+		_place_slot_in_current_world(slot)
+
+
+func _place_slot_in_current_world(slot: PlayerSlot) -> void:
 	if not slot:
 		return
 	if not current_world:
@@ -144,7 +160,30 @@ func _place_joined_remote_slot(slot: PlayerSlot) -> void:
 		return
 
 	_restore_player_for_session_presence(player)
+	_apply_slot_presence_debug(slot, player)
 	_ensure_local_coop_viewports()
+
+
+func _apply_slot_presence_debug(slot: PlayerSlot, player: PlayerController) -> void:
+	var label := player.get_node_or_null("SessionDebugLabel") as Label3D
+	if not label:
+		label = Label3D.new()
+		label.name = "SessionDebugLabel"
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.position = Vector3(0.0, 1.85, 0.0)
+		label.font_size = 26
+		label.modulate = Color(0.65, 0.9, 1.0, 1.0) if slot.is_local else Color(1.0, 0.82, 0.35, 1.0)
+		player.add_child(label)
+
+	label.text = "%s\npeer %d" % [slot.display_name, slot.peer_id]
+
+
+func _apply_slot_presence_debug_to_all() -> void:
+	for slot in player_slot_manager.slots:
+		if not is_instance_valid(slot.player):
+			continue
+
+		_apply_slot_presence_debug(slot, slot.player)
 
 
 func _restore_player_for_session_presence(player: PlayerController) -> void:
@@ -205,7 +244,7 @@ func _request_host_deploy() -> void:
 		return
 
 	print("Game: Requesting host deploy.")
-	_server_request_deploy.rpc_id(NetworkSession.HOST_PEER_ID)
+	_server_request_deploy.rpc_id(NetworkSessionScript.HOST_PEER_ID)
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -242,6 +281,22 @@ func _send_session_world_to_peer(peer_id: int) -> void:
 		_client_load_session_world.rpc_id(peer_id, SESSION_WORLD_HUB, last_run_summary)
 
 
+func _broadcast_session_membership() -> void:
+	if not network_session.is_host:
+		return
+
+	_client_apply_session_membership.rpc(player_slot_manager.get_session_snapshot())
+
+
+@rpc("authority", "call_remote", "reliable")
+func _client_apply_session_membership(snapshot: Array) -> void:
+	if not network_session.is_client():
+		return
+
+	player_slot_manager.apply_session_snapshot(snapshot, network_session.local_peer_id)
+	_place_all_slots_in_current_world()
+
+
 @rpc("authority", "call_remote", "reliable")
 func _client_load_session_world(world_key: String, summary: String = "") -> void:
 	if not network_session.is_client():
@@ -265,9 +320,10 @@ func _on_level_ready() -> void:
 		push_error("Game: PlayerSlotManager did not spawn any local players.")
 		return
 
+	_apply_slot_presence_debug_to_all()
 	_ensure_local_coop_viewports()
 
-	print("Game: Spawned %d local player(s)." % players.size())
+	print("Game: Spawned %d session player(s)." % players.size())
 
 
 func _process(_delta: float) -> void:

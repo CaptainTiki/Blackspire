@@ -1,6 +1,6 @@
 # Handoff Notes
 
-**Last Updated:** 2026-06-01
+**Last Updated:** 2026-06-02
 
 ---
 
@@ -221,7 +221,16 @@ These are durable truths about how we build Blackspire.
   - Client deploy requests now go to the host instead of locally loading a private run.
   - Manual two-instance test confirmed the client joins the host, the host sees the real peer id, remote slot 1 is created, and the remote player is placed at the second hub spawn.
   - The observed peer-left log came from closing/restarting sessions, not from an immediate disconnect.
-  - Current expected limitation: client-side membership/visible remote bodies are not synchronized yet, so visible player presence is not proven on either side.
+- Added the host-sent session membership snapshot and first visible remote presence slice.
+  - `PlayerSlot` now carries a temporary `display_name` for debug-visible session identity.
+  - `PlayerSlotManager.get_session_snapshot()` serializes slot index, session player id, peer id, local player index, and display name.
+  - `PlayerSlotManager.apply_session_snapshot(snapshot, local_peer_id)` reconciles host-authored membership on clients while preserving the client's local input slot when the host assigns it a different session slot index.
+  - `Game` broadcasts membership snapshots from the host on peer join/leave.
+  - Clients apply the snapshot, create non-local slots for host/other peers, and place those remote actors in the current hub/run world.
+  - Player actors now get temporary overhead `SessionDebugLabel` labels showing display name and peer id, making remote presence obvious during manual tests.
+  - Automated two-process localhost smoke passed on port `24547`: host saw the client remote slot, client received the host membership snapshot, and client treated host slot 0 as remote.
+  - Manual two-instance laptop test passed on port `24545`: host and client each saw the other peer appear, stayed connected, and disconnect/removal was clean.
+  - Current expected limitation: remote actors do not move or show combat yet because player command submission and transform/combat replication are not implemented.
 
 **Current State:**
 - The application bootstrap now follows the new session chain:
@@ -238,8 +247,11 @@ These are durable truths about how we build Blackspire.
   - Join Game opens an IP/port popup and creates a `MULTIPLAYER_CLIENT` session config.
   - `NetworkSession` is the only node that should own raw ENet setup/teardown.
   - Multiplayer world transitions are currently string-keyed (`hub` / `run`) RPCs owned by `Game`.
+  - Host-authored membership snapshots now keep client and host slot lists aligned during join/leave.
   - `PlayerSlotManager` now owns slot player spawning once `Game` receives `Level.level_ready`.
   - `PlayerSlot` is now a session participant record; local co-op input/camera/UI ownership is attached to local slots through `is_local`, `local_player_index`, and `input_device`.
+  - Online host/client sessions currently spawn visible remote player actors with overhead peer labels in the hub.
+  - Online movement, combat, interaction, inventory, and stash authority are still not replicated; remote actors are presence markers until the next networking slice.
   - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
   - Local Co-op spawns two local players. Slot 0 uses keyboard/mouse and owns mouse look; slot 1 uses controller device 0 and does not receive mouse or unassigned joypad input.
   - Local Co-op now creates a two-row split-screen overlay using shared-world `SubViewport`s.
@@ -313,6 +325,9 @@ These are durable truths about how we build Blackspire.
   - Remote slot smoke passed: host local slot plus remote peer slot keeps local count correct, duplicate remote slots are rejected loudly, and disconnect removal works.
   - Session transition smoke passed: the new host transition helpers can load hub -> run -> hub through the existing `Game` spine.
   - Manual two-instance host/join test passed for network membership on the host: host created remote slot 1 for peer `482473802` and placed it at the second hub spawn.
+  - Session membership snapshot smoke passed: host snapshot serialization and client reconciliation preserve the client's local slot while creating remote host/peer slots.
+  - Two-process localhost membership smoke passed: host/client connected on `127.0.0.1:24547`, host created the remote client slot, client received the membership snapshot, and both processes exited cleanly.
+  - Manual two-instance laptop presence test passed: host and client each saw the other peer appear and stay connected until manual client disconnect.
   - Godot check-only exited 0.
   - Quick-entry hub boot exited 0 after the slot participant refactor.
   - Headless app boot exited 0 after the network-session scaffold and menu join popup.
@@ -320,9 +335,11 @@ These are durable truths about how we build Blackspire.
   - Remaining Godot shutdown output is the known cleanup/leak-warning noise plus the Windows root certificate warning seen during headless runs.
 
 **Next Steps / Pickup Goals:**
-- Add a host-sent session membership snapshot.
-- On clients, create non-local slots for the host and any already-connected peers.
-- Add obvious debug-visible remote bodies/name labels so host/client player presence can be visually confirmed.
+- Add the first networked player movement presence slice.
+- Send client-owned movement/look intent or a temporary transform update to the host.
+- Have the host apply/accept remote player movement and broadcast transforms.
+- Have clients apply replicated transforms to non-local player actors.
+- Keep debug-visible overhead labels until remote identity is obvious without them.
 - Keep the current host/join/manual test path: host one instance, join from a second instance with `127.0.0.1:24545`.
 - Keep local co-op working after every session/slot/networking prep slice.
 - Defer polish and deeper refactors unless they block the hub/run loop.

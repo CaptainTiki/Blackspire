@@ -288,13 +288,22 @@ Project Blackspire must support:
 
 - Single-player
 - Split-screen couch co-op
-- Future online co-op
+- Online co-op
 
 The architecture should be built around player slots instead of assuming one global player.
 
 ### PlayerSlot Concept
 
 A `PlayerSlot` represents a participant in the current session.
+
+Current slot identity fields include:
+
+- Slot index
+- Session player id
+- Network peer id
+- Local player index on the owning peer
+- Local ownership flag
+- Temporary display name for debug visibility
 
 A local player slot owns:
 
@@ -306,7 +315,7 @@ A local player slot owns:
 - Interaction prompt UI
 - Player index/color/name
 
-A future remote player slot may own:
+A remote player slot may own:
 
 - Remote player actor reference
 - Network peer ID
@@ -336,8 +345,8 @@ Prototype play modes:
 
 - `SINGLE_PLAYER`
 - `LOCAL_COOP`
-- `ONLINE_HOST`, future
-- `ONLINE_CLIENT`, future
+- `MULTIPLAYER_HOST`
+- `MULTIPLAYER_CLIENT`
 
 Session config should eventually include:
 
@@ -911,29 +920,31 @@ This keeps single-player, couch co-op, and future online modes flowing through t
 
 ### Current Bootstrap Implementation
 
-As of `v0.0.0034`, the working prototype flow is:
+As of 2026-06-02, the working prototype flow is:
 
 ```text
 system/main.tscn
   -> system/menu/main_menu.tscn
   -> GameSessionConfig
   -> system/game/game.tscn
-  -> PlayerSlotManager.create_local_slots(...)
+  -> PlayerSlotManager.create_local_session_slots(...)
+  -> world/hub/hub.tscn
+  -> hub deploy portal
   -> world/levels/test_level.tscn
-  -> LevelGenerator generated room chain
-  -> PlayerSlotManager.spawn_local_players(...)
-  -> Local Co-op only: shared-world SubViewport split-screen overlay
+  -> LevelGenerator deterministic room chain
+  -> extraction/failure
+  -> world/hub/hub.tscn
 ```
 
 `system/quick_entry.tscn` bypasses the menu for fast iteration, but still creates the same `GameSessionConfig` and enters through `system/game/game.tscn`.
 
-`PlayerSlotManager` now owns local player spawning and slot input assignment. Single Player spawns one slot/player and keeps controller-friendly solo play by letting slot 0 accept unassigned joypads. Local Co-op spawns two slots/players: slot 0 uses keyboard/mouse and owns mouse look, while slot 1 uses controller device 0.
+`Game` owns a session-lifetime `CrewStashInventory`, the active hub or level world, and the hub/run transitions. `PlayerSlotManager` owns slot player spawning and slot input assignment. Single Player spawns one slot/player and keeps controller-friendly solo play by letting slot 0 accept unassigned joypads. Local Co-op spawns two local slots/players: slot 0 uses keyboard/mouse and owns mouse look, while slot 1 uses controller device 0.
 
-The first split-screen pass lives in `Game`: Local Co-op creates a full-screen two-row split-screen layout, gives each slot a shared-world `SubViewport`, and mirrors each player's source camera into a viewport-local camera. This proves two-player visibility without moving the dungeon world under a viewport.
+The split-screen pass lives in `Game`: Local Co-op creates a full-screen two-row split-screen layout, gives each local slot a shared-world `SubViewport`, and mirrors each player's source camera into a viewport-local camera. This proves two-player visibility without moving the dungeon world under a viewport.
 
-Per-slot UI and inventory ownership is now partially proven: player-owned CanvasLayers bind to the owning slot's `SubViewport`, `PlayerEquipmentUI` filters input through the owning `PlayerInput`, and inventory component instances are separate per spawned player. The current HP readout is intentionally slot-owned: `Game` hides the player-owned `PlayerHUD` during Local Co-op and draws a lightweight HP label directly over each split-screen pane.
+Per-slot UI and inventory ownership is now proven for the local co-op prototype loop: player-owned CanvasLayers bind to the owning slot's `SubViewport`, `PlayerEquipmentUI` filters input through the owning `PlayerInput`, inventory component instances are separate per spawned player, and slot-owned UI hosts own split-screen HP/prompt/feedback/stash UI. The current split-screen HP readout is intentionally slot-owned: `Game` hides the player-owned `PlayerHUD` during Local Co-op and draws a lightweight HP label directly over each split-screen pane.
 
-The known architecture risk is UI focus ownership. Manual two-player testing shows that two simultaneous `PlayerEquipmentUI` panels can still cross-wire hover, held-item, equipment-slot, hotbar, and controller navigation state. The next local co-op UI pass should either make every `PlayerEquipmentUI` interaction strictly instance-local and viewport/input-owned, or introduce explicit slot-owned UI host scenes under each split-screen pane.
+Host/client sessions now use `NetworkSession` for ENet setup/teardown, peer ids, and peer join/leave signals. The host creates remote slots on peer join and broadcasts membership snapshots; clients reconcile those snapshots, create non-local host/peer slots, and spawn visible remote player actors with temporary overhead peer labels. Remote movement, combat, interaction, inventory, and stash replication are still future slices.
 
 ## 30. UI Architecture
 
@@ -1011,9 +1022,9 @@ Combat can initially be component-to-component through weapons, hitboxes, hurtbo
 
 ## 33. Networking Preparation
 
-Online multiplayer is not part of the earliest prototype, but the architecture should avoid obvious blockers.
+Online multiplayer is now in prototype scaffolding. The architecture still keeps the same host-authoritative target and avoids deeper replication work until the hub/run lifecycle is reliable.
 
-Future online target:
+Online target:
 
 - Four-player online co-op maximum
 - Host-authoritative model
@@ -1023,6 +1034,14 @@ Future online target:
 - Host resolves loot pickup/equip
 - Clients send input/action requests
 - Clients receive replicated state/results
+
+Current implemented foundation:
+
+- `NetworkSession` owns raw ENet host/client startup and close.
+- `Game` owns host/client session flow and crude host-authored `hub` / `run` world transition RPCs.
+- `PlayerSlotManager` serializes and applies host-authored membership snapshots.
+- Clients create non-local slots and visible remote player actors from those snapshots.
+- Remote bodies are presence markers until movement and combat replication are added.
 
 ### Online-Friendly Rules Now
 

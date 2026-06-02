@@ -2,7 +2,7 @@
 
 **Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.** It recreates the feeling of early MMO raiding before every answer was known.
 
-## Current Status (as of 2026-06-01)
+## Current Status (as of 2026-06-02)
 
 - **Core authoring pipeline**: Fully TrenchBroom + FuncGodot. Everything placeable comes through the FGD.
 - **Interaction system**: Thin `Interactable` component + `Entity` owns real behavior (proven pattern).
@@ -86,10 +86,13 @@
   - Single Player creates a `GameSessionConfig`, instantiates `system/game/game.tscn`, creates one local `PlayerSlot`, loads `world/hub/hub.tscn`, then deploys into `world/levels/test_level.tscn`.
   - Local Co-op now creates two local slots and spawns two players into the hub/run flow.
   - Host Game starts an ENet host through `NetworkSession`; Join Game creates a client session config and connects through the same `NetworkSession` node.
-  - Host-side peer join currently creates a non-local remote `PlayerSlot` and places its actor into the current hub/level.
+  - Host-side peer join creates a non-local remote `PlayerSlot` and places its actor into the current hub/level.
+  - Host-authored membership snapshots now synchronize slot identity to clients.
+  - Clients reconcile membership snapshots, preserve their own local input slot, create non-local host/peer slots, and place visible remote actors in the current hub/run world.
+  - Temporary overhead debug labels show each session player's display name and peer id.
   - Host-owned world transition RPCs can now push clients through crude `hub` / `run` loads for the first two-instance lifecycle skeleton.
-  - Manual two-instance testing confirmed host/client connection, host-side remote slot creation, and host-side placement at the second hub spawn.
-  - Current online limitation: client-side membership and visible remote player bodies are not synchronized yet.
+  - Manual two-instance testing confirmed host/client connection, visible remote presence on both copies, stable connection until manual client disconnect, and clean host-side removal.
+  - Current online limitation: remote actors do not move or show combat yet; movement, transform replication, interaction, combat, inventory, and stash authority are next networking slices.
   - `PlayerSlot` now represents a session participant with `session_player_id`, `peer_id`, `local_player_index`, local ownership, and input-device fields, preparing the same slot path for future host/client players.
   - `PlayerSlotManager` now exposes participant-shaped slot/spawn methods while preserving the current single-player and local co-op behavior.
   - The temporary hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.

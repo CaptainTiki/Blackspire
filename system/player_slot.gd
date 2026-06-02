@@ -10,6 +10,9 @@ var slot_index: int = -1
 ## Durable identity for this participant within a session.
 var session_player_id: int = -1
 
+## Human-readable placeholder until character/session names exist.
+var display_name: String = ""
+
 ## Network peer that owns this participant. The offline/local placeholder is 1,
 ## matching Godot's usual server peer id once online play is introduced.
 var peer_id: int = 1

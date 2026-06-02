@@ -1,6 +1,6 @@
 # Session and Host Multiplayer Plan
 
-**Last Updated:** 2026-06-01
+**Last Updated:** 2026-06-02
 
 ## Mission
 
@@ -19,13 +19,13 @@ The current architecture is already close to the right outline:
 - `Main` owns the menu and creates `GameSessionConfig`.
 - `Game` owns one session, the `PlayerSlotManager`, the crew stash, the current hub/level world, and hub/run transitions.
 - `PlayerSlotManager` creates local session slots and spawns or moves player actors between hub and run worlds.
-- `PlayerSlot` now represents a session participant. It stores session identity (`session_player_id`, `peer_id`, `local_player_index`) plus local-only input, camera, split-screen viewport, and per-slot UI references where applicable.
+- `PlayerSlot` now represents a session participant. It stores session identity (`session_player_id`, `peer_id`, `local_player_index`, `display_name`) plus local-only input, camera, split-screen viewport, and per-slot UI references where applicable.
 - `Hub` emits `deploy_requested` and `stash_requested`.
 - `Level` owns run state, enemy spawning, active players, extraction, completion, and failure.
 - Player input is already isolated behind `PlayerInput`.
 - Damage, interaction, pickups, stash movement, health, down/revive, and extraction are explicit enough to become host-owned actions.
 
-The first slot identity mismatch has been addressed: a slot no longer only means "a local input device." The remaining work is to add a real network session layer that assigns peers, creates remote slots from connections, and feeds remote players through network commands instead of local `PlayerInput`.
+The first slot identity mismatch has been addressed: a slot no longer only means "a local input device." Host-authored membership snapshots now assign peers and create visible remote slots on clients. The remaining work is to feed remote players through network commands and replicated state instead of local `PlayerInput`.
 
 ## Completed Prep
 
@@ -34,6 +34,12 @@ The first slot identity mismatch has been addressed: a slot no longer only means
 - Added participant-shaped `PlayerSlotManager` APIs: `create_local_session_slots()`, `spawn_slot_players()`, `spawn_or_move_slot_players()`, and a placeholder `add_remote_slot(peer_id)`.
 - Updated `Game` to use slot-shaped spawn/move calls and to create/sync split-screen viewports only for local slots.
 - Verified the prep slice with Godot check-only, quick-entry hub boot, `git diff --check`, and a local ignored session-slot smoke script.
+- Added `GameSessionConfig.MULTIPLAYER_HOST` and `MULTIPLAYER_CLIENT`, menu Host/Join buttons, quick-entry network fields, and `NetworkSession` as the focused ENet wrapper.
+- Host peer join now creates a non-local remote slot, places the remote actor in the current hub/level, and removes it on disconnect.
+- Host-owned world transition RPCs now broadcast crude `hub` / `run` loads, and client deploy requests go to the host.
+- Added host-sent membership snapshots. Clients reconcile slot identity from the host snapshot, preserve their local input slot, create non-local host/peer slots, and place visible remote actors in the current world.
+- Added temporary overhead `SessionDebugLabel` labels showing display name and peer id for manual remote-presence verification.
+- Verified membership/presence with session-slot smoke coverage, two-process localhost host/client smoke, and manual two-instance laptop testing.
 
 ## Authority Model
 
@@ -125,17 +131,17 @@ The first prototype can send simple unreliable/reliable RPCs directly. A formal 
 
 Definition of done:
 
-- main menu can start Host
-- a second instance can Join by address/port or hardcoded localhost during development
-- host and client create one slot each
-- both players appear in the hub
+- main menu can start Host - done
+- a second instance can Join by address/port or hardcoded localhost during development - done
+- host and client create one slot each - done
+- both players appear in the hub - done as visible remote presence/debug bodies
 - host can deploy
 - both instances load the run
 - both player actors appear in the run
 - host can complete or fail the run
 - both instances return to hub with the same session alive
 
-Combat, enemies, inventory, and stash can be minimal or host-only during this milestone. The lifecycle is the prize.
+Combat, enemies, inventory, movement replication, and stash can be minimal or host-only during this milestone. The lifecycle is the prize.
 
 Implementation steps:
 
@@ -152,6 +158,12 @@ Implementation steps:
 9. Add scene transition RPCs: host tells clients to load hub or run.
 10. Smoke test two instances through hub -> run -> hub.
 
+Completed within this milestone:
+
+- Steps 1-9 have first-pass implementations.
+- Host/client join and visible hub presence are proven.
+- Full hub -> run -> hub two-instance lifecycle still needs another pass after movement/world transition verification.
+
 ## Milestone 2: Networked Player Presence
 
 Definition of done:
@@ -164,11 +176,15 @@ Definition of done:
 
 Recommended path:
 
-- Split `PlayerController` into local input application and replicated state application only where necessary.
 - Keep the real player actor scene for all players.
-- Disable local `PlayerInput` processing for remote slots.
-- Host receives client movement/look commands and applies movement.
-- Host replicates player transforms, health, life state, and basic animation/combat state.
+- Continue disabling local `PlayerInput` processing for remote slots.
+- Add a first movement replication slice before combat:
+  - client sends movement/look intent or a temporary transform update for its owned slot
+  - host applies/accepts the client-owned player movement
+  - host broadcasts slot transforms
+  - clients apply received transforms only to non-local player actors
+- Split `PlayerController` into local input application and replicated state application only where necessary once the temporary path proves the shape.
+- Host replicates health, life state, and basic animation/combat state after transform visibility is boringly reliable.
 - Clients can locally apply their own camera/look for feel later; do not start there.
 
 ## Milestone 3: Host-Resolved Interaction and Loot
@@ -216,7 +232,7 @@ Definition of done:
 ## Known Risks
 
 - `PlayerSlotManager` currently treats every slot as local input. This is the first refactor.
-- `PlayerController._physics_process()` directly reads `PlayerInput`; remote players need a non-local command source.
+- `PlayerController._physics_process()` directly reads `PlayerInput`; remote players need a non-local command source or transform application path.
 - `InteractionScanner`, `PlayerMeleeAttack`, `PlayerHotbar`, and UI scripts currently react to local input. Online mode needs these to send requests when the slot is client-owned, and execute directly only when host/local-authoritative.
 - The current split-screen viewport code lives inside `Game`. That is fine for now, but network sessions should only create split-screen UI for local slots.
 - `Level.current_level` is acceptable for one active level, but online timing needs care during client scene transitions.
@@ -228,8 +244,8 @@ Build a local-host networking skeleton with Godot high-level multiplayer:
 
 ```text
 Host button -> ENet host -> Game starts as host -> creates host slot -> loads hub
-Client quick entry -> ENet client -> joins localhost -> host creates remote slot -> both load hub
+Client quick entry/menu Join -> ENet client -> joins localhost -> host creates remote slot -> host sends membership snapshot -> both load hub with visible remote bodies
 Host deploy -> both load run -> both spawn -> host exits -> both return hub
 ```
 
-Keep gameplay shallow until that exact loop is boringly reliable.
+Keep gameplay shallow until that exact loop is boringly reliable. The immediate next slice is visible movement replication, not combat prediction.
