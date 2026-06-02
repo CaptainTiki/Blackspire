@@ -69,7 +69,7 @@ var _just_pressed: Dictionary[StringName, bool] = {}     # action_name -> true f
 # Keeping this list explicit makes the component self-documenting.
 const GAMEPLAY_ACTIONS: Array[StringName] = [
 	&"move_left", &"move_right", &"move_forward", &"move_backward",
-	&"sprint", &"jump",
+	&"sprint", &"jump", &"crouch",
 	&"interact", &"primary_action",
 	&"toggle_equipment",
 	&"inventory_pick_place", &"inventory_cancel_drag",
@@ -230,8 +230,12 @@ func _update_action_from_analog(action: StringName, analog_value: float) -> void
 
 
 func _physics_process(_delta: float) -> void:
-	# Clear "just pressed" state at the start of each physics frame.
-	# This gives us reliable one-frame "just pressed" behavior.
+	# Clear after this physics frame so state-chart signal handlers later in the tree
+	# can still consume one-frame input.
+	_clear_just_pressed.call_deferred()
+
+
+func _clear_just_pressed() -> void:
 	for action in _just_pressed.keys():
 		_just_pressed[action] = false
 
@@ -299,6 +303,9 @@ func is_jump_just_pressed() -> bool:
 
 func is_sprint_pressed() -> bool:
 	return is_action_pressed(&"sprint")
+
+func is_crouch_pressed() -> bool:
+	return is_action_pressed(&"crouch")
 
 func is_interact_just_pressed() -> bool:
 	return is_action_just_pressed(&"interact")

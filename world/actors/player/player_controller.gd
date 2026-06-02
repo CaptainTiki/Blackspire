@@ -13,66 +13,136 @@ const DROP_DOWN_OFFSET := 0.35
 @export var walk_speed: float = 5.0
 @export var sprint_speed: float = 8.0
 @export var jump_velocity: float = 4.5
-@export var mouse_sensitivity: float = 0.002
-@export var controller_look_speed: float = 2.8
+@export var acceleration: float = 28.0
+@export var deceleration: float = 24.0
 
-# --- Player Sizing (Standard) ---
-# Locked after testing with 64-unit rooms.
-# Capsule: 1.45
-# Eye/Camera: 1.30
-@export var capsule_height: float = 1.45
+# --- Stance Camera ---
 @export var eye_height: float = 1.30
+@export var crouch_eye_height: float = 0.78
+@export var stance_camera_lerp_speed: float = 12.0
 
 # --- Camera ---
 @onready var camera: Camera3D = $CameraRig/Camera3D
-@onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var standing_collision: CollisionShape3D = $StandingCollision
+@onready var crouch_collision: CollisionShape3D = $CrouchCollision
+@onready var crouch_check: ShapeCast3D = $CrouchCheck
+@onready var state_chart: StateChart = %StateChart
 @onready var inventory: Node = $Components/PlayerInventory
 @onready var equipment: Node = $Components/PlayerEquipment
 @onready var hotbar: Node = $Components/PlayerHotbar
 @onready var health: Node = $Components/HealthComponent
 @onready var life_state: Node = $Components/PlayerLifeState
 @onready var input_reader: PlayerInputScript = $Components/PlayerInput
+@onready var interaction_scanner: InteractionScanner = $Components/InteractionScanner
+@onready var player_look: Node = $Components/PlayerLook
 
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var current_speed: float = 0.0
+var _input_dir := Vector2.ZERO
 var _can_act := true
 var _gameplay_input_enabled := true
 var _life_state_tween: Tween
 var _standing_camera_position := Vector3.ZERO
 var _standing_camera_rotation := Vector3.ZERO
-var _controller_look_enabled := true
 var _uses_replicated_transform := false
+var _target_eye_height: float = 0.0
+var _is_crouching := false
 
 func _ready() -> void:
 	add_to_group("players")
 
-	# Capture the mouse for first-person control
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
 	if not camera:
 		push_error("PlayerController is missing a Camera3D child node!")
 	
 	if not input_reader:
 		push_error("PlayerController is missing PlayerInput component!")
+	if not player_look:
+		push_error("PlayerController is missing PlayerLook component!")
 	else:
-		input_reader.mouse_motion_captured.connect(_on_mouse_motion_captured)
+		player_look.capture_mouse()
 	
-	# Apply capsule and camera height from exported variables (useful for testing different sizes)
-	_apply_player_height()
+	current_speed = walk_speed
+	_target_eye_height = eye_height
+	_apply_camera_height()
+	_set_standing_collision_enabled(true)
 	_standing_camera_position = camera.position
 	_standing_camera_rotation = camera.rotation
 
 
-func _apply_player_height() -> void:
-	# Update collision shape
-	if collision_shape and collision_shape.shape is CapsuleShape3D:
-		var capsule := collision_shape.shape as CapsuleShape3D
-		capsule.height = capsule_height
-		collision_shape.position.y = capsule_height * 0.5
-	
-	# Update camera height
+func _apply_camera_height() -> void:
 	if camera:
 		camera.position.y = eye_height
+
+
+func run() -> void:
+	current_speed = walk_speed + equipment.get_move_speed_modifier()
+
+
+func sprint() -> void:
+	current_speed = sprint_speed + equipment.get_move_speed_modifier()
+
+
+func jump() -> void:
+	if is_on_floor():
+		velocity.y = jump_velocity
+
+
+func crouch() -> void:
+	_is_crouching = true
+	_target_eye_height = crouch_eye_height
+	_set_standing_collision_enabled(false)
+
+
+func stand() -> void:
+	if not can_stand():
+		return
+
+	_is_crouching = false
+	_target_eye_height = eye_height
+	_set_standing_collision_enabled(true)
+
+
+func can_stand() -> bool:
+	if not crouch_check:
+		return true
+
+	crouch_check.force_shapecast_update()
+	return not crouch_check.is_colliding()
+
+
+func is_crouching() -> bool:
+	return _is_crouching
+
+
+func is_head_blocked() -> bool:
+	return not can_stand()
+
+
+func check_fall_speed() -> bool:
+	return velocity.y < -8.0
+
+
+func update_camera_height(delta: float, _direction: float = 0.0) -> void:
+	if not camera:
+		return
+
+	camera.position.y = move_toward(camera.position.y, _target_eye_height, stance_camera_lerp_speed * delta)
+
+
+func get_current_interaction_target() -> Node:
+	if not interaction_scanner:
+		return null
+	if interaction_scanner.current_revive_target:
+		return interaction_scanner.current_revive_target
+	return interaction_scanner.current_interactable
+
+
+func _set_standing_collision_enabled(is_enabled: bool) -> void:
+	if standing_collision:
+		standing_collision.disabled = not is_enabled
+	if crouch_collision:
+		crouch_collision.disabled = is_enabled
 
 
 func get_inventory() -> Node:
@@ -153,7 +223,18 @@ func set_gameplay_input_enabled(is_enabled: bool) -> void:
 
 
 func set_controller_look_enabled(is_enabled: bool) -> void:
-	_controller_look_enabled = is_enabled
+	if player_look:
+		player_look.set_look_enabled(is_enabled)
+
+
+func capture_mouse() -> void:
+	if player_look:
+		player_look.capture_mouse()
+
+
+func release_mouse() -> void:
+	if player_look:
+		player_look.release_mouse()
 
 
 func set_uses_replicated_transform(is_enabled: bool) -> void:
@@ -204,24 +285,9 @@ func exit_bleeding_out_state() -> void:
 	_life_state_tween.parallel().tween_property(camera, "rotation", _standing_camera_rotation, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	# Mouse motion is now delivered via signal from PlayerInput.
-	# We keep this stub in case other one-off input is needed later.
-	pass
-
-
-func _on_mouse_motion_captured(relative: Vector2) -> void:
-	if not can_act():
-		return
-	if not input_reader.owns_mouse:
-		return
-
-	rotate_y(-relative.x * mouse_sensitivity)
-	if camera:
-		camera.rotate_x(-relative.y * mouse_sensitivity)
-		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
-
 func _physics_process(delta: float) -> void:
+	_update_movement_input()
+
 	if not can_act():
 		_process_disabled_movement(delta)
 		return
@@ -230,27 +296,30 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	# Handle jump via PlayerInput (required — fail loudly if missing)
-	if input_reader.is_jump_just_pressed() and is_on_floor():
-		velocity.y = jump_velocity
+	var direction := get_movement_direction()
 
-	# Movement comes exclusively from the per-player input reader.
-	# If this is null the game will error here — that is intentional.
-	var input_dir := input_reader.get_movement_vector()
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-
-	var sprinting := input_reader.is_sprint_pressed()
-	var current_speed = sprint_speed if sprinting else walk_speed
+	current_speed = maxf(current_speed, 0.0)
 
 	if direction:
-		velocity.x = direction.x * current_speed
-		velocity.z = direction.z * current_speed
+		velocity.x = move_toward(velocity.x, direction.x * current_speed, acceleration * delta)
+		velocity.z = move_toward(velocity.z, direction.z * current_speed, acceleration * delta)
 	else:
-		velocity.x = move_toward(velocity.x, 0, current_speed)
-		velocity.z = move_toward(velocity.z, 0, current_speed)
+		velocity.x = move_toward(velocity.x, 0, deceleration * delta)
+		velocity.z = move_toward(velocity.z, 0, deceleration * delta)
 
-	_process_controller_look(delta)
+	if player_look:
+		player_look.process_controller_look(delta)
 	move_and_slide()
+
+
+func _update_movement_input() -> void:
+	# Movement comes exclusively from the per-player input reader.
+	# If this is null the game will error here - that is intentional.
+	_input_dir = input_reader.get_movement_vector()
+
+
+func get_movement_direction() -> Vector3:
+	return (transform.basis * Vector3(_input_dir.x, 0, _input_dir.y)).normalized()
 
 
 func _process_disabled_movement(delta: float) -> void:
@@ -260,21 +329,6 @@ func _process_disabled_movement(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, walk_speed)
 	velocity.z = move_toward(velocity.z, 0.0, walk_speed)
 	move_and_slide()
-
-
-func _process_controller_look(delta: float) -> void:
-	if not _controller_look_enabled:
-		return
-
-	# Direct access — missing input_reader will error loudly (desired).
-	var look_input := input_reader.get_look_vector()
-	if look_input.is_zero_approx():
-		return
-
-	rotate_y(-look_input.x * controller_look_speed * delta)
-	if camera:
-		camera.rotate_x(-look_input.y * controller_look_speed * delta)
-		camera.rotation.x = clamp(camera.rotation.x, -1.5, 1.5)
 
 
 func _play_collapse_pose() -> void:

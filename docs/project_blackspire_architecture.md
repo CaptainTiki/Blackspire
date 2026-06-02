@@ -95,16 +95,19 @@ If a `PlayerActor` requires a `HealthComponent`, then the player scene should di
 
 ### Example Required Player Components
 
-A prototype `PlayerActor` may require:
+A prototype `Player` may require:
 
 - `HealthComponent`
-- `StatsComponent`
-- `EquipmentComponent`
-- `ActionStateChart`
-- `ActionStateMachine`
+- `PlayerInput`
+- `PlayerLook`
+- `PlayerLifeState`
+- `PlayerEquipment`
+- `PlayerInventory`
+- `StateChart`
+- `StateMachine`
 - `InteractionScanner`
-- `WeaponController`
-- `PlayerMotor`
+- `PlayerMeleeAttack`
+- `PlayerController` motor/verb surface
 
 ### Example Required Enemy Components
 
@@ -199,7 +202,8 @@ Examples:
 - `MeleeAttackComponent`
 - `ProjectileAttackComponent`
 - `InteractionScanner`
-- `PlayerMotor`
+- `PlayerInput`
+- `PlayerLook`
 - `EnemyMotor`
 - `EnemyPerception`
 - `LootDropComponent`
@@ -233,20 +237,35 @@ A scene should visually express what the object is made of. If a player has heal
 ### Prototype Player Scene Example
 
 ```text
-PlayerActor.tscn
-  PlayerActor.gd
-  Body / CharacterBody3D
-  Head
-    CameraMount
-  PlayerMotor
-  HealthComponent
-  StatsComponent
-  EquipmentComponent
-  WeaponController
-  InteractionScanner
-  ActionStateChart
-  ActionStateMachine
-  DebugStateLabel
+Player.tscn
+  PlayerController.gd (CharacterBody3D motor and gameplay verbs)
+  StandingCollision
+  CrouchCollision
+  CrouchCheck
+  CameraRig
+    Camera3D
+      Interaction RayCast3D
+      WeaponRoot
+  Components
+    PlayerInput
+    PlayerLook
+    InteractionScanner
+    PlayerMeleeAttack
+    HealthComponent
+    PlayerLifeState
+    PlayerInventory
+    PlayerEquipment
+    PlayerHotbar
+  StateChart
+    Movement
+    Posture
+    Life
+    Action
+  StateMachine
+    MovementState
+    PostureState
+    LifeState
+    ActionState
 ```
 
 ### Prototype Enemy Scene Example
@@ -401,18 +420,25 @@ Input should be separated from actor behavior.
 
 ### Rule
 
-The controller reads input. The actor performs gameplay.
+Per-player input is a component. Actor behavior is state-driven.
 
-Preferred shape:
+Current player shape:
 
 ```text
-PlayerController
-  reads input device
-  sends commands to PlayerActor
+PlayerInput
+  owns device filtering, action state, movement vector, look vector
 
-PlayerActor
-  owns gameplay state
-  asks components to perform actions
+PlayerLook
+  owns mouse capture, mouse look, and controller look
+
+StateChart
+  owns active player states and legal transitions
+
+StateMachine scripts
+  consume PlayerInput intent, run state entry/physics hooks, request chart events
+
+PlayerController
+  owns CharacterBody3D movement integration and verbs such as run/jump/crouch
 ```
 
 This separation supports:
@@ -421,6 +447,7 @@ This separation supports:
 - Multiple controllers for couch co-op
 - Future network-controlled remote actors
 - Test bots or AI-controlled player actors later
+- Semantic state transitions that can become future network hooks
 
 ### Avoid
 
@@ -443,7 +470,7 @@ Movement requirements:
 - No tile stepping
 - No fixed-grid turning
 
-Jumping, crouching, sprinting, and stamina may be added based on combat and room needs, but are not required for the earliest prototype unless the controller feel demands them.
+Jumping, crouching, and sprinting are currently player statechart behavior. Stamina may be added later if combat and room pacing need it.
 
 ## 16. Player-to-Player Collision
 
@@ -490,8 +517,8 @@ Combat should be built from explicit actions and damage requests.
 
 ### Basic Combat Flow
 
-1. Controller requests attack.
-2. PlayerActor forwards attack to WeaponController or ActionStateMachine.
+1. Player input or network intent requests attack.
+2. The player action state or verb surface forwards attack intent to the attack component.
 3. Action state enters attack state.
 4. Attack component enables hit detection during the active attack window.
 5. Valid target is hit.
@@ -559,6 +586,22 @@ In multiplayer:
 - Other players can revive the downed player.
 - Revived player returns with very low HP, such as 1 HP.
 - If all players are down/dead, the run fails or restarts.
+
+### Current Player Life Branch
+
+The current player has a `Life` statechart branch:
+
+- `Deploying`
+- `Alive`
+- `Downed`
+- `Dead`
+
+`Deploying` is the load-in/handshake hook and currently auto-completes to
+`Alive`. Health reaching 0 requests `Downed`. Revive requests `Alive`. Future
+bleed-out completion will request `Dead`. `Dead` is intentionally not revivable.
+
+`PlayerLifeState` keeps the public health/death/revive API, emits the existing
+local signals, and routes semantic life transitions into the chart.
 
 ### Downed State Components
 
@@ -751,6 +794,48 @@ EnemyActor
 State charts should own transitions. State machine logic should own behavior.
 
 State logic may request transitions, but the state chart decides whether the transition is valid.
+
+### Current Player State Architecture
+
+The player now uses this split directly:
+
+```text
+Player
+  StateChart
+    Root (parallel)
+      Movement
+        Grounded
+          Idle
+          Moving
+            Running
+            Sprinting
+        Airborne
+          Jumping
+      Posture
+        Standing
+        Crouching
+      Life
+        Deploying
+        Alive
+        Downed
+        Dead
+      Action
+        Ready
+  StateMachine
+    Root
+      MovementState
+      PostureState
+      LifeState
+      ActionState
+```
+
+Movement, posture, and life state scripts call intent-level methods on
+`PlayerController`. The controller applies shared movement physics and owns the
+physical implementation details, such as collider swapping for crouch/stand.
+
+Player look is deliberately not in the controller motor. `PlayerLook` owns mouse
+capture, mouse look, and controller look so UI and future networking code can
+toggle look behavior through a small component API.
 
 ## 25. State Machine Debugging
 

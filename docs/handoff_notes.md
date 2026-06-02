@@ -6,7 +6,7 @@ At the start of a new session, read this file first.
 
 ## Current Build
 
-`v0.0.0050` - Multiplayer proof complete; pivoting to the Multiplayer Playthrough Slice.
+`v0.0.0051` - Player StateMachine refactor checkpoint.
 
 ## Current Direction
 
@@ -19,7 +19,7 @@ The project has proven the session foundation:
 - Hub -> run -> hub works in a two-instance host/client session.
 - Enemy AI/damage/death can be host-owned, and client attacks can be forwarded to host authority.
 
-We are intentionally **not** pushing deeper into temporary networking hooks right now. The next milestone is to make the first five minutes fun, while preserving the multiplayer-aware architecture.
+We are intentionally **not** pushing deeper into temporary networking hooks right now. The immediate baseline is now the refactored player controller/state architecture, and the next milestone remains making the first five minutes fun while preserving the multiplayer-aware architecture.
 
 Active plan:
 
@@ -70,7 +70,7 @@ spawn room -> cramped fight -> lock-in panic fight -> elite arena -> locked exit
 
 Primary goals:
 
-- rebuild player around a state-machine-driven controller, visible mesh, animation states, and tunable feel
+- build on the new player statechart/state-machine controller with visible mesh, animation states, and tunable feel
 - replace the temporary enemy with three state-machine enemies:
   - melee slime
   - ranged spitter
@@ -106,13 +106,39 @@ Known gaps to revisit after the gameplay rebuild:
 - door/lever world-state replication
 - robust extraction/failure authority
 
+## Current Player Controller Baseline
+
+`Player.tscn` now uses a StateChart plus mirrored StateMachine script tree:
+
+- `Movement`: grounded/idle/moving/running/sprinting/airborne/jumping
+- `Posture`: standing/crouching
+- `Life`: deploying/alive/downed/dead
+- `Action`: ready placeholder
+
+The chart owns active states and transitions. Mirrored state scripts own entry
+points and per-state processing, and call `PlayerController` verbs such as
+`run()`, `sprint()`, `jump()`, `crouch()`, and `stand()`.
+
+`PlayerController` remains the shared `CharacterBody3D` motor and gameplay verb
+surface. It no longer owns raw look/capture math. `Components/PlayerLook` owns
+mouse capture, mouse look, and controller look. `Components/PlayerInput` remains
+the per-player input source.
+
+Posture now has one story: `StandingCollision`, `CrouchCollision`, and
+`CrouchCheck`. There is no remaining capsule-height resizing path in the
+controller.
+
+Manual runtime testing after the refactor confirmed movement, sprint, crouch,
+jump, primary attack, interact pickup, urn breaking, and extraction back to hub.
+
 ## Key Files And Systems
 
 - `system/main.tscn` - app root and menu bootstrap
 - `system/game/game.tscn` / `system/game/game.gd` - session owner, world transitions, slot manager, crew stash
 - `system/player_slot.gd` / `system/player_slot_manager.gd` - session participant slots and player spawning/moving
 - `system/network/network_session.gd` - ENet host/client wrapper
-- `world/actors/player/Player.tscn` - current temporary player actor
+- `world/actors/player/Player.tscn` - current player actor and statechart/state-machine controller
+- `world/actors/player/README.md` - current player controller/state architecture notes
 - `world/actors/enemies/basic_enemy.tscn` - current temporary enemy actor
 - `world/level.gd` - run state, generated level, enemies, extraction/failure
 - `world/hub/hub.tscn` - current temporary crew hub

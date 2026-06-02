@@ -6,18 +6,45 @@
 [ext_resource type="Script" uid="uid://dftvemuu6jugp" path="res://world/components/player/interaction_scanner.gd" id="3_interaction"]
 [ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="4_health"]
 [ext_resource type="Script" uid="uid://21j40pjto1k4" path="res://world/components/combat/player_melee_attack.gd" id="5_melee_attack"]
-[ext_resource type="Script" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
-[ext_resource type="Script" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
-[ext_resource type="Script" path="res://world/components/player/player_life_state.gd" id="8_life_state"]
-[ext_resource type="Script" path="res://world/components/player/player_hud.gd" id="9_hud"]
-[ext_resource type="Script" path="res://world/components/player/player_equipment.gd" id="10_equipment"]
-[ext_resource type="Script" path="res://world/components/player/player_equipment_ui.gd" id="11_equipment_ui"]
-[ext_resource type="Script" path="res://world/components/player/player_hotbar.gd" id="12_hotbar"]
-[ext_resource type="Script" path="res://world/components/player/player_input.gd" id="13_player_input"]
+[ext_resource type="Script" uid="uid://c5wo7tdddt4iq" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
+[ext_resource type="Script" uid="uid://de8irhle2fe2o" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
+[ext_resource type="Script" uid="uid://d0evnabg4cufv" path="res://world/components/player/player_life_state.gd" id="8_life_state"]
+[ext_resource type="Script" uid="uid://c5wd0jqd4rq6q" path="res://world/components/player/player_hud.gd" id="9_hud"]
+[ext_resource type="Script" uid="uid://n5rgpnmt5ikk" path="res://world/components/player/player_equipment.gd" id="10_equipment"]
+[ext_resource type="Script" uid="uid://dqkot5nmfr27r" path="res://world/components/player/player_equipment_ui.gd" id="11_equipment_ui"]
+[ext_resource type="Script" uid="uid://crn1u6pu1ehr0" path="res://world/components/player/player_hotbar.gd" id="12_hotbar"]
+[ext_resource type="Script" uid="uid://b4p3d3hf450er" path="res://world/components/player/player_input.gd" id="13_player_input"]
+[ext_resource type="Script" uid="uid://couw105c3bde4" path="res://addons/godot_state_charts/state_chart.gd" id="15_ahkk7"]
+[ext_resource type="Script" uid="uid://c1vp0ojjvaby1" path="res://addons/godot_state_charts/parallel_state.gd" id="16_twcsy"]
+[ext_resource type="Script" uid="uid://jk2jm1g6q853" path="res://addons/godot_state_charts/compound_state.gd" id="17_msw2x"]
+[ext_resource type="Script" uid="uid://cytafq8i1y8qm" path="res://addons/godot_state_charts/atomic_state.gd" id="18_k7toq"]
+[ext_resource type="Script" uid="uid://cf1nsco3w0mf6" path="res://addons/godot_state_charts/transition.gd" id="19_akwv5"]
+[ext_resource type="Script" uid="uid://ccudspsqxi2tq" path="res://world/actors/player/player_state_machine.gd" id="20_gl3xj"]
+[ext_resource type="Script" uid="uid://dn6povv6pglox" path="res://world/actors/player/states/player_grounded_state.gd" id="21_akwv5"]
+[ext_resource type="Script" uid="uid://dxd2r5ppe5ovh" path="res://world/actors/player/states/player_idle_state.gd" id="21_msw2x"]
+[ext_resource type="Script" uid="uid://bgygifvl2dn3g" path="res://world/actors/player/states/player_moving_state.gd" id="23_gl3xj"]
+[ext_resource type="Script" uid="uid://ced7essgxciv1" path="res://world/actors/player/states/player_running_state.gd" id="24_gl3xj"]
+[ext_resource type="Script" uid="uid://b5lem4f0tpjkt" path="res://world/actors/player/states/player_sprinting_state.gd" id="25_6bexg"]
+[ext_resource type="Script" uid="uid://c8mmvrp4s0r2" path="res://world/actors/player/states/player_airborne_state.gd" id="26_gfrq3"]
+[ext_resource type="Script" uid="uid://neycwl1mu2nc" path="res://world/actors/player/states/player_jumping_state.gd" id="27_gl4q7"]
+[ext_resource type="Script" uid="uid://4mih1ghlieu5" path="res://world/actors/player/states/player_standing_state.gd" id="28_p8f1f"]
+[ext_resource type="Script" uid="uid://t3ujgke1qh5a" path="res://world/actors/player/states/player_crouching_state.gd" id="29_83pgd"]
+[ext_resource type="Script" path="res://world/actors/player/player_look.gd" id="30_look"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_deploying_state.gd" id="31_deploying"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_alive_state.gd" id="32_alive"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_downed_state.gd" id="33_downed"]
+[ext_resource type="Script" path="res://world/actors/player/states/player_dead_state.gd" id="34_dead"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_83pgd"]
 radius = 0.4
 height = 1.45
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.325
+height = 1.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_83pgd"]
+radius = 0.3
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
 radius = 0.4
@@ -108,12 +135,22 @@ collision_layer = 16
 collision_mask = 33
 script = ExtResource("1_script")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=158910546]
+[node name="StandingCollision" type="CollisionShape3D" parent="." unique_id=158910546]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.725, 0)
+shape = SubResource("CapsuleShape3D_83pgd")
+
+[node name="CrouchCollision" type="CollisionShape3D" parent="." unique_id=1661613205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4999227, 0)
 shape = SubResource("CapsuleShape3D_1")
+disabled = true
+
+[node name="CrouchCheck" type="ShapeCast3D" parent="." unique_id=1604914935]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9198883, 0)
+shape = SubResource("SphereShape3D_83pgd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1553463508]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.725, 0)
+visible = false
 mesh = SubResource("CapsuleMesh_1")
 
 [node name="CameraRig" type="Node3D" parent="." unique_id=346636072]
@@ -133,7 +170,7 @@ collide_with_areas = true
 [node name="WeaponRoot" type="Node3D" parent="CameraRig/Camera3D" unique_id=1036805861]
 
 [node name="SwordPivot" type="Node3D" parent="CameraRig/Camera3D/WeaponRoot" unique_id=1670787752]
-transform = Transform3D(0.90044713, 0.43908277, 0, -0.37081876, 0.77491957, 0.51786375, 0.22735094, -0.4751073, 0.8446572, 0.42, -0.36, -0.72)
+transform = Transform3D(0.90044713, 0.43908277, 0, -0.37081876, 0.77491957, 0.51786375, 0.22735094, -0.4751073, 0.84465724, 0.42, -0.36, -0.72)
 
 [node name="Blade" type="MeshInstance3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=1234842442]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
@@ -167,28 +204,28 @@ equipment = NodePath("PlayerEquipment")
 hotbar = NodePath("PlayerHotbar")
 life_state = NodePath("PlayerLifeState")
 
-[node name="PlayerInventory" type="Node" parent="Components" node_paths=PackedStringArray("equipment")]
+[node name="PlayerInventory" type="Node" parent="Components" unique_id=1088625875 node_paths=PackedStringArray("equipment")]
 script = ExtResource("7_inventory")
 equipment = NodePath("../PlayerEquipment")
 
-[node name="PlayerEquipment" type="Node" parent="Components"]
+[node name="PlayerEquipment" type="Node" parent="Components" unique_id=1330587047]
 script = ExtResource("10_equipment")
 
-[node name="PlayerHotbar" type="Node" parent="Components" node_paths=PackedStringArray("player", "inventory")]
+[node name="PlayerHotbar" type="Node" parent="Components" unique_id=1627341317 node_paths=PackedStringArray("inventory", "player")]
 script = ExtResource("12_hotbar")
-player = NodePath("../..")
 inventory = NodePath("../PlayerInventory")
+player = NodePath("../..")
 
-[node name="PlayerInput" type="Node" parent="Components" node_paths=PackedStringArray("player")]
+[node name="PlayerInput" type="Node" parent="Components" unique_id=1608029817 node_paths=PackedStringArray("player")]
 script = ExtResource("13_player_input")
 player = NodePath("../..")
-device = -1
-owns_mouse = true
 invert_movement_y = true
-invert_look_y = false
-invert_movement_x = false
-invert_look_x = false
-joy_deadzone = 0.2
+
+[node name="PlayerLook" type="Node" parent="Components" unique_id=989061640 node_paths=PackedStringArray("player", "camera", "input_reader")]
+script = ExtResource("30_look")
+player = NodePath("../..")
+camera = NodePath("../../CameraRig/Camera3D")
+input_reader = NodePath("../PlayerInput")
 
 [node name="InteractionScanner" type="Node3D" parent="Components" unique_id=277905915 node_paths=PackedStringArray("player_components")]
 script = ExtResource("3_interaction")
@@ -203,16 +240,16 @@ script = ExtResource("4_health")
 max_health = 100
 current_health = 100
 
-[node name="PlayerLifeState" type="Node" parent="Components" node_paths=PackedStringArray("player", "health_component")]
+[node name="PlayerLifeState" type="Node" parent="Components" unique_id=2076330052 node_paths=PackedStringArray("player", "health_component")]
 script = ExtResource("8_life_state")
 player = NodePath("../..")
 health_component = NodePath("../HealthComponent")
 
-[node name="PlayerHitFeedback" type="CanvasLayer" parent="." node_paths=PackedStringArray("health_component")]
+[node name="PlayerHitFeedback" type="CanvasLayer" parent="." unique_id=1690976719 node_paths=PackedStringArray("health_component")]
 script = ExtResource("6_hit_feedback")
 health_component = NodePath("../Components/HealthComponent")
 
-[node name="Overlay" type="ColorRect" parent="PlayerHitFeedback"]
+[node name="Overlay" type="ColorRect" parent="PlayerHitFeedback" unique_id=1887373028]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -221,11 +258,11 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.85, 0.02, 0.02, 0)
 
-[node name="PlayerHUD" type="CanvasLayer" parent="." node_paths=PackedStringArray("health_component")]
+[node name="PlayerHUD" type="CanvasLayer" parent="." unique_id=724469567 node_paths=PackedStringArray("health_component")]
 script = ExtResource("9_hud")
 health_component = NodePath("../Components/HealthComponent")
 
-[node name="HealthLabel" type="Label" parent="PlayerHUD"]
+[node name="HealthLabel" type="Label" parent="PlayerHUD" unique_id=1190038610]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -236,14 +273,14 @@ offset_bottom = -28.0
 grow_vertical = 0
 text = "HP 100/100"
 
-[node name="PlayerEquipmentUI" type="CanvasLayer" parent="." node_paths=PackedStringArray("equipment", "inventory", "hotbar", "melee_attack")]
+[node name="PlayerEquipmentUI" type="CanvasLayer" parent="." unique_id=221893434 node_paths=PackedStringArray("equipment", "inventory", "hotbar", "melee_attack")]
 script = ExtResource("11_equipment_ui")
 equipment = NodePath("../Components/PlayerEquipment")
 inventory = NodePath("../Components/PlayerInventory")
 hotbar = NodePath("../Components/PlayerHotbar")
 melee_attack = NodePath("../Components/PlayerMeleeAttack")
 
-[node name="Root" type="Control" parent="PlayerEquipmentUI"]
+[node name="Root" type="Control" parent="PlayerEquipmentUI" unique_id=379827471]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -252,7 +289,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="PaperDollPanel" type="PanelContainer" parent="PlayerEquipmentUI/Root"]
+[node name="PaperDollPanel" type="PanelContainer" parent="PlayerEquipmentUI/Root" unique_id=752303425]
 custom_minimum_size = Vector2(1080, 460)
 layout_mode = 0
 anchor_left = 0.5
@@ -264,78 +301,77 @@ offset_top = -230.0
 offset_right = 540.0
 offset_bottom = 230.0
 
-[node name="Layout" type="HBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel"]
+[node name="Layout" type="HBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel" unique_id=911729664]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="StatsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+[node name="StatsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout" unique_id=2038352806]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 
-[node name="StatsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/StatsPanel"]
+[node name="StatsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/StatsPanel" unique_id=848773327]
 layout_mode = 2
 text = "Stats"
 
-[node name="StatsLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/StatsPanel"]
+[node name="StatsLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/StatsPanel" unique_id=1140000773]
 layout_mode = 2
 text = "Attack Damage: 10"
 
-[node name="SlotsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+[node name="SlotsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout" unique_id=844938893]
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 
-[node name="SlotsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/SlotsPanel"]
+[node name="SlotsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/SlotsPanel" unique_id=761460021]
 layout_mode = 2
 text = "Equipment"
 
-[node name="SlotButtons" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/SlotsPanel"]
+[node name="SlotButtons" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/SlotsPanel" unique_id=1019736728]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="BackpackPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+[node name="BackpackPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout" unique_id=1585254320]
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="BackpackTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel"]
+[node name="BackpackTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel" unique_id=1477613831]
 layout_mode = 2
 text = "Backpack"
 
-[node name="BackpackSlots" type="GridContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel"]
+[node name="BackpackSlots" type="GridContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel" unique_id=1487470491]
 layout_mode = 2
 theme_override_constants/v_separation = 6
-columns = 1
 
-[node name="HotbarTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel"]
+[node name="HotbarTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel" unique_id=860757672]
 layout_mode = 2
 text = "Hotbar"
 
-[node name="HotbarSlots" type="HBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel"]
+[node name="HotbarSlots" type="HBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel" unique_id=1412476568]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="DropButton" type="Button" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel"]
+[node name="DropButton" type="Button" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/BackpackPanel" unique_id=1888575205]
 custom_minimum_size = Vector2(230, 38)
 layout_mode = 2
 text = "Drop"
 
-[node name="DetailsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout"]
+[node name="DetailsPanel" type="VBoxContainer" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout" unique_id=1387479515]
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 
-[node name="DetailsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel"]
+[node name="DetailsTitle" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel" unique_id=643522502]
 layout_mode = 2
 text = "Item"
 
-[node name="ItemNameLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel"]
+[node name="ItemNameLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel" unique_id=1176417892]
 layout_mode = 2
 text = "Primary Weapon"
 
-[node name="ItemDetailsLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel"]
+[node name="ItemDetailsLabel" type="Label" parent="PlayerEquipmentUI/Root/PaperDollPanel/Layout/DetailsPanel" unique_id=215662213]
 layout_mode = 2
 text = "Empty slot"
 
-[node name="FeedbackLabel" type="Label" parent="PlayerEquipmentUI/Root"]
+[node name="FeedbackLabel" type="Label" parent="PlayerEquipmentUI/Root" unique_id=1598516925]
 layout_mode = 0
 anchor_left = 0.5
 anchor_right = 0.5
@@ -343,5 +379,257 @@ offset_left = -220.0
 offset_top = 92.0
 offset_right = 220.0
 offset_bottom = 132.0
-horizontal_alignment = 1
 text = "Equipped"
+horizontal_alignment = 1
+
+[node name="StateChart" type="Node" parent="." unique_id=877959116]
+unique_name_in_owner = true
+script = ExtResource("15_ahkk7")
+metadata/_custom_type_script = "uid://couw105c3bde4"
+
+[node name="Root" type="Node" parent="StateChart" unique_id=1937007154]
+script = ExtResource("16_twcsy")
+metadata/_custom_type_script = "uid://c1vp0ojjvaby1"
+
+[node name="Movement" type="Node" parent="StateChart/Root" unique_id=1938965714]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Grounded")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Grounded" type="Node" parent="StateChart/Root/Movement" unique_id=1561533986]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Moving")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Idle" type="Node" parent="StateChart/Root/Movement/Grounded" unique_id=2001627315]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnMoving" type="Node" parent="StateChart/Root/Movement/Grounded/Idle" unique_id=327692594]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Moving")
+event = &"onMoving"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Moving" type="Node" parent="StateChart/Root/Movement/Grounded" unique_id=1714335153]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Running")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Running" type="Node" parent="StateChart/Root/Movement/Grounded/Moving" unique_id=859093049]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="Sprinting" type="Node" parent="StateChart/Root/Movement/Grounded/Moving" unique_id=978774074]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnIdle" type="Node" parent="StateChart/Root/Movement/Grounded/Moving" unique_id=1045246538]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Idle")
+event = &"onIdle"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnRunning" type="Node" parent="StateChart/Root/Movement/Grounded/Moving" unique_id=2039964690]
+script = ExtResource("19_akwv5")
+to = NodePath("../Running")
+event = &"onRunning"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnSprinting" type="Node" parent="StateChart/Root/Movement/Grounded/Moving" unique_id=1085128358]
+script = ExtResource("19_akwv5")
+to = NodePath("../Sprinting")
+event = &"onSprinting"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnAirborne" type="Node" parent="StateChart/Root/Movement/Grounded" unique_id=703213993]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Airborne")
+event = &"onAirborne"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Airborne" type="Node" parent="StateChart/Root/Movement" unique_id=1814289532]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Jumping")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Jumping" type="Node" parent="StateChart/Root/Movement/Airborne" unique_id=559973105]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnGrounded" type="Node" parent="StateChart/Root/Movement/Airborne" unique_id=1285307695]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Grounded")
+event = &"onGrounded"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Posture" type="Node" parent="StateChart/Root" unique_id=209379466]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Standing")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Standing" type="Node" parent="StateChart/Root/Posture" unique_id=697854857]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="Crouching" type="Node" parent="StateChart/Root/Posture" unique_id=1912713320]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnStanding" type="Node" parent="StateChart/Root/Posture" unique_id=826740775]
+script = ExtResource("19_akwv5")
+to = NodePath("../Standing")
+event = &"onStanding"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnCrouching" type="Node" parent="StateChart/Root/Posture" unique_id=1832158798]
+script = ExtResource("19_akwv5")
+to = NodePath("../Crouching")
+event = &"onCrouching"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Life" type="Node" parent="StateChart/Root" unique_id=1952164817]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Deploying")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Deploying" type="Node" parent="StateChart/Root/Life" unique_id=1852923172]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnAlive" type="Node" parent="StateChart/Root/Life/Deploying" unique_id=490071159]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Alive")
+event = &"onAlive"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Alive" type="Node" parent="StateChart/Root/Life" unique_id=373251118]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnDowned" type="Node" parent="StateChart/Root/Life/Alive" unique_id=1770264157]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Downed")
+event = &"onDowned"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnDead" type="Node" parent="StateChart/Root/Life/Alive" unique_id=1668770405]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Dead")
+event = &"onDead"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Downed" type="Node" parent="StateChart/Root/Life" unique_id=854290365]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnAlive" type="Node" parent="StateChart/Root/Life/Downed" unique_id=328126070]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Alive")
+event = &"onAlive"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="OnDead" type="Node" parent="StateChart/Root/Life/Downed" unique_id=585162738]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Dead")
+event = &"onDead"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Dead" type="Node" parent="StateChart/Root/Life" unique_id=880421894]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="Action" type="Node" parent="StateChart/Root" unique_id=1929144836]
+script = ExtResource("17_msw2x")
+initial_state = NodePath("Ready")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Ready" type="Node" parent="StateChart/Root/Action" unique_id=913328450]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="StateMachine" type="Node" parent="." unique_id=2104204779 node_paths=PackedStringArray("player_controller")]
+unique_name_in_owner = true
+script = ExtResource("20_gl3xj")
+player_controller = NodePath("..")
+
+[node name="Root" type="Node" parent="StateMachine" unique_id=167950421]
+
+[node name="MovementState" type="Node" parent="StateMachine/Root" unique_id=1877701828]
+
+[node name="GroundedState" type="Node" parent="StateMachine/Root/MovementState" unique_id=1571738056]
+script = ExtResource("21_akwv5")
+
+[node name="IdleState" type="Node" parent="StateMachine/Root/MovementState/GroundedState" unique_id=829558006]
+script = ExtResource("21_msw2x")
+
+[node name="MovingState" type="Node" parent="StateMachine/Root/MovementState/GroundedState" unique_id=265045922]
+script = ExtResource("23_gl3xj")
+
+[node name="RunningState" type="Node" parent="StateMachine/Root/MovementState/GroundedState/MovingState" unique_id=2047769071]
+script = ExtResource("24_gl3xj")
+
+[node name="SprintingState" type="Node" parent="StateMachine/Root/MovementState/GroundedState/MovingState" unique_id=1068118451]
+script = ExtResource("25_6bexg")
+
+[node name="AirborneState" type="Node" parent="StateMachine/Root/MovementState" unique_id=1042101971]
+script = ExtResource("26_gfrq3")
+
+[node name="JumpingState" type="Node" parent="StateMachine/Root/MovementState/AirborneState" unique_id=378723329]
+script = ExtResource("27_gl4q7")
+
+[node name="PostureState" type="Node" parent="StateMachine/Root" unique_id=2078086641]
+
+[node name="StandingState" type="Node" parent="StateMachine/Root/PostureState" unique_id=2001298299]
+script = ExtResource("28_p8f1f")
+
+[node name="CrouchingState" type="Node" parent="StateMachine/Root/PostureState" unique_id=1957296088]
+script = ExtResource("29_83pgd")
+
+[node name="LifeState" type="Node" parent="StateMachine/Root" unique_id=1799805180]
+
+[node name="DeployingState" type="Node" parent="StateMachine/Root/LifeState" unique_id=450295808]
+script = ExtResource("31_deploying")
+
+[node name="AliveState" type="Node" parent="StateMachine/Root/LifeState" unique_id=730586909]
+script = ExtResource("32_alive")
+
+[node name="DownedState" type="Node" parent="StateMachine/Root/LifeState" unique_id=1364240970]
+script = ExtResource("33_downed")
+
+[node name="DeadState" type="Node" parent="StateMachine/Root/LifeState" unique_id=674045522]
+script = ExtResource("34_dead")
+
+[node name="ActionState" type="Node" parent="StateMachine/Root" unique_id=655953819]
+
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded" to="StateMachine/Root/MovementState/GroundedState" method="_on_grounded_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded/Idle" to="StateMachine/Root/MovementState/GroundedState/IdleState" method="_on_idle_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded/Moving" to="StateMachine/Root/MovementState/GroundedState/MovingState" method="_on_moving_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Movement/Grounded/Moving/Running" to="StateMachine/Root/MovementState/GroundedState/MovingState/RunningState" method="_on_running_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded/Moving/Running" to="StateMachine/Root/MovementState/GroundedState/MovingState/RunningState" method="_on_running_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Movement/Grounded/Moving/Sprinting" to="StateMachine/Root/MovementState/GroundedState/MovingState/SprintingState" method="_on_sprinting_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Grounded/Moving/Sprinting" to="StateMachine/Root/MovementState/GroundedState/MovingState/SprintingState" method="_on_sprinting_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Airborne" to="StateMachine/Root/MovementState/AirborneState" method="_on_airborne_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Movement/Airborne/Jumping" to="StateMachine/Root/MovementState/AirborneState/JumpingState" method="_on_jumping_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Airborne/Jumping" to="StateMachine/Root/MovementState/AirborneState/JumpingState" method="_on_jumping_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Posture/Standing" to="StateMachine/Root/PostureState/StandingState" method="_on_standing_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Posture/Standing" to="StateMachine/Root/PostureState/StandingState" method="_on_standing_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Posture/Crouching" to="StateMachine/Root/PostureState/CrouchingState" method="_on_crouching_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Posture/Crouching" to="StateMachine/Root/PostureState/CrouchingState" method="_on_crouching_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Life/Deploying" to="StateMachine/Root/LifeState/DeployingState" method="_on_deploying_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Life/Alive" to="StateMachine/Root/LifeState/AliveState" method="_on_alive_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Life/Downed" to="StateMachine/Root/LifeState/DownedState" method="_on_downed_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Life/Dead" to="StateMachine/Root/LifeState/DeadState" method="_on_dead_state_entered"]

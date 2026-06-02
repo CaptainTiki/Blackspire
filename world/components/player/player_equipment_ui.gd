@@ -178,7 +178,7 @@ func _toggle_paper_doll(show_mouse_cursor: bool = true) -> void:
 		controller_nav_direction = Vector2i.ZERO
 		controller_nav_repeat_timer = 0.0
 		if show_mouse_cursor:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			player.release_mouse()
 		player.set_gameplay_input_enabled(false)
 		player.set_controller_look_enabled(false)
 		_refresh_mouse_filters()
@@ -192,7 +192,10 @@ func _toggle_paper_doll(show_mouse_cursor: bool = true) -> void:
 		_refresh_mouse_filters()
 		player.set_gameplay_input_enabled(true)
 		player.set_controller_look_enabled(true)
-		Input.set_mouse_mode(previous_mouse_mode)
+		if previous_mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			player.capture_mouse()
+		else:
+			player.release_mouse()
 
 
 func _close_paper_doll_for_life_state() -> void:
@@ -214,7 +217,10 @@ func _close_paper_doll_for_life_state() -> void:
 	_refresh_mouse_filters()
 	player.set_gameplay_input_enabled(true)
 	player.set_controller_look_enabled(true)
-	Input.set_mouse_mode(previous_mouse_mode)
+	if previous_mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		player.capture_mouse()
+	else:
+		player.release_mouse()
 
 
 func _should_show_mouse_for_toggle(event: InputEvent) -> bool:
