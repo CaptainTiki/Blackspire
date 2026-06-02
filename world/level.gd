@@ -24,6 +24,7 @@ var extracting_player: PlayerController
 var extraction_remaining_seconds := 0.0
 var extraction_duration_seconds := 0.0
 var _extraction_label: Label
+var _next_enemy_network_id := 0
 
 @onready var level_generator: LevelGenerator = $LevelGenerator
 
@@ -36,6 +37,7 @@ signal player_died(player: PlayerController)
 signal run_completed(actor: Node)
 signal run_failed(reason: String)
 signal player_exited_level(player: PlayerController)
+signal enemy_died(enemy_id: int)
 
 func _enter_tree() -> void:
 	Level.current_level = self
@@ -111,15 +113,54 @@ func spawn_enemies() -> Array[Node3D]:
 	var spawns := get_enemy_spawns()
 	for spawn_point in spawns:
 		var enemy_scene := _get_enemy_scene_for_spawn(spawn_point)
-		var enemy := enemy_scene.instantiate() as Node3D
+		var enemy := enemy_scene.instantiate() as BasicEnemy
 		var authored_scale := enemy.scale
 		add_child(enemy)
 		enemy.global_transform = spawn_point.global_transform
 		enemy.scale = authored_scale
+		enemy.set_network_enemy_id(_next_enemy_network_id)
+		_next_enemy_network_id += 1
+		enemy.health.died.connect(_on_enemy_health_died.bind(enemy))
 		spawned_enemies.append(enemy)
 		print("Level: Spawned ", _get_enemy_spawn_label(spawn_point), " enemy at ", enemy.global_position, " using spawn point: ", spawn_point.name)
 
 	return spawned_enemies
+
+
+func set_enemy_network_authority_enabled(is_enabled: bool) -> void:
+	for enemy in spawned_enemies:
+		if not is_instance_valid(enemy):
+			continue
+		if enemy.has_method("set_network_authority_enabled"):
+			enemy.set_network_authority_enabled(is_enabled)
+
+
+func get_enemy_for_network_id(enemy_id: int) -> BasicEnemy:
+	for enemy in spawned_enemies:
+		if not is_instance_valid(enemy):
+			continue
+		if enemy is BasicEnemy and enemy.network_enemy_id == enemy_id:
+			return enemy
+
+	return null
+
+
+func get_enemy_network_snapshot() -> Array[Dictionary]:
+	var snapshot: Array[Dictionary] = []
+	for enemy in spawned_enemies:
+		if not is_instance_valid(enemy):
+			continue
+		if enemy.has_method("get_network_state"):
+			snapshot.append(enemy.get_network_state())
+
+	return snapshot
+
+
+func _on_enemy_health_died(_damage_request: Variant, enemy: BasicEnemy) -> void:
+	if not is_instance_valid(enemy):
+		return
+
+	enemy_died.emit(enemy.network_enemy_id)
 
 
 func has_living_enemies() -> bool:

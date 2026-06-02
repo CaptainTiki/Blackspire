@@ -125,18 +125,18 @@ func spawn_local_players(level: Level, player_scene: PackedScene) -> Array[Playe
 	return spawn_slot_players(level, player_scene)
 
 
-func spawn_slot_players(level: Level, player_scene: PackedScene) -> Array[PlayerController]:
+func spawn_slot_players(level: Level, player_scene: PackedScene, spawn_assignments: Array = []) -> Array[PlayerController]:
 	if not level:
 		push_error("PlayerSlotManager.spawn_slot_players requires a Level.")
 		return []
-	return spawn_or_move_slot_players(level, level.get_player_spawns(), player_scene, level)
+	return spawn_or_move_slot_players(level, level.get_player_spawns(), player_scene, level, spawn_assignments)
 
 
-func spawn_or_move_local_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null) -> Array[PlayerController]:
-	return spawn_or_move_slot_players(world_root, spawns, player_scene, level)
+func spawn_or_move_local_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null, spawn_assignments: Array = []) -> Array[PlayerController]:
+	return spawn_or_move_slot_players(world_root, spawns, player_scene, level, spawn_assignments)
 
 
-func spawn_or_move_slot_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null) -> Array[PlayerController]:
+func spawn_or_move_slot_players(world_root: Node3D, spawns: Array[Marker3D], player_scene: PackedScene, level: Level = null, spawn_assignments: Array = []) -> Array[PlayerController]:
 	if not world_root:
 		push_error("PlayerSlotManager.spawn_or_move_slot_players requires a world_root.")
 		return []
@@ -152,9 +152,11 @@ func spawn_or_move_slot_players(world_root: Node3D, spawns: Array[Marker3D], pla
 
 	var players: Array[PlayerController] = []
 	var allow_single_player_controller := get_local_player_count() == 1
+	var spawn_index_by_session_player := _build_spawn_index_lookup(spawn_assignments)
 
 	for slot in slots:
-		var player := spawn_or_move_slot_player(slot, world_root, spawns, player_scene, level, allow_single_player_controller)
+		var spawn_index := int(spawn_index_by_session_player.get(slot.session_player_id, slot.slot_index))
+		var player := spawn_or_move_slot_player(slot, world_root, spawns, player_scene, level, allow_single_player_controller, spawn_index)
 		if not player:
 			return players
 		players.append(player)
@@ -168,7 +170,8 @@ func spawn_or_move_slot_player(
 	spawns: Array[Marker3D],
 	player_scene: PackedScene,
 	level: Level = null,
-	allow_single_player_controller: bool = false
+	allow_single_player_controller: bool = false,
+	spawn_index: int = -1
 ) -> PlayerController:
 	if not slot:
 		push_error("PlayerSlotManager.spawn_or_move_slot_player requires a slot.")
@@ -197,13 +200,24 @@ func spawn_or_move_slot_player(
 			previous_parent.remove_child(player)
 		world_root.add_child(player)
 
-	player.global_transform = _get_spawn_transform(spawns, slot.slot_index)
+	player.global_transform = _get_spawn_transform(spawns, spawn_index if spawn_index >= 0 else slot.slot_index)
 	if level:
 		level.register_player(player)
 
 	_assign_slot_player(slot, player, allow_single_player_controller)
 	print("PlayerSlotManager: Placed slot %d player at %s" % [slot.slot_index, player.global_position])
 	return player
+
+
+func get_spawn_assignments() -> Array[Dictionary]:
+	var assignments: Array[Dictionary] = []
+	for slot in slots:
+		assignments.append({
+			"session_player_id": slot.session_player_id,
+			"spawn_index": slot.slot_index,
+		})
+
+	return assignments
 
 
 func _assign_slot_player(slot: PlayerSlot, player: PlayerController, allow_single_player_controller: bool) -> void:
@@ -218,6 +232,18 @@ func _assign_slot_player(slot: PlayerSlot, player: PlayerController, allow_singl
 	slot.input.set_process_input(slot.is_local)
 	slot.camera.current = slot.is_local and slot.local_player_index == 0
 	player.set_uses_replicated_transform(not slot.is_local)
+	_configure_slot_player_ui(slot, player)
+
+
+func _configure_slot_player_ui(slot: PlayerSlot, player: PlayerController) -> void:
+	for child in player.get_children():
+		if not child is CanvasLayer:
+			continue
+
+		var canvas_layer := child as CanvasLayer
+		canvas_layer.visible = slot.is_local
+		canvas_layer.set_process_input(slot.is_local)
+		canvas_layer.set_process_unhandled_input(slot.is_local)
 
 
 func _get_local_input_device(slot_index: int) -> int:
@@ -239,6 +265,19 @@ func _get_spawn_transform(spawns: Array[Marker3D], slot_index: int) -> Transform
 		spawn_transform.origin += spawn_transform.basis.x.normalized() * side_offset
 
 	return spawn_transform
+
+
+func _build_spawn_index_lookup(spawn_assignments: Array) -> Dictionary:
+	var lookup := {}
+	for raw_assignment in spawn_assignments:
+		if not raw_assignment is Dictionary:
+			push_error("PlayerSlotManager: Spawn assignments must be dictionaries.")
+			return {}
+
+		var assignment := raw_assignment as Dictionary
+		lookup[int(assignment["session_player_id"])] = int(assignment["spawn_index"])
+
+	return lookup
 
 ## Placeholder shape for future remote player support.
 func add_remote_slot(peer_id: int) -> PlayerSlot:

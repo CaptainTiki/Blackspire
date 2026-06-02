@@ -3,11 +3,13 @@ extends Node
 
 const CrewStashInventoryScript := preload("res://system/crew_stash_inventory.gd")
 const CrewStashUIScript := preload("res://system/ui/crew_stash_ui.gd")
+const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
 const NetworkSessionScript := preload("res://system/network/network_session.gd")
 
 const SESSION_WORLD_HUB := "hub"
 const SESSION_WORLD_RUN := "run"
 const NETWORK_TRANSFORM_SEND_INTERVAL := 0.05
+const NETWORK_ENEMY_SEND_INTERVAL := 0.1
 const PLAYER_ACTION_PRIMARY := "primary_action"
 
 ## The central "session" container.
@@ -33,6 +35,9 @@ var split_screen_layer: CanvasLayer
 var split_screen_root: Control
 var last_run_summary := "No run completed yet"
 var _network_transform_send_elapsed := 0.0
+var _network_enemy_send_elapsed := 0.0
+var _pending_spawn_assignments: Array = []
+var _known_dead_enemy_ids: Array[int] = []
 
 
 func start_session(config: GameSessionConfig) -> void:
@@ -67,6 +72,8 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 		push_error("Game: No hub_scene assigned!")
 		return
 
+	_network_enemy_send_elapsed = 0.0
+	_known_dead_enemy_ids.clear()
 	_clear_current_world()
 
 	var hub := hub_scene.instantiate()
@@ -80,7 +87,7 @@ func _load_hub(summary: String = "No run completed yet") -> void:
 	hub.stash_requested.connect(_on_hub_stash_requested)
 	hub.show_run_summary(summary)
 
-	var players := player_slot_manager.spawn_or_move_slot_players(hub, hub.get_player_spawns(), player_scene)
+	var players := player_slot_manager.spawn_or_move_slot_players(hub, hub.get_player_spawns(), player_scene, null, _pending_spawn_assignments)
 	if players.is_empty():
 		push_error("Game: PlayerSlotManager did not place any local players in the hub.")
 		return
@@ -101,7 +108,7 @@ func _on_network_peer_joined(peer_id: int) -> void:
 	var slot := player_slot_manager.add_remote_slot(peer_id)
 	_place_joined_remote_slot(slot)
 	_broadcast_session_membership()
-	_send_session_world_to_peer(peer_id)
+	_send_session_transition_to_peer(peer_id)
 
 
 func _on_network_peer_left(peer_id: int) -> void:
@@ -200,11 +207,14 @@ func _restore_player_for_session_presence(player: PlayerController) -> void:
 		health.heal(maxi(health.max_health - health.current_health, 1))
 
 
-func _load_starting_world() -> void:
+func _load_starting_world(spawn_assignments: Array = []) -> void:
 	if not test_level_scene:
 		push_error("Game: No test_level_scene assigned!")
 		return
 
+	_network_enemy_send_elapsed = 0.0
+	_known_dead_enemy_ids.clear()
+	_pending_spawn_assignments = spawn_assignments
 	_clear_current_world()
 
 	var level := test_level_scene.instantiate() as Level
@@ -230,8 +240,9 @@ func _host_load_run() -> void:
 		push_error("Game: Clients cannot host-load the run.")
 		return
 
-	_broadcast_session_world(SESSION_WORLD_RUN, last_run_summary)
-	_load_starting_world()
+	var transition := _build_session_transition(SESSION_WORLD_RUN, last_run_summary)
+	_broadcast_session_transition(transition)
+	_apply_session_transition_locally(transition)
 
 
 func _host_load_hub(summary: String = "No run completed yet") -> void:
@@ -239,8 +250,9 @@ func _host_load_hub(summary: String = "No run completed yet") -> void:
 		push_error("Game: Clients cannot host-load the hub.")
 		return
 
-	_broadcast_session_world(SESSION_WORLD_HUB, summary)
-	_load_hub(summary)
+	var transition := _build_session_transition(SESSION_WORLD_HUB, summary)
+	_broadcast_session_transition(transition)
+	_apply_session_transition_locally(transition)
 
 
 func _request_host_deploy() -> void:
@@ -270,20 +282,20 @@ func _server_request_deploy() -> void:
 	_host_load_run()
 
 
-func _broadcast_session_world(world_key: String, summary: String = "") -> void:
+func _broadcast_session_transition(transition: Dictionary) -> void:
 	if not network_session.is_host:
 		return
 
-	_client_load_session_world.rpc(world_key, summary)
+	_client_apply_session_transition.rpc(transition)
 
 
-func _send_session_world_to_peer(peer_id: int) -> void:
+func _send_session_transition_to_peer(peer_id: int) -> void:
 	if not network_session.is_host:
 		return
 	if current_world is Level:
-		_client_load_session_world.rpc_id(peer_id, SESSION_WORLD_RUN, last_run_summary)
+		_client_apply_session_transition.rpc_id(peer_id, _build_session_transition(SESSION_WORLD_RUN, last_run_summary))
 	else:
-		_client_load_session_world.rpc_id(peer_id, SESSION_WORLD_HUB, last_run_summary)
+		_client_apply_session_transition.rpc_id(peer_id, _build_session_transition(SESSION_WORLD_HUB, last_run_summary))
 
 
 func _broadcast_session_membership() -> void:
@@ -300,6 +312,47 @@ func _client_apply_session_membership(snapshot: Array) -> void:
 
 	player_slot_manager.apply_session_snapshot(snapshot, network_session.local_peer_id)
 	_place_all_slots_in_current_world()
+
+
+func _build_session_transition(world_key: String, summary: String = "") -> Dictionary:
+	return {
+		"world_key": world_key,
+		"summary": summary,
+		"membership": player_slot_manager.get_session_snapshot(),
+		"spawn_assignments": player_slot_manager.get_spawn_assignments(),
+	}
+
+
+func _apply_session_transition_locally(transition: Dictionary) -> void:
+	var world_key := str(transition["world_key"])
+	var summary := str(transition.get("summary", ""))
+	var spawn_assignments := transition.get("spawn_assignments", []) as Array
+
+	match world_key:
+		SESSION_WORLD_HUB:
+			last_run_summary = summary
+			_pending_spawn_assignments = spawn_assignments
+			_load_hub(summary)
+		SESSION_WORLD_RUN:
+			_load_starting_world(spawn_assignments)
+		_:
+			push_error("Game: Unknown session world key '%s'." % world_key)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _client_apply_session_transition(transition: Dictionary) -> void:
+	if not network_session.is_client():
+		return
+
+	if not transition.has("membership"):
+		push_error("Game: Session transition requires a membership snapshot.")
+		return
+	if not transition.has("spawn_assignments"):
+		push_error("Game: Session transition requires spawn assignments.")
+		return
+
+	player_slot_manager.apply_session_snapshot(transition["membership"], network_session.local_peer_id)
+	_apply_session_transition_locally(transition)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -320,13 +373,15 @@ func _client_load_session_world(world_key: String, summary: String = "") -> void
 
 func _on_level_ready() -> void:
 	var level := current_world as Level
-	var players := player_slot_manager.spawn_slot_players(level, player_scene)
+	var players := player_slot_manager.spawn_slot_players(level, player_scene, _pending_spawn_assignments)
 	if players.is_empty():
 		push_error("Game: PlayerSlotManager did not spawn any local players.")
 		return
 
 	_apply_slot_presence_debug_to_all()
 	_bind_player_action_events_to_all()
+	_configure_enemy_network_authority()
+	_bind_level_enemy_events(level)
 	_ensure_local_coop_viewports()
 
 	print("Game: Spawned %d session player(s)." % players.size())
@@ -338,6 +393,7 @@ func _process(_delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	_process_network_transform_sync(delta)
+	_process_network_enemy_sync(delta)
 
 
 func _process_network_transform_sync(delta: float) -> void:
@@ -355,6 +411,29 @@ func _process_network_transform_sync(delta: float) -> void:
 		if not network_session.is_connected_to_host():
 			return
 		_send_local_player_transforms_to_host()
+
+
+func _process_network_enemy_sync(delta: float) -> void:
+	if not network_session.is_online_session():
+		return
+	if not network_session.is_host:
+		return
+
+	var level := current_world as Level
+	if not level:
+		return
+
+	_network_enemy_send_elapsed += delta
+	if _network_enemy_send_elapsed < NETWORK_ENEMY_SEND_INTERVAL:
+		return
+
+	_network_enemy_send_elapsed = 0.0
+	var snapshot := level.get_enemy_network_snapshot()
+	if snapshot.is_empty():
+		return
+
+	_client_apply_enemy_snapshot.rpc(snapshot)
+	_broadcast_new_enemy_deaths(snapshot)
 
 
 func _send_local_player_transforms_to_host() -> void:
@@ -443,6 +522,96 @@ func _client_apply_player_transform_snapshot(snapshot: Array) -> void:
 		)
 
 
+func _configure_enemy_network_authority() -> void:
+	var level := current_world as Level
+	if not level:
+		return
+
+	if not network_session.is_online_session():
+		level.set_enemy_network_authority_enabled(true)
+		return
+
+	level.set_enemy_network_authority_enabled(network_session.is_host)
+
+
+func _bind_level_enemy_events(level: Level) -> void:
+	var callback := Callable(self, "_on_host_enemy_died")
+	if not level.enemy_died.is_connected(callback):
+		level.enemy_died.connect(callback)
+
+
+func _on_host_enemy_died(enemy_id: int) -> void:
+	if not network_session.is_online_session():
+		return
+	if not network_session.is_host:
+		return
+	if _known_dead_enemy_ids.has(enemy_id):
+		return
+
+	_known_dead_enemy_ids.append(enemy_id)
+	_client_apply_enemy_death.rpc(enemy_id)
+
+
+func _broadcast_new_enemy_deaths(snapshot: Array) -> void:
+	for raw_entry in snapshot:
+		if not raw_entry is Dictionary:
+			push_error("Game: Enemy snapshot entries must be dictionaries.")
+			return
+
+		var entry := raw_entry as Dictionary
+		if not bool(entry["is_dead"]):
+			continue
+
+		var enemy_id := int(entry["enemy_id"])
+		if _known_dead_enemy_ids.has(enemy_id):
+			continue
+
+		_known_dead_enemy_ids.append(enemy_id)
+		_client_apply_enemy_death.rpc(enemy_id)
+
+
+@rpc("authority", "call_remote", "unreliable")
+func _client_apply_enemy_snapshot(snapshot: Array) -> void:
+	if not network_session.is_client():
+		return
+
+	var level := current_world as Level
+	if not level:
+		return
+
+	for raw_entry in snapshot:
+		if not raw_entry is Dictionary:
+			push_error("Game: Enemy snapshot entries must be dictionaries.")
+			return
+
+		var entry := raw_entry as Dictionary
+		var enemy := level.get_enemy_for_network_id(int(entry["enemy_id"]))
+		if not enemy:
+			continue
+
+		enemy.apply_network_state(
+			entry["position"],
+			float(entry["body_yaw"]),
+			bool(entry["is_dead"])
+		)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _client_apply_enemy_death(enemy_id: int) -> void:
+	if not network_session.is_client():
+		return
+
+	var level := current_world as Level
+	if not level:
+		return
+
+	var enemy := level.get_enemy_for_network_id(enemy_id)
+	if not enemy:
+		return
+
+	enemy.apply_network_death()
+
+
 func _bind_player_action_events_to_all() -> void:
 	for slot in player_slot_manager.slots:
 		_bind_player_action_events(slot)
@@ -455,9 +624,13 @@ func _bind_player_action_events(slot: PlayerSlot) -> void:
 		return
 
 	var melee_attack := slot.player.get_node("Components/PlayerMeleeAttack") as PlayerMeleeAttack
-	var callback := Callable(self, "_on_player_primary_action_started")
-	if not melee_attack.primary_action_started.is_connected(callback):
-		melee_attack.primary_action_started.connect(callback)
+	var primary_callback := Callable(self, "_on_player_primary_action_started")
+	if not melee_attack.primary_action_started.is_connected(primary_callback):
+		melee_attack.primary_action_started.connect(primary_callback)
+
+	var hit_callback := Callable(self, "_on_player_damage_area_hit")
+	if not melee_attack.damage_area_hit.is_connected(hit_callback):
+		melee_attack.damage_area_hit.connect(hit_callback)
 
 
 func _on_player_primary_action_started(player: PlayerController) -> void:
@@ -531,6 +704,69 @@ func _play_player_action_presentation(slot: PlayerSlot, action_key: String) -> v
 
 	var melee_attack := slot.player.get_node("Components/PlayerMeleeAttack") as PlayerMeleeAttack
 	melee_attack.play_attack_presentation()
+
+
+func _on_player_damage_area_hit(player: PlayerController, area: Area3D, damage_amount: int, hit_position: Vector3) -> void:
+	if not network_session.is_online_session():
+		return
+	if network_session.is_host:
+		return
+	if not network_session.is_connected_to_host():
+		return
+
+	var slot := _get_slot_for_player(player)
+	if not slot:
+		push_error("Game: Damage hit came from a player with no slot.")
+		return
+	if not slot.is_local:
+		return
+	if not area is Hurtbox3D:
+		return
+
+	var hurtbox := area as Hurtbox3D
+	var enemy := hurtbox.damage_target as BasicEnemy
+	if not enemy:
+		return
+
+	_server_receive_enemy_damage.rpc_id(
+		NetworkSessionScript.HOST_PEER_ID,
+		slot.session_player_id,
+		enemy.network_enemy_id,
+		damage_amount,
+		hit_position
+	)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _server_receive_enemy_damage(session_player_id: int, enemy_id: int, damage_amount: int, hit_position: Vector3) -> void:
+	if not network_session.is_host:
+		push_error("Game: Non-host received enemy damage event.")
+		return
+
+	var sender_id := multiplayer.get_remote_sender_id()
+	var slot := player_slot_manager.get_slot_for_session_player(session_player_id)
+	if not slot:
+		push_error("Game: Enemy damage for unknown session player %d." % session_player_id)
+		return
+	if slot.peer_id != sender_id:
+		push_error("Game: Peer %d tried to damage as session player %d owned by peer %d." % [sender_id, session_player_id, slot.peer_id])
+		return
+
+	var level := current_world as Level
+	if not level:
+		return
+
+	var enemy := level.get_enemy_for_network_id(enemy_id)
+	if not enemy:
+		return
+	if enemy.is_dead:
+		return
+
+	var bounded_damage := clampi(damage_amount, 0, 1000)
+	if bounded_damage <= 0:
+		return
+
+	enemy.apply_damage(DamageRequestScript.new(slot.player, bounded_damage, hit_position))
 
 
 func _on_hub_deploy_requested(_actor: PlayerController) -> void:

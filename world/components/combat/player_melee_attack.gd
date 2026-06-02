@@ -3,6 +3,7 @@ class_name PlayerMeleeAttack
 
 signal primary_action_started(player: PlayerController)
 signal attack_presentation_started(player: PlayerController)
+signal damage_area_hit(player: PlayerController, area: Area3D, damage_amount: int, hit_position: Vector3)
 
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
 const StatModifierDefinitionScript := preload("res://data/items/stat_modifier_definition.gd")
@@ -99,8 +100,10 @@ func _try_damage_area(area: Area3D) -> void:
 
 	_hit_targets.append(area)
 	var hit_position := _get_feedback_hit_position(area)
-	var damage_request := DamageRequestScript.new(player_components.player, get_attack_damage(), hit_position)
+	var damage_amount := get_attack_damage()
+	var damage_request := DamageRequestScript.new(player_components.player, damage_amount, hit_position)
 	area.apply_damage(damage_request)
+	damage_area_hit.emit(player_components.player, area, damage_amount, hit_position)
 
 
 func get_attack_damage() -> int:

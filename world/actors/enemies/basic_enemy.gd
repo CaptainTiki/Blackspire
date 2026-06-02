@@ -26,7 +26,9 @@ const FloatingDamageNumber := preload("res://world/components/combat/floating_da
 @onready var attack_range_debug_mesh: MeshInstance3D = $AttackRangeDebug/AttackRangeMesh
 @onready var death_timer: Timer = $DeathTimer
 
+var network_enemy_id := -1
 var is_dead := false
+var is_network_authority := true
 var _feedback_tween: Tween
 var _base_mesh_position := Vector3.ZERO
 var _base_mesh_scale := Vector3.ONE
@@ -48,10 +50,15 @@ func _ready() -> void:
 
 
 func apply_damage(damage_request: Variant) -> void:
+	if not is_network_authority:
+		return
+
 	health.apply_damage(damage_request)
 
 
 func alert_to_player(player: Node3D) -> void:
+	if not is_network_authority:
+		return
 	if is_dead:
 		return
 
@@ -104,6 +111,53 @@ func die(_damage_request: Variant) -> void:
 		_feedback_tween.kill()
 
 	death_timer.start(death_cleanup_delay)
+
+
+func set_network_enemy_id(enemy_id: int) -> void:
+	network_enemy_id = enemy_id
+
+
+func set_network_authority_enabled(is_enabled: bool) -> void:
+	is_network_authority = is_enabled
+	behavior.set_physics_process(is_enabled)
+	if not is_enabled:
+		velocity = Vector3.ZERO
+		collision_shape.disabled = true
+
+
+func get_network_state() -> Dictionary:
+	return {
+		"enemy_id": network_enemy_id,
+		"position": global_position,
+		"body_yaw": rotation.y,
+		"is_dead": is_dead,
+	}
+
+
+func apply_network_state(position: Vector3, body_yaw: float, replicated_is_dead: bool) -> void:
+	if replicated_is_dead:
+		apply_network_death()
+		return
+
+	global_position = position
+	rotation.y = body_yaw
+	velocity = Vector3.ZERO
+
+
+func apply_network_death() -> void:
+	if is_dead:
+		return
+
+	is_dead = true
+	behavior.set_dead()
+	collision_shape.disabled = true
+	hurtbox_collision_shape.disabled = true
+	mesh.visible = false
+	debug_label.visible = false
+	attack_range_debug_collision.disabled = true
+	attack_range_debug_mesh.visible = false
+	if _feedback_tween:
+		_feedback_tween.kill()
 
 
 func _on_health_damaged(damage_request: Variant, _remaining_health: int) -> void:

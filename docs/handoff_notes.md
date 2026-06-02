@@ -2,414 +2,134 @@
 
 **Last Updated:** 2026-06-02
 
----
+At the start of a new session, read this file first.
 
-## Project Memories (Stable Context)
+## Current Build
 
-These are durable truths about how we build Blackspire.  
-**At the start of every new session, re-read this entire section + the linked documents.**
+`v0.0.0050` - Multiplayer proof complete; pivoting to the Multiplayer Playthrough Slice.
+
+## Current Direction
+
+The project has proven the session foundation:
+
+- Single Player, Local Co-op, Host, and Client sessions all use the same `Game` flow.
+- `PlayerSlot` is now a session participant record, not just a local input device.
+- Host/client join, membership snapshots, visible remote players, and disconnect cleanup work.
+- Player transform, rotation, jump movement, and primary-action presentation replicate.
+- Hub -> run -> hub works in a two-instance host/client session.
+- Enemy AI/damage/death can be host-owned, and client attacks can be forwarded to host authority.
+
+We are intentionally **not** pushing deeper into temporary networking hooks right now. The next milestone is to make the first five minutes fun, while preserving the multiplayer-aware architecture.
+
+Active plan:
+
+- `docs/multiplayer_playthrough_slice_plan.md`
+
+Known online bugs/authority gaps:
+
+- `docs/network_known_issues.md`
+
+## Durable Project Rules
 
 ### Authoring Pipeline
+
 - All maps and placed objects are authored in **TrenchBroom**.
 - Everything enters the game through **FuncGodotMap** nodes using our FGD definitions.
 - There are currently no hybrid scenes or exceptions to this rule.
-- **Trigger:** When working with any placeable object (props, doors, enemies, etc.), check the current FGD entities in `trenchbroom/` and how they map to Godot scenes.
+- When working with placeable objects, check the current FGD entities in `trenchbroom/` and how they map to Godot scenes.
 
-### Architectural Principles
+### Architecture
+
 - Short, focused scripts.
-- **Parents own references. Siblings own behavior.**
-- Prefer direct `@export` references and hardcoded knowledge of scene structure over defensive `if has_node()` checks.
+- Parents own references. Siblings own behavior.
+- Prefer direct `@export` references and explicit scene knowledge over broad fallback logic.
 - There is exactly one active dungeon `Level` at runtime. Level-global dungeon context is available through `Level.current_level`.
-- **Review the Architecture Document** when starting any significant systems work:  
-  `docs/project_blackspire_architecture.md`
+- Re-read `docs/project_blackspire_architecture.md` before significant systems work.
 
-### Philosophy - Fail Loudly
-- We want to know *immediately* when something is broken so we can fix it.
-- Almost no fallbacks, safety nets, or defensive checks in prototype/single-player code.
-- Fallbacks are only acceptable for multiplayer timing concerns.
-- If a required node or component is missing, the game should fail hard (not silently continue).
-- **Trigger:** If you see defensive `has_node()` patterns or broad fallback logic appearing in non-multiplayer code, push back.
+### Fail Loudly
 
-### Current Milestone
-- Single player **closed prototype loop** (following the Prototype GDD).
-- Current loop: spawn -> hallway-separated combat rooms -> treasure side branch -> elite room -> exit room / extraction portal.
-- Review current prototype milestones and scope here:  
-  `docs/project_blackspire_prototype_gdd.md`
+- We want to know immediately when something is broken.
+- Avoid fallback/safety-net code in prototype gameplay systems.
+- Fallbacks are acceptable only for multiplayer timing/transition concerns.
+- If a required node or component is missing, the game should fail loudly.
 
-### How to Work With Me
-- Always start a session by re-reading:
-  1. This handoff (`docs/handoff_notes.md`)
-  2. The Architecture Document
-  3. The Prototype GDD
-- You are encouraged to be **proactive**. If you have solid context on what we're doing and why, push through multiple steps and report back. You do not need to stop after every small task.
-- I am always available for direction or clarification when needed.
+### Multiplayer Shape
 
----
+- Host-authoritative remains the target.
+- Clients own local input intent and presentation.
+- State-machine transitions and semantic gameplay events should become future network hooks.
+- Avoid binding future replication to temporary animation names, node paths, or one-off presentation scripts.
 
-## Current Session Context
+## Current Gameplay Pivot
 
-**Last Worked On:**
-- Added a small player HP HUD.
-  - `HealthComponent` now emits `health_changed(current_health, max_health)`.
-  - `PlayerHUD` is a player-owned `CanvasLayer` bound directly to that player's `HealthComponent`.
-  - The HUD currently shows `HP current/max` in the lower-left overlay.
-- Added the player bleedout / run-fail slice.
-  - `PlayerLifeState` listens to player `HealthComponent.died` and turns zero HP into bleeding out instead of immediate final death.
-  - Bleeding out locks player control, interaction, and melee attacks, and collapses the camera toward the floor.
-  - Bleed-out duration is currently 60 seconds; expiry marks the player dead.
-  - Bleeding-out and dead players notify `Level`.
-  - `Level` tracks active players and shows a run-failed overlay when all active players are bleeding out or dead.
-  - A small revive hook exists on `PlayerLifeState`, but revive interaction/gameplay is not wired yet.
-- Changed extraction from a living-enemy gate into a delayed holdout.
-  - `ExitPortal` now starts extraction through `Level.begin_extraction(player, extraction_delay_seconds)`.
-  - The mapper-facing `exit_portal` property is now `extraction_delay_seconds`, currently authored as 15 seconds.
-  - Extraction can start while enemies remain.
-  - Starting extraction alerts every active spawned enemy to the extracting player.
-  - `Level` shows a temporary countdown overlay, changes it to `Extraction Ready` when the countdown expires, and waits for another portal interaction before calling `exit_level(player)`.
-- Added the first loot pickup slice on top of the closed run loop.
-  - `PlayerInventory` is a tiny player-owned component that currently tracks only collected coins.
-  - `Pickup` is the base interactable collection entity; `GoldPickup` adds coins to the interacting player's inventory.
-  - `pickup_gold` is exposed through the FGD, and `room_treasure_01.map` / generated scene now contains 25 gold total.
-  - `Level` asks the player for the exit summary, emits exit/completion signals, shows the prototype overlay, and pauses the tree.
-- Added the first equipment data foundation.
-  - `ItemDefinition` owns id, display name, icon, stackability, max stack, and enum-backed item type.
-  - `EquipmentDefinition` extends item data with enum-backed equipment slot and an array of stat modifier resources.
-  - `StatModifierDefinition` owns enum-backed stat type and a signed value, so authored equipment can carry positive and negative modifiers.
-  - Added sample `gold_coin`, `rusted_sword`, and `padded_vest` resources under `data/`.
-  - Focused smoke coverage loads the sample resources and verifies item type, equipment slot, and stat modifier totals.
-- Added placeable direct-equipment pickups.
-  - `PlayerEquipment` tracks equipped equipment definitions by slot and totals stat modifiers from equipped gear.
-  - `EquipmentPickup` reads an `EquipmentDefinition`, shows an equip prompt, equips directly into the interacting player's `PlayerEquipment`, then removes itself.
-  - Added `rusted_sword_pickup.tscn` and `padded_vest_pickup.tscn`.
-  - Added TrenchBroom point entities `pickup_rusted_sword` and `pickup_padded_vest` to the Blackspire FGD.
-  - Placed one rusted sword and one padded vest in `room_treasure_01`.
-  - `PlayerMeleeAttack` now includes equipped `ATTACK_DAMAGE` modifiers; the rusted sword raises melee damage from 10 to 14.
-- Added the first equipment inspection UI.
-  - `toggle_equipment` is bound to Tab.
-  - `PlayerEquipmentUI` is a player-owned CanvasLayer that reads that player's `PlayerEquipment` and `PlayerMeleeAttack`.
-  - Direct equip-on-pickup now shows a short "Equipped X" feedback toast.
-  - The Tab panel shows equipment slots, focused slot/item details, and current prototype stats.
-  - The Tab panel now also carries the first backpack display slice.
-- Added armor mitigation and hardened the stat pipeline.
-  - `PlayerEquipment` now exposes named stat helpers for attack damage, armor, max health, and move speed.
-  - `PlayerEquipment.mitigate_physical_damage()` applies flat armor reduction with a minimum of 1 chip damage for positive physical hits.
-  - `PlayerController.apply_damage()` is now the player-side damage entry point and applies physical mitigation before forwarding to `HealthComponent`.
-  - Enemy attacks now call `target.apply_damage(damage_request)` instead of reaching directly into the target's `HealthComponent`.
-  - Non-physical damage bypasses armor for now.
-  - `DamageRequest.with_amount()` preserves source, hit position, and damage type when producing adjusted requests.
-- Added the item backend foundation without inventory UI.
-  - `ItemInstance` is the runtime item model: item definition reference, quantity, stack helpers, split support, and unique ids for non-stackables.
-  - `PlayerInventory` now stores item instances instead of only a raw coin counter.
-  - `PlayerInventory.add_item()` supports stack merging, max-stack overflow, and non-stackable item instance creation.
-  - Gold still works through `add_coins()` and the extraction summary, but it now uses the `gold_coin` item definition internally.
-  - Inventory pickups emit `inventory_toast`, currently shown through the existing player-local equipment feedback label.
-  - This deliberately does not add the inventory grid yet.
-- Added the backpack and hotbar display foundation.
-  - `PlayerInventory` exposes baseline slot counts: 5 backpack slots and a 3-slot hotbar placeholder.
-  - The Tab paper-doll panel now shows a Backpack section populated from `PlayerInventory.get_items()`.
-  - Backpack slot focus uses the existing item details area to show quantity and item modifier details where available.
-  - The Hotbar section is visible but intentionally nonfunctional for now.
-  - Future bag equipment should expand backpack capacity and alter hotbar size.
-- Added the bag equipment capacity pipeline.
-  - `EquipmentDefinition.EquipmentSlot` now includes `BAG`.
-  - `StatModifierDefinition.StatType` now includes `BACKPACK_SLOTS` and `HOTBAR_SLOTS`.
-  - `worn_pack` is the first bag definition: +3 backpack slots and +1 hotbar slot.
-  - `pickup_worn_pack` is exposed through the TrenchBroom FGD and placed in the treasure room.
-  - `PlayerInventory` computes current backpack/hotbar counts from base values plus equipped modifiers.
-  - `PlayerEquipmentUI` rebuilds backpack and hotbar buttons when equipment changes the counts.
-- Added backpack capacity enforcement.
-  - `PlayerInventory.add_item()` and `add_coins()` now return success/failure.
-  - Capacity is enforced as all-or-nothing for now; no partial gold/item pickup yet.
-  - Stackable items can fit into matching stacks plus available empty slots.
-  - Non-stackable items require one empty slot per instance.
-  - Failed pickups emit an inventory toast and remain in the world.
-  - The paper-doll stats readout shows backpack usage as used/total.
-- Added mouse equip-from-backpack behavior.
-  - `inventory_pick_place` and `inventory_cancel_drag` are defined in the input map.
-  - Backpack slots preserve explicit slot positions, including empty holes.
-  - Left-click backpack slot with no held item: hold that item.
-  - Left-click backpack slot with a held item: place into empty slot or swap with occupied slot.
-  - Left-click compatible equipment slot with a held equipment item: equip it.
-  - Left-click occupied equipment slot with no held item: unequip it into the held cursor item.
-  - Equipment pickups now go into the backpack first instead of direct-equipping.
-  - Hotbar remains display-only; future hotbar assignment should link to backpack items rather than move them.
-- Added hotbar binding foundation.
-  - `HotbarBinding` links a hotbar slot to a real backpack `ItemInstance`.
-  - `PlayerHotbar` owns bindings and uses the player's current hotbar slot count.
-  - Dropping a held backpack item onto a hotbar slot returns it to the backpack and creates a link.
-  - The link survives moving that same item instance to another backpack slot.
-  - Clicking a bound hotbar slot, or pressing number keys 1-4, produces placeholder use feedback.
-  - Hotbar slots still do not consume, equip, cast, or move items yet.
-- Added generic drop-from-backpack.
-  - `ItemDefinition` now carries `world_pickup_scene_path`.
-  - Existing item definitions point to their pickup scenes.
-  - Pickup scene roots are now `RigidBody3D`, so dropped loot can be tossed into the world.
-  - The paper-doll Backpack panel has a Drop button.
-  - Dropping requires holding a backpack item; equipped items must be unequipped to backpack first.
-  - Dropping removes that item instance from the backpack, clears matching hotbar bindings, spawns the configured pickup scene near the player camera, and applies a small forward/up impulse.
-  - Gold drops preserve stack quantity; equipment drops preserve equipment definition.
-- Added health potion hotbar use.
-  - `ConsumableDefinition` extends `ItemDefinition` for authored consumables.
-  - `health_potion` restores 15 HP when used from a bound hotbar slot.
-  - Health potion use consumes one item from the linked backpack stack and clears the hotbar binding when that stack is exhausted.
-  - Health potion use creates an `empty_bottle` replacement item.
-  - Replacement bottles go into the backpack when space is available; otherwise they drop into the world through the same generic rigid-body drop path.
-  - `pickup_health_potion` is exposed through the TrenchBroom FGD and placed in the treasure room.
-- Added controller input foundation.
-  - Existing keyboard/mouse controls remain in place.
-  - Controller bindings now cover the basic run loop: left stick movement, right stick look, left-stick press sprint, A jump, X interact, right trigger primary attack, Y paper-doll toggle, B drag cancel, and D-pad hotbar slots 1-4.
-  - `PlayerController` owns right-stick look through `look_left/right/up/down` actions and `controller_look_speed`.
-  - `PlayerEquipmentUI` disables gameplay input and controller look while the paper doll is open, then re-enables them when the panel closes.
-  - Opening the paper doll from controller keeps the mouse cursor hidden; keyboard/mouse toggles still show the cursor.
-  - Controller inventory movement uses focus + A-button hold/place/equip/bind/drop.
-  - Controller-held items mark the source slot as `[Held]` instead of using the mouse-follow drag label.
-- Reworked local co-op paper-doll inventory selection so simultaneous inventories work.
-  - `PlayerEquipmentUI` no longer uses Godot's single native `Control` focus as the source of truth for controller inventory actions.
-  - Each player-owned paper-doll UI now tracks explicit selection across equipment slots, backpack slots, hotbar slots, and Drop.
-  - Player 1 mouse hover/click is accepted only by the mouse-owning UI.
-  - Player 2 controller navigation and A-button activation are routed through that player's own `PlayerInput` and `PlayerEquipmentUI` selection state.
-  - Manual local co-op verification passed with both inventories open: both players can navigate their own inventory, pick up equipment, equip from backpack, bind items to their own hotbar, drop backpack items, and close inventory without cross-panel mutation.
-- Added the first slot-owned local co-op UI host slice.
-  - `Game` now creates a `PlayerXUIHost` under each split-screen pane.
-  - Existing split-screen HP labels now live under the owning slot's UI host.
-  - `InteractionScanner` emits `focus_changed(prompt)` when that player's raycast focus changes.
-  - Each slot UI host owns a prompt label driven by that slot player's scanner.
-  - Manual local co-op verification passed at the equipment stash: both players see their own pickup prompt, pickup toast, hotbar binding feedback, and potion-use feedback without crossing panes.
-- Hardened the local co-op downed/revive lifecycle.
-  - Downed/dead players cannot open the paper-doll inventory or activate hotbar items.
-  - If a player is downed while inventory is open, the paper doll closes safely.
-  - Held backpack items return to their source slot when forced closed; held unequipped items drop into the world.
-  - `PlayerHotbar` now reports that items cannot be used while downed instead of the misleading full-health potion message.
-  - `InteractionScanner` now includes the player layer, ignores its own player, recognizes another bleeding-out player as a revive target, shows `Revive PlayerX`, and calls `PlayerLifeState.revive()`.
-  - Manual local co-op verification passed: player 2 can revive downed player 1 to 25 HP, one player down does not fail the run, both players down fails the run, revive-then-extract works, and downed inventory/hotbar use is blocked.
-- Started the temporary hub / repeatable run loop foundation.
-  - `Game` now loads `world/hub/hub.tscn` before the current dungeon run.
-  - The hub contains player spawns, a deploy portal, a stash placeholder, and a last-run summary board.
-  - `PlayerSlotManager` can now spawn or move existing slot players into a new world root, preserving player-owned inventory/equipment/hotbar state between hub and run worlds.
-  - Deploying from the hub loads the current generated `test_level`.
-  - Successful extraction and all-down run failure now return to the hub with a summary instead of using the old terminal pause overlays during session flow.
-  - `Level` still defaults to the old overlay/pause behavior, but `Game` disables that behavior for hub-based sessions.
-  - The hub summary aggregates crew gold across all local player slots and shows per-player gold lines.
-  - Headless runtime logging now writes to ignored local `godot-headless*.log` files instead of Godot's default `user://logs` path, avoiding the Windows native crash popup during console smoke tests.
-- Added the minimal crew stash foundation.
-  - `Game` owns a session-lifetime `CrewStashInventory`, so stash contents survive hub/run scene reloads.
-  - `HubStashChest` now asks the hub/game session to open the stash UI instead of showing placeholder feedback.
-  - `CrewStashUI` shows the interacting player's backpack beside the crew stash.
-  - Mouse and controller-owned selection paths are both supported for basic slot movement.
-  - Stash UI is owned per `PlayerSlot` and attaches to that slot's split-screen UI host when available, matching the existing local co-op inventory/HUD pattern.
-  - The stash panel centers through a full-rect `CenterContainer` and uses compact slot buttons so it fits inside a split-screen pane.
-  - Moving an item from backpack to stash clears hotbar bindings for that item instance.
-  - Deploy is blocked while any stash UI is open so no held item can be lost during a world transition.
-  - Manual local co-op verification passed: both players can open their own stash UI at the same time, stash changes update live in both open panels, and stash contents persist through multiple hub/run loops.
-- Started session/host multiplayer planning and the first slot prep slice.
-  - Added `docs/session_host_multiplayer_plan.md` as the working host-authoritative multiplayer blueprint.
-  - `PlayerSlot` now represents a session participant, with `session_player_id`, `peer_id`, `local_player_index`, `is_local`, and `input_device`.
-  - Local input, camera, viewport, and UI references remain on `PlayerSlot`, but are now clearly local ownership details rather than the slot's identity.
-  - `PlayerSlotManager` now exposes `create_local_session_slots()`, `spawn_slot_players()`, and `spawn_or_move_slot_players()` while preserving compatibility wrappers for the old local naming.
-  - `PlayerSlotManager.add_remote_slot(peer_id)` now creates a non-local placeholder slot, giving the next networking slice a concrete target shape.
-  - `Game` now calls the participant-shaped slot/spawn methods and skips non-local slots when creating or syncing local split-screen viewports.
-  - Single-player and local co-op behavior should be unchanged by this prep slice.
-- Added the first host/client session skeleton.
-  - `GameSessionConfig` now includes `MULTIPLAYER_HOST` and `MULTIPLAYER_CLIENT`.
-  - Session config now carries `host_address`, `host_port`, `max_player_count`, and `local_player_count`.
-  - The main menu has `Host Game` and `Join Game`; Join opens an address/port popup defaulting to `127.0.0.1:24545`.
-  - `QuickEntry` exposes the same network fields for fast test sessions.
-  - Added `system/network/network_session.gd` as the focused ENet wrapper for host/client startup, close, peer ids, connected peer tracking, and peer joined/left/connection signals.
-  - `Game` starts host/client peers from the session config.
-  - On host peer join, `Game` creates a non-local remote `PlayerSlot`, places its actor in the current hub/level, and removes it on disconnect.
-  - Host-owned world transition RPCs now broadcast crude `hub` / `run` loads so clients can follow host deploy and hub return.
-  - Client deploy requests now go to the host instead of locally loading a private run.
-  - Manual two-instance test confirmed the client joins the host, the host sees the real peer id, remote slot 1 is created, and the remote player is placed at the second hub spawn.
-  - The observed peer-left log came from closing/restarting sessions, not from an immediate disconnect.
-- Added the host-sent session membership snapshot and first visible remote presence slice.
-  - `PlayerSlot` now carries a temporary `display_name` for debug-visible session identity.
-  - `PlayerSlotManager.get_session_snapshot()` serializes slot index, session player id, peer id, local player index, and display name.
-  - `PlayerSlotManager.apply_session_snapshot(snapshot, local_peer_id)` reconciles host-authored membership on clients while preserving the client's local input slot when the host assigns it a different session slot index.
-  - `Game` broadcasts membership snapshots from the host on peer join/leave.
-  - Clients apply the snapshot, create non-local slots for host/other peers, and place those remote actors in the current hub/run world.
-  - Player actors now get temporary overhead `SessionDebugLabel` labels showing display name and peer id, making remote presence obvious during manual tests.
-  - Automated two-process localhost smoke passed on port `24547`: host saw the client remote slot, client received the host membership snapshot, and client treated host slot 0 as remote.
-  - Manual two-instance laptop test passed on port `24545`: host and client each saw the other peer appear, stayed connected, and disconnect/removal was clean.
-- Added the first networked player transform and primary-action presentation slice.
-  - Local owners publish stable transform facts: `session_player_id`, position, body yaw, and camera pitch.
-  - Clients send their locally owned player transforms to the host over unreliable RPC.
-  - The host validates peer ownership before applying incoming transforms to host-side remote actors.
-  - The host broadcasts player transform snapshots; clients apply them only to non-local player actors.
-  - Remote player actors disable local physics and act as replicated presentation bodies.
-  - `PlayerMeleeAttack` now emits semantic `primary_action_started` events.
-  - `Game` sends client primary-action events to the host, validates ownership, and broadcasts action events to peers.
-  - Remote peers play the current temporary sword-swing presentation for non-local actors without implying host-resolved damage yet.
-  - Automated two-process localhost transform smoke passed on port `24548`.
-  - Automated two-process localhost primary-action smoke passed on port `24549`.
-  - Manual two-instance laptop test passed on port `24545`: both players translated, rotated, jumped, and showed sword-swing presentation on the other peer; connection stayed stable until manual disconnect/shutdown.
-  - Current expected limitation: combat damage/results, enemy state, interaction, inventory, stash authority, and robust hub-to-level lifecycle sync are not replicated yet.
+Build the **Multiplayer Playthrough Slice**:
 
-**Current State:**
-- The application bootstrap now follows the new session chain:
-  - `system/main.tscn` is the app root and opens the main menu.
-  - `system/menu/main_menu.tscn` routes Single Player into a `GameSessionConfig`.
-  - `system/game/game.tscn` owns `PlayerSlotManager`, creates configured local session slots, and loads the temporary hub world.
-  - `world/hub/hub.tscn` is the crude crew room for proving the repeatable loop.
-  - Hub interaction can deploy into `world/levels/test_level.tscn`.
-  - Extraction or all-down failure returns to the hub and updates the summary board.
-  - `world/levels/test_level.tscn` still owns the deterministic generated dungeon chain through `LevelGenerator`.
-  - Single Player now flows through `Main -> Menu -> Game -> Hub -> Level -> Rooms -> Hub`.
-  - `system/quick_entry.tscn` skips the menu for fast iteration while still using the same `Game` session path.
-  - Host Game starts an ENet host on the configured port, currently default `24545`.
-  - Join Game opens an IP/port popup and creates a `MULTIPLAYER_CLIENT` session config.
-  - `NetworkSession` is the only node that should own raw ENet setup/teardown.
-  - Multiplayer world transitions are currently string-keyed (`hub` / `run`) RPCs owned by `Game`.
-  - Host-authored membership snapshots now keep client and host slot lists aligned during join/leave.
-  - `PlayerSlotManager` now owns slot player spawning once `Game` receives `Level.level_ready`.
-  - `PlayerSlot` is now a session participant record; local co-op input/camera/UI ownership is attached to local slots through `is_local`, `local_player_index`, and `input_device`.
-  - Online host/client sessions currently spawn visible remote player actors with overhead peer labels in the hub.
-  - Online player transform replication currently covers translation, body yaw, camera pitch, and jump movement.
-  - Online primary-action event replication currently shows the temporary sword-swing presentation on remote peers.
-  - Online combat damage/results, enemies, interaction, inventory, stash authority, and robust world-transition synchronization are still not replicated.
-  - Single Player spawns one local player, slot 0 uses keyboard/mouse, and still accepts unassigned joypad input for controller-friendly solo play.
-  - Local Co-op spawns two local players. Slot 0 uses keyboard/mouse and owns mouse look; slot 1 uses controller device 0 and does not receive mouse or unassigned joypad input.
-  - Local Co-op now creates a two-row split-screen overlay using shared-world `SubViewport`s.
-  - Slot 0 renders through the top viewport; slot 1 renders through the bottom viewport.
-  - Each slot gets a viewport-local camera that mirrors that player's real camera every frame.
-  - Player-owned CanvasLayers (`PlayerHUD`, `PlayerHitFeedback`, `PlayerEquipmentUI`) are bound to the owning slot's viewport.
-  - `PlayerEquipmentUI` filters input through the owning `PlayerInput`, so keyboard/mouse UI controls player 1 and controller UI controls player 2.
-  - `PlayerEquipmentUI` now enters compact split-screen layout when bound to a local co-op viewport.
-  - The original player-owned `PlayerHUD` is hidden in Local Co-op; split-screen HP now uses slot-owned labels drawn directly over each split-screen pane.
-  - The paper-doll panel is top-aligned and shortened to fit the half-height viewport.
-  - Player inventory components are smoke-verified as separate instances; adding coins to player 1 does not mutate player 2.
-  - Simultaneous paper-doll inventory ownership is now manually verified for player 1 mouse and player 2 controller.
-  - Slot-owned prompt and feedback path is now manually verified for pickup prompts, item pickup toasts, hotbar binding feedback, and potion-use feedback.
-  - Dropped backpack items, damage HUD/hit feedback, revive, all-down failure, revive-then-extract, and full two-player extraction have been manually verified.
-  - The full local co-op prototype spine is validated enough to move on: menu -> local co-op -> spawn -> fight -> loot -> inventory/equip/hotbar/drop -> down/revive -> extract -> run-complete gold readout.
-- The deterministic generated dungeon now supports the full rough loop:
-  - Player spawns in the authored spawn room.
-  - Combat rooms spawn basic enemies from `info_enemy_spawn`.
-  - Treasure side room contains breakable urns and interactable gold pickups.
-  - Treasure side room also contains one rusted sword pickup and one padded vest pickup.
-  - Treasure side room also contains two health potion pickups.
-  - Final elite room spawns the elite enemy from the same marker type with `elite = true`.
-  - Exit room contains the extraction portal.
-  - Extraction is smoke-verified to start while enemies remain, alert those enemies to the extracting player, become ready after the countdown, and only complete after a second portal interaction.
-  - Player failure is smoke-verified with two active players: one down/dead player does not fail the run while another player is active, but all active players bleeding out/dead fails the run.
-  - Player HUD is smoke-verified to update on damage and revive.
-- Validation completed:
-  - Targeted player HUD smoke script passed.
-  - Targeted player bleedout/fail-state smoke script passed.
-  - Targeted extraction-ready smoke script passed.
-  - Targeted equipment definition smoke script passed.
-  - Targeted equipment pickup smoke script passed.
-  - Targeted treasure equipment placement smoke script passed.
-  - Targeted equipment UI smoke script passed.
-  - Targeted armor mitigation smoke script passed.
-  - Targeted inventory backend smoke script passed.
-  - Targeted backpack UI smoke script passed.
-  - Targeted bag capacity smoke script passed.
-  - Targeted inventory capacity enforcement smoke script passed.
-  - Targeted mouse inventory/equipment movement smoke script passed.
-  - Targeted hotbar binding smoke script passed.
-  - Targeted drop-from-backpack smoke script passed.
-  - Targeted health potion smoke script passed.
-  - Targeted controller input smoke script passed.
-  - Targeted controller inventory pick/place smoke script passed.
-  - Targeted controller inventory cursor-mode smoke script passed.
-  - Targeted controller held-item affordance smoke script passed.
-  - Targeted main-menu single-player boot smoke passed: `main.tscn` created `Game`, loaded `Level`, generated rooms, spawned the player, and assigned slot 0.
-  - Targeted single-player player-slot boot smoke passed: one slot, one player, slot 0 camera/input assigned.
-  - Targeted local co-op player-slot boot smoke passed: two slots, two players, slot 0 keyboard/mouse, slot 1 controller device 0, only slot 0 camera current.
-  - Targeted local co-op split-screen boot smoke passed: two slots, two players, two shared-world `SubViewport`s, and two current viewport cameras.
-  - Targeted local co-op slot UI ownership smoke passed: player CanvasLayers bind to the correct slot viewport, keyboard Tab opens only player 1 paper doll, controller Y opens only player 2 paper doll, and player inventories are distinct.
-  - Targeted split-screen HUD/paper-doll layout smoke passed: both HUDs and equipment UIs enter split-screen layout, HP labels use compact bottom offsets, and paper-doll panels are top-aligned and short enough for half-height viewports.
-  - Targeted split-screen HP labels smoke passed: both slot-owned labels exist, initialize independently, and damaging player 2 updates only player 2's HP label.
-  - Manual local co-op viewport/input test passed: player 1 keyboard/mouse movement only moves the player-1/top camera, and player 2 controller movement only moves the player-2/bottom camera.
-  - Manual controller playtest passed: movement, look, combat, interaction, inventory, equipment, hotbar, potion use, and extraction are all reachable without switching back to mouse/keyboard.
-  - Manual simultaneous local co-op inventory playtest passed: with both paper dolls open, player 1 mouse and player 2 controller can independently use backpack/equipment/hotbar/drop and close their own inventories.
-  - Manual slot-owned local co-op UI host playtest passed: both players see their own pickup prompt, pickup toast, hotbar feedback, and potion-use feedback.
-  - Manual local co-op downed/revive lifecycle playtest passed: one player down does not fail, both players down fails, revive restores to 25 HP, downed players cannot use inventory/hotbar, and revive-then-extract works.
-  - Manual full two-player run passed through extraction and run-complete gold readout.
-  - Quick-entry hub boot smoke passed: `quick_entry.tscn` created `Game`, loaded `Hub`, and placed the local player at the hub spawn.
-  - Quick-entry no-explicit-log smoke passed without the native Windows memory-read crash popup after redirecting Godot file logging.
-  - Manual local co-op hub loop passed: both players spawned in the hub, deployed, completed a full run, returned to hub, kept equipment/inventory/hotbar state, redeployed with that state intact, completed a second run, and returned with accumulated loot intact.
-  - Manual local co-op hub summary verification passed: the board shows total crew gold plus per-player gold lines, including player 2's gold.
-  - Hub summary board/sign orientation has been corrected and manually verified.
-  - Manual local co-op stash verification passed: player 1 deposited gold, player 2 removed it while player 1's stash UI was still open, player 1 saw the live removal, and stash contents persisted through multiple runs.
-  - Session slot shape smoke passed: two local session slots preserve keyboard/mouse + controller ownership, and a remote placeholder slot increments total slots without incrementing local slots.
-  - Session config smoke passed: host/client enum values and host/client fields are present and writable.
-  - Join menu smoke passed: Join popup opens, address/port entry emits the expected payload, and the popup closes on confirm.
-  - NetworkSession smoke passed: ENet host startup, active-peer state, connected host peer tracking, and close/reset behavior are valid.
-  - Remote slot smoke passed: host local slot plus remote peer slot keeps local count correct, duplicate remote slots are rejected loudly, and disconnect removal works.
-  - Session transition smoke passed: the new host transition helpers can load hub -> run -> hub through the existing `Game` spine.
-  - Manual two-instance host/join test passed for network membership on the host: host created remote slot 1 for peer `482473802` and placed it at the second hub spawn.
-  - Session membership snapshot smoke passed: host snapshot serialization and client reconciliation preserve the client's local slot while creating remote host/peer slots.
-  - Two-process localhost membership smoke passed: host/client connected on `127.0.0.1:24547`, host created the remote client slot, client received the membership snapshot, and both processes exited cleanly.
-  - Manual two-instance laptop presence test passed: host and client each saw the other peer appear and stay connected until manual client disconnect.
-  - Two-process localhost transform smoke passed: client moved its local player to a known position, host received and applied the transform to the remote actor.
-  - Two-process localhost action smoke passed: client primary-action event reached the host and started attack presentation on the host-side remote actor.
-  - Manual two-instance laptop transform/action test passed: both players translated, rotated, jumped, and showed sword-swing presentation remotely.
-  - Godot check-only exited 0.
-  - Quick-entry hub boot exited 0 after the slot participant refactor.
-  - Headless app boot exited 0 after the network-session scaffold and menu join popup.
-  - `git diff --check` exited 0.
-  - Remaining Godot shutdown output is the known cleanup/leak-warning noise plus the Windows root certificate warning seen during headless runs.
+```text
+spawn room -> cramped fight -> lock-in panic fight -> elite arena -> locked exit
+```
 
-**Next Steps / Pickup Goals:**
-- Sync the host/client transition from hub to level.
-- Ensure host deploy loads the run on both peers in the right order.
-- Ensure membership snapshots and player spawning are correct after `hub -> level`.
-- Verify replicated player transforms/actions still work after entering the level.
-- Keep level-load sync focused on lifecycle; do not start combat damage or enemy replication until the two-instance world transition is reliable.
-- Keep debug-visible overhead labels until remote identity is obvious without them.
-- Keep the current host/join/manual test path: host one instance, join from a second instance with `127.0.0.1:24545`.
-- Keep local co-op working after every session/slot/networking prep slice.
-- Defer polish and deeper refactors unless they block the hub/run loop.
-- Keep the first real network milestone focused on two-instance hub -> run -> hub lifecycle, not combat prediction or internet polish.
+Primary goals:
 
----
+- rebuild player around a state-machine-driven controller, visible mesh, animation states, and tunable feel
+- replace the temporary enemy with three state-machine enemies:
+  - melee slime
+  - ranged spitter
+  - elite slime with melee and ranged pressure
+- author five silver-standard rooms with more shape than box-with-doors
+- add first-pass VFX for hits, death, projectile impact, and attack readability
+- add rough SFX so timing and feedback can be judged
+- keep single-player, local co-op, and multiplayer sessions in mind while refactoring
 
-## North Star (Stable)
+This is not a public demo. It is the "is this fun?" pass.
 
-Blackspire is a four-player procedural dungeon raid about discovery, greed, survival, and escape.  
-It should feel like early MMO raiding before everything was known.
+## Current Network Baseline
 
----
+Things already proven:
 
-## Useful References
+- host/client connect on local network
+- both peers see remote players
+- player movement and action presentation replicate
+- client-requested deploy can load both peers into the run
+- enemies can move/death-sync from host authority
+- client attacks can kill host-owned enemies
+- successful extraction returns both peers to hub
+- hub summary board can show shared run result text
 
-**Always re-read at session start:**
-- `docs/project_blackspire_architecture.md`
-- `docs/project_blackspire_prototype_gdd.md`
-- This handoff file
+Known gaps to revisit after the gameplay rebuild:
 
-**Key Systems (current focus areas):**
-- `docs/session_host_multiplayer_plan.md`
-- `world/components/interactable/interactable.gd`
-- `world/components/combat/health_component.gd`
-- `world/components/combat/damage_request.gd`
-- `world/components/combat/hurtbox_3d.gd`
-- `world/components/combat/player_melee_attack.gd`
-- `world/components/combat/floating_damage_number_3d.gd`
-- `world/components/combat/world_health_bar_3d.gd`
-- `world/components/combat/player_hit_feedback.gd`
-- `world/components/player/player_inventory.gd`
-- `world/components/player/player_hotbar.gd`
-- `world/components/player/player_life_state.gd`
-- `world/components/player/player_hud.gd`
-- `world/entities/entity.gd`
-- `world/entities/pickups/pickup.gd`
-- `world/entities/pickups/gold_pickup.gd`
-- `world/entities/exit/exit_portal.gd`
-- `world/level.gd`
-- `world/systems/MapEntityRegistry.gd`
-- `world/entities/lever/lever.gd`
-- `world/entities/door/swing_door.gd`
-- `world/entities/door/wooden_door.gd`
-- `world/entities/door/iron_door.gd`
-- `world/actors/enemies/basic_enemy.gd`
-- `world/actors/enemies/enemy_behavior.gd`
-- TrenchBroom FGD + entity definitions in `trenchbroom/`
+- player health/life state replication
+- downed/revive replication
+- enemy damage feedback on clients
+- host-owned pickups and inventory snapshots
+- host-owned hotbar/potion use
+- host-owned shared stash
+- door/lever world-state replication
+- robust extraction/failure authority
 
-**Recent Major Patterns:**
-- Thin `Interactable` component + Entity owns real behavior (proven with Breakable Urn).
-- TrenchBroom-authored activation uses `targetname` / `targets` and resolves live nodes through the active `Level` registry.
-- Combat damage path is now `weapon active hitbox -> Hurtbox3D -> explicit damage_target.apply_damage(DamageRequest) -> HealthComponent`.
-- Feedback is signal-driven off `HealthComponent.damaged` / `HealthComponent.died` where possible.
-- Keep temporary behavior brains (`EnemyBehavior`) as siblings under `Components`, so the actor root stays close to the future state-machine shape.
+## Key Files And Systems
+
+- `system/main.tscn` - app root and menu bootstrap
+- `system/game/game.tscn` / `system/game/game.gd` - session owner, world transitions, slot manager, crew stash
+- `system/player_slot.gd` / `system/player_slot_manager.gd` - session participant slots and player spawning/moving
+- `system/network/network_session.gd` - ENet host/client wrapper
+- `world/actors/player/Player.tscn` - current temporary player actor
+- `world/actors/enemies/basic_enemy.tscn` - current temporary enemy actor
+- `world/level.gd` - run state, generated level, enemies, extraction/failure
+- `world/hub/hub.tscn` - current temporary crew hub
+- `.tests/` - ignored local smoke/diagnostic scripts
+
+## Start-Of-Session Reading
+
+1. `docs/handoff_notes.md`
+2. `docs/multiplayer_playthrough_slice_plan.md`
+3. `docs/project_blackspire_architecture.md`
+4. `docs/project_blackspire_prototype_gdd.md`
+5. `docs/network_known_issues.md` only when touching online sync
+
+## Verification Habits
+
+- Use `rg` for fast code search.
+- Use `apply_patch` for manual file edits.
+- Run Godot headless checks after code changes when feasible.
+- `git diff --check` before handoff.
+- Known headless noise: Windows root certificate warning and occasional shutdown leak/resource messages from diagnostic scripts.
