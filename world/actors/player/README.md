@@ -58,6 +58,11 @@ Life:
 - `Downed`
 - `Dead`
 
+Action:
+
+- `Ready`
+- `PrimaryAttack`
+
 `Deploying` currently auto-completes to `Alive`. It exists as the future hook for
 spawn setup, networking handshakes, and ready checks.
 

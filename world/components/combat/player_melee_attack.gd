@@ -3,10 +3,10 @@ class_name PlayerMeleeAttack
 
 signal primary_action_started(player: PlayerController)
 signal attack_presentation_started(player: PlayerController)
+signal attack_finished(player: PlayerController)
 signal damage_area_hit(player: PlayerController, area: Area3D, damage_amount: int, hit_position: Vector3)
 
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
-const StatModifierDefinitionScript := preload("res://data/items/stat_modifier_definition.gd")
 
 @export var player_components: PlayerComponents
 @export var attack_damage := 10
@@ -35,15 +35,6 @@ func _ready() -> void:
 	hitbox.area_entered.connect(_on_hitbox_area_entered)
 
 
-func _unhandled_input(_event: InputEvent) -> void:
-	# Input must come through the per-player PlayerInput component.
-	# Missing wiring will cause a hard error here — this is intentional ("fail loudly").
-	if player_components.input.is_primary_action_just_pressed():
-		if can_attack():
-			primary_action_started.emit(player_components.player)
-		attack()
-
-
 func can_attack() -> bool:
 	if _is_attacking:
 		return false
@@ -53,12 +44,29 @@ func can_attack() -> bool:
 	return true
 
 
-func attack() -> void:
+func attack() -> bool:
 	if not can_attack():
+		return false
+
+	_run_attack()
+	return true
+
+
+func play_attack_presentation() -> void:
+	if _is_attacking:
 		return
 
 	_is_attacking = true
+	animation_player.play("attack")
+	attack_presentation_started.emit(player_components.player)
+	await animation_player.animation_finished
+	_is_attacking = false
+
+
+func _run_attack() -> void:
+	_is_attacking = true
 	_hit_targets.clear()
+	primary_action_started.emit(player_components.player)
 	animation_player.play("attack")
 	attack_presentation_started.emit(player_components.player)
 
@@ -74,17 +82,7 @@ func attack() -> void:
 
 	await animation_player.animation_finished
 	_is_attacking = false
-
-
-func play_attack_presentation() -> void:
-	if _is_attacking:
-		return
-
-	_is_attacking = true
-	animation_player.play("attack")
-	attack_presentation_started.emit(player_components.player)
-	await animation_player.animation_finished
-	_is_attacking = false
+	attack_finished.emit(player_components.player)
 
 
 func _on_hitbox_area_entered(area: Area3D) -> void:

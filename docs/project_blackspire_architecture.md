@@ -821,6 +821,7 @@ Player
         Dead
       Action
         Ready
+        PrimaryAttack
   StateMachine
     Root
       MovementState

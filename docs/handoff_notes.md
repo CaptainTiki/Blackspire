@@ -113,7 +113,7 @@ Known gaps to revisit after the gameplay rebuild:
 - `Movement`: grounded/idle/moving/running/sprinting/airborne/jumping
 - `Posture`: standing/crouching
 - `Life`: deploying/alive/downed/dead
-- `Action`: ready placeholder
+- `Action`: ready/primary attack
 
 The chart owns active states and transitions. Mirrored state scripts own entry
 points and per-state processing, and call `PlayerController` verbs such as

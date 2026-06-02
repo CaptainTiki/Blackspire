@@ -35,6 +35,7 @@ const DROP_DOWN_OFFSET := 0.35
 @onready var input_reader: PlayerInputScript = $Components/PlayerInput
 @onready var interaction_scanner: InteractionScanner = $Components/InteractionScanner
 @onready var player_look: Node = $Components/PlayerLook
+@onready var melee_attack: PlayerMeleeAttack = $Components/PlayerMeleeAttack
 
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -86,6 +87,14 @@ func sprint() -> void:
 func jump() -> void:
 	if is_on_floor():
 		velocity.y = jump_velocity
+
+
+func can_primary_attack() -> bool:
+	return melee_attack.can_attack()
+
+
+func primary_attack() -> bool:
+	return melee_attack.attack()
 
 
 func crouch() -> void:
