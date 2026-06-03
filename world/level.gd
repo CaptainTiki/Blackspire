@@ -7,8 +7,9 @@ static var current_level: Level
 ## Handles common level concerns (environment, lighting, spawn points, etc.).
 
 @export var level_name: String = "Unnamed Level"
-@export var basic_enemy_scene: PackedScene = preload("res://world/actors/enemies/basic_enemy.tscn")
-@export var elite_enemy_scene: PackedScene = preload("res://world/actors/enemies/elite_enemy.tscn")
+@export var enemy_scene: PackedScene = preload("res://world/actors/enemies/slime.tscn")
+@export var elite_enemy_scene: PackedScene = preload("res://world/actors/enemies/elite_slime.tscn")
+
 @export var show_run_end_overlays := true
 @export var pause_on_run_end := true
 
@@ -110,39 +111,65 @@ func _find_enemy_spawns_recursive(node: Node, results: Array[Marker3D]) -> void:
 
 
 func spawn_enemies() -> Array[Node3D]:
-	var spawns := get_enemy_spawns()
-	for spawn_point in spawns:
-		var enemy_scene := _get_enemy_scene_for_spawn(spawn_point)
-		var enemy := enemy_scene.instantiate() as BasicEnemy
-		var authored_scale := enemy.scale
+	var spawns: Array[Marker3D] = get_enemy_spawns()
+	for spawn_point: Marker3D in spawns:
+		var e_scene: PackedScene = _get_enemy_scene_for_spawn(spawn_point)
+		var enemy: Node3D = e_scene.instantiate() as Node3D
+		if not enemy:
+			push_error("Failed to instantiate enemy scene for spawn: " + str(spawn_point.name))
+			continue
+		var authored_scale: Vector3 = enemy.scale
 		add_child(enemy)
 		enemy.global_transform = spawn_point.global_transform
 		enemy.scale = authored_scale
-		enemy.set_network_enemy_id(_next_enemy_network_id)
+
+		if enemy is Enemy:
+			var e: Enemy = enemy
+			e.set_network_enemy_id(_next_enemy_network_id)
+		elif enemy.has_method("set_network_enemy_id"):
+			enemy.set_network_enemy_id(_next_enemy_network_id)
 		_next_enemy_network_id += 1
-		enemy.health.died.connect(_on_enemy_health_died.bind(enemy))
+
+		var hc: Node = enemy.get_node_or_null("Components/HealthComponent")
+		if hc and hc.has_signal("died"):
+			hc.died.connect(_on_enemy_health_died.bind(enemy))
+
 		spawned_enemies.append(enemy)
 		print("Level: Spawned ", _get_enemy_spawn_label(spawn_point), " enemy at ", enemy.global_position, " using spawn point: ", spawn_point.name)
 
 	return spawned_enemies
 
 
+
 func set_enemy_network_authority_enabled(is_enabled: bool) -> void:
 	for enemy in spawned_enemies:
 		if not is_instance_valid(enemy):
 			continue
-		if enemy.has_method("set_network_authority_enabled"):
+		if enemy is Enemy:
+			var e: Enemy = enemy
+			e.set_network_authority_enabled(is_enabled)
+		elif enemy.has_method("set_network_authority_enabled"):
 			enemy.set_network_authority_enabled(is_enabled)
 
 
-func get_enemy_for_network_id(enemy_id: int) -> BasicEnemy:
+func get_enemy_for_network_id(enemy_id: int) -> Node:
 	for enemy in spawned_enemies:
 		if not is_instance_valid(enemy):
 			continue
-		if enemy is BasicEnemy and enemy.network_enemy_id == enemy_id:
-			return enemy
+		if enemy is Enemy:
+			var e: Enemy = enemy
+			if e.network_enemy_id == enemy_id:
+				return e
+		elif enemy is BasicEnemy:
+			if enemy.network_enemy_id == enemy_id:
+				return enemy
+		elif enemy.has_method("get_network_state"):
+			# Fallback for other implementations
+			if enemy.get("network_enemy_id") == enemy_id:
+				return enemy
 
 	return null
+
 
 
 func get_enemy_network_snapshot() -> Array[Dictionary]:
@@ -150,17 +177,33 @@ func get_enemy_network_snapshot() -> Array[Dictionary]:
 	for enemy in spawned_enemies:
 		if not is_instance_valid(enemy):
 			continue
-		if enemy.has_method("get_network_state"):
+		if enemy is Enemy:
+			var e: Enemy = enemy
+			snapshot.append(e.get_network_state())
+		elif enemy.has_method("get_network_state"):
 			snapshot.append(enemy.get_network_state())
 
 	return snapshot
 
 
-func _on_enemy_health_died(_damage_request: Variant, enemy: BasicEnemy) -> void:
+func _on_enemy_health_died(_damage_request: Variant, enemy: Node) -> void:
 	if not is_instance_valid(enemy):
 		return
 
-	enemy_died.emit(enemy.network_enemy_id)
+	var eid: int = -1
+	if enemy is Enemy:
+		var e: Enemy = enemy
+		eid = e.network_enemy_id
+	elif enemy is BasicEnemy:
+		eid = enemy.network_enemy_id
+	elif enemy.has_method("get_network_state"):
+		var st: Dictionary = enemy.get_network_state() as Dictionary
+		if st.has("enemy_id"):
+			eid = st["enemy_id"] as int
+	elif "network_enemy_id" in enemy:
+		eid = enemy.get("network_enemy_id") as int
+	enemy_died.emit(eid)
+
 
 
 func has_living_enemies() -> bool:
@@ -353,7 +396,11 @@ func _alert_living_enemies_to_player(player: PlayerController) -> void:
 		if not is_instance_valid(enemy):
 			continue
 
-		enemy.alert_to_player(player)
+		if enemy is Enemy:
+			var e: Enemy = enemy
+			e.alert_to_player(player)
+		elif enemy.has_method("alert_to_player"):
+			enemy.alert_to_player(player)
 
 
 func _show_extraction_countdown_overlay() -> void:
@@ -399,17 +446,22 @@ func _remove_extraction_countdown_overlay() -> void:
 
 
 func _get_enemy_scene_for_spawn(spawn_point: Marker3D) -> PackedScene:
-	if spawn_point is EnemySpawnMarker and spawn_point.is_elite_spawn():
+	if _is_elite_spawn(spawn_point):
 		return elite_enemy_scene
-
-	return basic_enemy_scene
+	return enemy_scene
 
 
 func _get_enemy_spawn_label(spawn_point: Marker3D) -> String:
-	if spawn_point is EnemySpawnMarker and spawn_point.is_elite_spawn():
-		return "elite"
+	return "elite slime" if _is_elite_spawn(spawn_point) else "slime"
 
-	return "basic"
+
+func _is_elite_spawn(spawn_point: Marker3D) -> bool:
+	# Fresh FuncGodot bakes attach the EnemySpawnMarker script (node_class in the
+	# FGD), which exposes is_elite_spawn(). Older bakes produced a plain Marker3D
+	# with no script, so guard with has_method and treat those as basic spawns.
+	if spawn_point.has_method("is_elite_spawn"):
+		return spawn_point.is_elite_spawn()
+	return false
 
 
 ## Spawns a player at the first available player spawn point.

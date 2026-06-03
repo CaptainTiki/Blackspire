@@ -28,8 +28,8 @@ func get_entity(targetname: StringName) -> Node:
 
 func get_entities(targetnames: Array[StringName]) -> Array[Node]:
 	var result: Array[Node] = []
-	for name in targetnames:
-		var node: Node = _entities.get(name)
+	for _name in targetnames:
+		var node: Node = _entities.get(_name)
 		if node:
 			result.append(node)
 	return result

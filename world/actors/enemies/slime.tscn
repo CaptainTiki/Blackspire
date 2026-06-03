@@ -1,0 +1,350 @@
+[gd_scene format=3 uid="uid://pea7edaa78m4"]
+
+[ext_resource type="Script" uid="uid://cf1ynv0you8jy" path="res://world/actors/enemies/slime.gd" id="1_slime"]
+[ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="2_health"]
+[ext_resource type="Script" uid="uid://dbb83kwwttkaj" path="res://world/components/combat/hurtbox_3d.gd" id="3_hurtbox"]
+[ext_resource type="Script" uid="uid://c8br85yoh3ri7" path="res://world/components/combat/world_health_bar_3d.gd" id="5_health_bar"]
+[ext_resource type="Script" uid="uid://couw105c3bde4" path="res://addons/godot_state_charts/state_chart.gd" id="10_chart"]
+[ext_resource type="Script" uid="uid://jk2jm1g6q853" path="res://addons/godot_state_charts/compound_state.gd" id="12_compound"]
+[ext_resource type="Script" uid="uid://cytafq8i1y8qm" path="res://addons/godot_state_charts/atomic_state.gd" id="13_atomic"]
+[ext_resource type="Script" uid="uid://cf1nsco3w0mf6" path="res://addons/godot_state_charts/transition.gd" id="14_transition"]
+[ext_resource type="Script" uid="uid://gx4k43gyf0jx" path="res://world/actors/enemies/enemy_state_machine.gd" id="15_emachine"]
+[ext_resource type="Script" uid="uid://b2n33khqg0reo" path="res://world/actors/enemies/states/enemy_idle_state.gd" id="17_idle"]
+[ext_resource type="Script" uid="uid://dsf4rtdrnwrm6" path="res://world/actors/enemies/states/enemy_chase_state.gd" id="18_chase"]
+[ext_resource type="Script" uid="uid://dtjoda8bs3s4" path="res://world/actors/enemies/states/enemy_windup_state.gd" id="19_windup"]
+[ext_resource type="Script" uid="uid://df2gfjfs4bl52" path="res://world/actors/enemies/states/enemy_lunge_state.gd" id="20_lunge"]
+[ext_resource type="Script" uid="uid://cxdh3m28u1h4l" path="res://world/actors/enemies/states/enemy_recover_state.gd" id="21_recover"]
+[ext_resource type="Script" uid="uid://du772qk0rdogo" path="res://world/actors/enemies/states/enemy_hurt_state.gd" id="22_hurt"]
+[ext_resource type="Script" uid="uid://bnqvc6fbhd6wh" path="res://world/actors/enemies/states/enemy_dead_state.gd" id="23_dead"]
+[ext_resource type="Script" uid="uid://c1vp0ojjvaby1" path="res://addons/godot_state_charts/parallel_state.gd" id="30_parallel"]
+[ext_resource type="Script" uid="uid://bae1icdakfct5" path="res://world/actors/enemies/states/enemy_deploying_state.gd" id="31_deploying"]
+[ext_resource type="Script" uid="uid://c5nkgi4cxt41d" path="res://world/actors/enemies/states/enemy_alive_state.gd" id="32_alive"]
+[ext_resource type="Script" uid="uid://b1habuduejcrd" path="res://world/actors/enemies/states/enemy_dying_state.gd" id="33_dying"]
+[ext_resource type="Script" uid="uid://bscmwbyos7hct" path="res://world/actors/enemies/states/enemy_ready_state.gd" id="34_ready"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.4
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_slime"]
+albedo_color = Color(0.2, 0.65, 0.25, 1)
+metallic = 0.1
+roughness = 0.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.4
+height = 1.0
+
+[sub_resource type="Animation" id="Animation_reset"]
+length = 0.001
+
+[sub_resource type="Animation" id="Animation_death"]
+resource_name = "death"
+length = 0.5
+
+[sub_resource type="Animation" id="Animation_hurt"]
+resource_name = "hurt"
+length = 0.2
+
+[sub_resource type="Animation" id="Animation_idle"]
+resource_name = "idle"
+loop_mode = 1
+
+[sub_resource type="Animation" id="Animation_lunge"]
+resource_name = "lunge"
+length = 0.35
+
+[sub_resource type="Animation" id="Animation_move"]
+resource_name = "move"
+length = 0.8
+loop_mode = 1
+
+[sub_resource type="Animation" id="Animation_windup"]
+resource_name = "windup"
+length = 0.35
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_slime"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"death": SubResource("Animation_death"),
+&"hurt": SubResource("Animation_hurt"),
+&"idle": SubResource("Animation_idle"),
+&"lunge": SubResource("Animation_lunge"),
+&"move": SubResource("Animation_move"),
+&"windup": SubResource("Animation_windup")
+}
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hurtbox"]
+radius = 0.7
+height = 1.4
+
+[sub_resource type="QuadMesh" id="HealthBarBackgroundMesh"]
+size = Vector2(0.84, 0.1)
+
+[sub_resource type="QuadMesh" id="HealthBarFillMesh"]
+size = Vector2(0.78, 0.06)
+
+[node name="Slime" type="CharacterBody3D" unique_id=1203782346]
+collision_layer = 32
+collision_mask = 17
+script = ExtResource("1_slime")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=719247011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=33802565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource("StandardMaterial3D_slime")
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1161418538]
+libraries/ = SubResource("AnimationLibrary_slime")
+autoplay = &"RESET"
+
+[node name="Components" type="Node3D" parent="." unique_id=1931754811]
+
+[node name="HealthComponent" type="Node" parent="Components" unique_id=1414560405]
+script = ExtResource("2_health")
+max_health = 32
+current_health = 32
+
+[node name="Hurtbox" type="Area3D" parent="Components" unique_id=121193178 node_paths=PackedStringArray("damage_target")]
+script = ExtResource("3_hurtbox")
+damage_target = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Components/Hurtbox" unique_id=1083370279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("CapsuleShape3D_hurtbox")
+
+[node name="HealthBar" type="Node3D" parent="." unique_id=227722130 node_paths=PackedStringArray("health_component")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+script = ExtResource("5_health_bar")
+health_component = NodePath("../Components/HealthComponent")
+
+[node name="Background" type="MeshInstance3D" parent="HealthBar" unique_id=1052878819]
+mesh = SubResource("HealthBarBackgroundMesh")
+
+[node name="Fill" type="MeshInstance3D" parent="HealthBar" unique_id=1499424912]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.001)
+mesh = SubResource("HealthBarFillMesh")
+
+[node name="DebugStateLabel" type="Label3D" parent="." unique_id=70215589]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 1.6, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(0.4, 1, 0.5, 1)
+text = "IDLE"
+font_size = 16
+
+[node name="DeathTimer" type="Timer" parent="." unique_id=272076948]
+wait_time = 0.6
+one_shot = true
+
+[node name="StateChart" type="Node" parent="." unique_id=1780322851]
+unique_name_in_owner = true
+script = ExtResource("10_chart")
+
+[node name="Root" type="Node" parent="StateChart" unique_id=1733117520]
+script = ExtResource("30_parallel")
+
+[node name="Life" type="Node" parent="StateChart/Root" unique_id=960785395]
+script = ExtResource("12_compound")
+initial_state = NodePath("Deploying")
+metadata/_custom_type_script = "uid://jk2jm1g6q853"
+
+[node name="Deploying" type="Node" parent="StateChart/Root/Life" unique_id=100000001]
+script = ExtResource("13_atomic")
+
+[node name="OnAlive" type="Node" parent="StateChart/Root/Life/Deploying" unique_id=100000002]
+script = ExtResource("14_transition")
+to = NodePath("../../Alive")
+event = &"onAlive"
+delay_in_seconds = "0.0"
+
+[node name="OnDyingFromDeploying" type="Node" parent="StateChart/Root/Life/Deploying" unique_id=100000008]
+script = ExtResource("14_transition")
+to = NodePath("../../Dying")
+event = &"onDying"
+delay_in_seconds = "0.0"
+
+[node name="Alive" type="Node" parent="StateChart/Root/Life" unique_id=100000003]
+script = ExtResource("13_atomic")
+
+[node name="OnDying" type="Node" parent="StateChart/Root/Life/Alive" unique_id=100000004]
+script = ExtResource("14_transition")
+to = NodePath("../../Dying")
+event = &"onDying"
+delay_in_seconds = "0.0"
+
+[node name="Dying" type="Node" parent="StateChart/Root/Life" unique_id=100000005]
+script = ExtResource("13_atomic")
+
+[node name="OnDead" type="Node" parent="StateChart/Root/Life/Dying" unique_id=100000006]
+script = ExtResource("14_transition")
+to = NodePath("../../Dead")
+event = &"onDead"
+delay_in_seconds = "0.0"
+
+[node name="Dead" type="Node" parent="StateChart/Root/Life" unique_id=100000007]
+script = ExtResource("13_atomic")
+
+[node name="Movement" type="Node" parent="StateChart/Root" unique_id=1555309895]
+script = ExtResource("12_compound")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateChart/Root/Movement" unique_id=703016146]
+script = ExtResource("13_atomic")
+
+[node name="OnChase" type="Node" parent="StateChart/Root/Movement/Idle" unique_id=224676325]
+script = ExtResource("14_transition")
+to = NodePath("../../Chase")
+event = &"onChase"
+delay_in_seconds = "0.0"
+
+[node name="Chase" type="Node" parent="StateChart/Root/Movement" unique_id=1516682014]
+script = ExtResource("13_atomic")
+
+[node name="OnIdle" type="Node" parent="StateChart/Root/Movement/Chase" unique_id=1617531729]
+script = ExtResource("14_transition")
+to = NodePath("../../Idle")
+event = &"onIdle"
+delay_in_seconds = "0.0"
+
+[node name="Action" type="Node" parent="StateChart/Root" unique_id=1499785244]
+script = ExtResource("12_compound")
+initial_state = NodePath("Ready")
+
+[node name="Ready" type="Node" parent="StateChart/Root/Action" unique_id=417090360]
+script = ExtResource("13_atomic")
+
+[node name="OnWindup" type="Node" parent="StateChart/Root/Action/Ready" unique_id=1526555337]
+script = ExtResource("14_transition")
+to = NodePath("../../Windup")
+event = &"onWindup"
+delay_in_seconds = "0.0"
+
+[node name="OnHurt" type="Node" parent="StateChart/Root/Action/Ready" unique_id=1063240091]
+script = ExtResource("14_transition")
+to = NodePath("../../Hurt")
+event = &"onHurt"
+delay_in_seconds = "0.0"
+
+[node name="Windup" type="Node" parent="StateChart/Root/Action" unique_id=1466544444]
+script = ExtResource("13_atomic")
+
+[node name="OnLunge" type="Node" parent="StateChart/Root/Action/Windup" unique_id=1139080831]
+script = ExtResource("14_transition")
+to = NodePath("../../Lunge")
+event = &"onLunge"
+delay_in_seconds = "0.0"
+
+[node name="OnHurt" type="Node" parent="StateChart/Root/Action/Windup" unique_id=1609311426]
+script = ExtResource("14_transition")
+to = NodePath("../../Hurt")
+event = &"onHurt"
+delay_in_seconds = "0.0"
+
+[node name="Lunge" type="Node" parent="StateChart/Root/Action" unique_id=2033112713]
+script = ExtResource("13_atomic")
+
+[node name="OnRecover" type="Node" parent="StateChart/Root/Action/Lunge" unique_id=1474206593]
+script = ExtResource("14_transition")
+to = NodePath("../../Recover")
+event = &"onRecover"
+delay_in_seconds = "0.0"
+
+[node name="OnHurt" type="Node" parent="StateChart/Root/Action/Lunge" unique_id=544349096]
+script = ExtResource("14_transition")
+to = NodePath("../../Hurt")
+event = &"onHurt"
+delay_in_seconds = "0.0"
+
+[node name="Recover" type="Node" parent="StateChart/Root/Action" unique_id=100000009]
+script = ExtResource("13_atomic")
+
+[node name="OnReady" type="Node" parent="StateChart/Root/Action/Recover" unique_id=100000010]
+script = ExtResource("14_transition")
+to = NodePath("../../Ready")
+event = &"onReady"
+delay_in_seconds = "0.0"
+
+[node name="OnHurt" type="Node" parent="StateChart/Root/Action/Recover" unique_id=100000011]
+script = ExtResource("14_transition")
+to = NodePath("../../Hurt")
+event = &"onHurt"
+delay_in_seconds = "0.0"
+
+[node name="Hurt" type="Node" parent="StateChart/Root/Action" unique_id=100000012]
+script = ExtResource("13_atomic")
+
+[node name="OnReady" type="Node" parent="StateChart/Root/Action/Hurt" unique_id=100000013]
+script = ExtResource("14_transition")
+to = NodePath("../../Ready")
+event = &"onReady"
+delay_in_seconds = "0.0"
+
+[node name="StateMachine" type="Node" parent="." unique_id=339389267 node_paths=PackedStringArray("enemy", "debug_label")]
+unique_name_in_owner = true
+script = ExtResource("15_emachine")
+debug = true
+enemy = NodePath("..")
+debug_label = NodePath("../DebugStateLabel")
+
+[node name="Root" type="Node" parent="StateMachine" unique_id=879850725]
+
+[node name="LifeState" type="Node" parent="StateMachine/Root" unique_id=300000001]
+
+[node name="DeployingState" type="Node" parent="StateMachine/Root/LifeState" unique_id=300000002]
+script = ExtResource("31_deploying")
+
+[node name="AliveState" type="Node" parent="StateMachine/Root/LifeState" unique_id=300000003]
+script = ExtResource("32_alive")
+
+[node name="DyingState" type="Node" parent="StateMachine/Root/LifeState" unique_id=300000004]
+script = ExtResource("33_dying")
+
+[node name="DeadState" type="Node" parent="StateMachine/Root/LifeState" unique_id=300000005]
+script = ExtResource("23_dead")
+
+[node name="MovementState" type="Node" parent="StateMachine/Root" unique_id=1610358762]
+
+[node name="IdleState" type="Node" parent="StateMachine/Root/MovementState" unique_id=254959757]
+script = ExtResource("17_idle")
+
+[node name="ChaseState" type="Node" parent="StateMachine/Root/MovementState" unique_id=1469296316]
+script = ExtResource("18_chase")
+
+[node name="ActionState" type="Node" parent="StateMachine/Root" unique_id=760617477]
+
+[node name="ReadyState" type="Node" parent="StateMachine/Root/ActionState" unique_id=269431129]
+script = ExtResource("34_ready")
+
+[node name="WindupState" type="Node" parent="StateMachine/Root/ActionState" unique_id=1390350503]
+script = ExtResource("19_windup")
+
+[node name="LungeState" type="Node" parent="StateMachine/Root/ActionState" unique_id=813327499]
+script = ExtResource("20_lunge")
+
+[node name="RecoverState" type="Node" parent="StateMachine/Root/ActionState" unique_id=100000016]
+script = ExtResource("21_recover")
+
+[node name="HurtState" type="Node" parent="StateMachine/Root/ActionState" unique_id=100000017]
+script = ExtResource("22_hurt")
+
+[connection signal="state_entered" from="StateChart/Root/Life/Deploying" to="StateMachine/Root/LifeState/DeployingState" method="_on_deploying_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Life/Alive" to="StateMachine/Root/LifeState/AliveState" method="_on_alive_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Life/Dying" to="StateMachine/Root/LifeState/DyingState" method="_on_dying_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Life/Dead" to="StateMachine/Root/LifeState/DeadState" method="_on_dead_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Movement/Idle" to="StateMachine/Root/MovementState/IdleState" method="_on_idle_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Idle" to="StateMachine/Root/MovementState/IdleState" method="_on_idle_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Movement/Chase" to="StateMachine/Root/MovementState/ChaseState" method="_on_chase_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Movement/Chase" to="StateMachine/Root/MovementState/ChaseState" method="_on_chase_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Action/Ready" to="StateMachine/Root/ActionState/ReadyState" method="_on_ready_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Action/Windup" to="StateMachine/Root/ActionState/WindupState" method="_on_windup_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Action/Windup" to="StateMachine/Root/ActionState/WindupState" method="_on_windup_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Action/Lunge" to="StateMachine/Root/ActionState/LungeState" method="_on_lunge_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Action/Lunge" to="StateMachine/Root/ActionState/LungeState" method="_on_lunge_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Action/Recover" to="StateMachine/Root/ActionState/RecoverState" method="_on_recover_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Action/Recover" to="StateMachine/Root/ActionState/RecoverState" method="_on_recover_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Action/Hurt" to="StateMachine/Root/ActionState/HurtState" method="_on_hurt_state_entered"]

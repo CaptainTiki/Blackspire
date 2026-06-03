@@ -1,13 +1,13 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://gvvm7kfgvwed"]
 
-[ext_resource type="Script" path="res://world/rooms/room.gd" id="1_nc5ud"]
-[ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="2_u15d5"]
-[ext_resource type="Resource" path="res://trenchbroom/blackspire_map_settings.tres" id="3_v2fvj"]
+[ext_resource type="Script" uid="uid://dhn3vj28knhfo" path="res://world/rooms/room.gd" id="1_nc5ud"]
+[ext_resource type="Script" uid="uid://cwu5cf7a0awcd" path="res://addons/func_godot/src/map/func_godot_map.gd" id="2_u15d5"]
+[ext_resource type="Resource" uid="uid://d1nvtpae520wt" path="res://trenchbroom/blackspire_map_settings.tres" id="3_v2fvj"]
 [ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_floor_01.tres" id="4_qsper"]
 [ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_trim_01.tres" id="5_5ffc5"]
 [ext_resource type="Material" path="res://assets/textures/trenchbroom/dungeon/bs_crypt_wall_01.tres" id="6_iv5q5"]
 [ext_resource type="PackedScene" path="res://world/rooms/room_connector.tscn" id="7_44wum"]
-[ext_resource type="Script" path="res://world/rooms/room_connector.gd" id="8_lndi4"]
+[ext_resource type="PackedScene" uid="uid://pea7edaa78m4" path="res://world/actors/enemies/slime.tscn" id="7_nc5ud"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_lni18"]
 _surfaces = [{
@@ -143,14 +143,15 @@ shape = SubResource("ConvexPolygonShape3D_0adhc")
 [node name="entity_0_brush_12_collision_shape" type="CollisionShape3D" parent="FuncGodotMap/entity_0_worldspawn" unique_id=934457115]
 shape = SubResource("ConvexPolygonShape3D_fboqi")
 
-[node name="entity_1_room_connector" type="Node3D" parent="FuncGodotMap" unique_id=1771757535 instance=ExtResource("7_44wum")]
+[node name="Slime" parent="FuncGodotMap/entity_0_worldspawn" unique_id=1457755157 instance=ExtResource("7_nc5ud")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.914917, 0, -2.5000916)
+
+[node name="entity_1_room_connector" parent="FuncGodotMap" unique_id=1771757535 instance=ExtResource("7_44wum")]
 transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 6.5, 0.5, 0)
-script = ExtResource("8_lndi4")
 connector_id = &"entrance"
 
-[node name="entity_2_room_connector" type="Node3D" parent="FuncGodotMap" unique_id=363583655 instance=ExtResource("7_44wum")]
+[node name="entity_2_room_connector" parent="FuncGodotMap" unique_id=363583655 instance=ExtResource("7_44wum")]
 transform = Transform3D(1.3907092e-07, 0, 1, 0, 1, 0, -1, 0, 1.3907092e-07, -6.5, 0.5, 0)
-script = ExtResource("8_lndi4")
 connector_id = &"exit"
 
 [node name="entity_3_info_enemy_spawn" type="Marker3D" parent="FuncGodotMap" unique_id=854639764]

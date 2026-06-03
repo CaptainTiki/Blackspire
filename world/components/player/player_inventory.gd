@@ -40,9 +40,9 @@ func add_item(item_definition: Resource, quantity: int = 1) -> bool:
 		push_error("PlayerInventory.add_item received an invalid item definition.")
 		return false
 	if not can_add_item(item_definition, quantity):
-		var toast_message := _format_item_full_message(item_definition)
-		inventory_toast.emit(toast_message)
-		print("PlayerInventory: ", toast_message)
+		var toastmessage := _format_item_full_message(item_definition)
+		inventory_toast.emit(toastmessage)
+		print("PlayerInventory: ", toastmessage)
 		return false
 
 	if item_definition.stackable:

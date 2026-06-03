@@ -111,5 +111,5 @@ Manual runtime testing after the StateMachine refactor verified:
 
 - Live-play tune movement feel values with controller in hand.
 - Add first visible player mesh and animation-state presentation.
-- Start the Slime enemy state machine.
+- Slime enemy state machine foundation complete (Enemy base + states + slime.tscn + contracts). See world/actors/enemies/README.md. Next: integrate into rooms, VFX/SFX, spitter, etc.
 - Expand `Life` replication hooks when player health/downed/dead sync becomes the active networking slice.

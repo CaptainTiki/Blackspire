@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://byhxa2g3ehjns"
+path="res://.godot/imported/crypt_hall_long.map-472f0cd324574a51ce3ac2792216b0ef.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/crypt_hall_long.map"
+dest_files=["res://.godot/imported/crypt_hall_long.map-472f0cd324574a51ce3ac2792216b0ef.tres"]
+
+[params]
+

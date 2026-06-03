@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://yaxifaaf1d0m"
+path="res://.godot/imported/room_arena_01.map-af747bb36ed07d04ef65e19f4909861f.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/room_arena_01.map"
+dest_files=["res://.godot/imported/room_arena_01.map-af747bb36ed07d04ef65e19f4909861f.tres"]
+
+[params]
+

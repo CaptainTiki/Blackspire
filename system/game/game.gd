@@ -723,18 +723,34 @@ func _on_player_damage_area_hit(player: PlayerController, area: Area3D, damage_a
 	if not area is Hurtbox3D:
 		return
 
-	var hurtbox := area as Hurtbox3D
-	var enemy := hurtbox.damage_target as BasicEnemy
-	if not enemy:
+	var hurtbox: Hurtbox3D = area as Hurtbox3D
+	var target: Node = hurtbox.damage_target
+	if not target:
+		return
+
+	var enemy_id: int = -1
+	if target is Enemy:
+		var e: Enemy = target
+		enemy_id = e.network_enemy_id
+	elif target is BasicEnemy:
+		enemy_id = target.network_enemy_id
+	elif "network_enemy_id" in target:
+		enemy_id = target.network_enemy_id
+	elif target.has_method("get_network_state"):
+		var st: Dictionary = target.get_network_state() as Dictionary
+		if st.has("enemy_id"):
+			enemy_id = st["enemy_id"] as int
+	if enemy_id < 0:
 		return
 
 	_server_receive_enemy_damage.rpc_id(
 		NetworkSessionScript.HOST_PEER_ID,
 		slot.session_player_id,
-		enemy.network_enemy_id,
+		enemy_id,
 		damage_amount,
 		hit_position
 	)
+
 
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -756,17 +772,30 @@ func _server_receive_enemy_damage(session_player_id: int, enemy_id: int, damage_
 	if not level:
 		return
 
-	var enemy := level.get_enemy_for_network_id(enemy_id)
-	if not enemy:
-		return
-	if enemy.is_dead:
+	var enemy_node: Node = level.get_enemy_for_network_id(enemy_id)
+	if not enemy_node:
 		return
 
-	var bounded_damage := clampi(damage_amount, 0, 1000)
+	var bounded_damage: int = clampi(damage_amount, 0, 1000)
 	if bounded_damage <= 0:
 		return
 
-	enemy.apply_damage(DamageRequestScript.new(slot.player, bounded_damage, hit_position))
+	if enemy_node is Enemy:
+		var e: Enemy = enemy_node
+		if e.is_dead:
+			return
+		e.apply_damage(DamageRequestScript.new(slot.player, bounded_damage, hit_position))
+	elif enemy_node is BasicEnemy:
+		var e: BasicEnemy = enemy_node
+		if e.is_dead:
+			return
+		e.apply_damage(DamageRequestScript.new(slot.player, bounded_damage, hit_position))
+	else:
+		if enemy_node.get("is_dead"):
+			return
+		if enemy_node.has_method("apply_damage"):
+			enemy_node.apply_damage(DamageRequestScript.new(slot.player, bounded_damage, hit_position))
+
 
 
 func _on_hub_deploy_requested(_actor: PlayerController) -> void:

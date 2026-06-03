@@ -134,12 +134,12 @@ func get_network_state() -> Dictionary:
 	}
 
 
-func apply_network_state(position: Vector3, body_yaw: float, replicated_is_dead: bool) -> void:
+func apply_network_state(_position: Vector3, body_yaw: float, replicated_is_dead: bool) -> void:
 	if replicated_is_dead:
 		apply_network_death()
 		return
 
-	global_position = position
+	global_position = _position
 	rotation.y = body_yaw
 	velocity = Vector3.ZERO
 

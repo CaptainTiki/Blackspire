@@ -331,8 +331,8 @@ func get_life_snapshot(session_player_id: int = -1) -> Dictionary:
 	return snapshot
 
 
-func apply_network_transform_state(position: Vector3, body_yaw: float, camera_pitch: float) -> void:
-	global_position = position
+func apply_network_transform_state(_position: Vector3, body_yaw: float, camera_pitch: float) -> void:
+	global_position = _position
 	rotation.y = body_yaw
 	if camera:
 		camera.rotation.x = clampf(camera_pitch, -1.5, 1.5)

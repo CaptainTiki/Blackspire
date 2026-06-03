@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c055rr1ygraei"]
+
+[ext_resource type="PackedScene" uid="uid://pea7edaa78m4" path="res://world/actors/enemies/slime.tscn" id="1_base"]
+[ext_resource type="Script" path="res://world/actors/enemies/elite_slime.gd" id="2_elite"]
+
+[node name="Slime" instance=ExtResource("1_base")]
+transform = Transform3D(1.7, 0, 0, 0, 1.7, 0, 0, 0, 1.7, 0, 0, 0)
+script = ExtResource("2_elite")
