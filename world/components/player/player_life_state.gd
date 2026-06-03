@@ -4,6 +4,7 @@ class_name PlayerLifeState
 signal bleeding_out_started(player: PlayerController)
 signal died(player: PlayerController)
 signal revived(player: PlayerController)
+signal life_snapshot_changed(snapshot: Dictionary)
 
 @export var player: PlayerController
 @export var health_component: Node
@@ -15,6 +16,13 @@ enum LifeMode {
 	ALIVE,
 	DOWNED,
 	DEAD,
+}
+
+const LIFE_MODE_KEYS := {
+	LifeMode.DEPLOYING: "deploying",
+	LifeMode.ALIVE: "alive",
+	LifeMode.DOWNED: "downed",
+	LifeMode.DEAD: "dead",
 }
 
 var current_mode := LifeMode.DEPLOYING
@@ -49,6 +57,7 @@ func start_bleeding_out(_damage_request: Variant) -> void:
 	bleed_out_remaining_seconds = bleed_out_duration
 	player.state_chart.send_event(&"onDowned")
 	bleeding_out_started.emit(player)
+	_emit_life_snapshot_changed()
 
 	if Level.current_level:
 		Level.current_level.notify_player_bleeding_out(player)
@@ -63,6 +72,7 @@ func die() -> void:
 	bleed_out_remaining_seconds = 0.0
 	player.state_chart.send_event(&"onDead")
 	died.emit(player)
+	_emit_life_snapshot_changed()
 
 	if Level.current_level:
 		Level.current_level.notify_player_died(player)
@@ -79,6 +89,7 @@ func revive(health_amount: int = -1) -> void:
 	health_component.revive(amount)
 	player.state_chart.send_event(&"onAlive")
 	revived.emit(player)
+	_emit_life_snapshot_changed()
 
 
 func is_bleeding_out_or_dead() -> bool:
@@ -87,6 +98,7 @@ func is_bleeding_out_or_dead() -> bool:
 
 func enter_deploying() -> void:
 	current_mode = LifeMode.DEPLOYING
+	_emit_life_snapshot_changed()
 
 
 func complete_deploying() -> void:
@@ -101,12 +113,14 @@ func enter_alive() -> void:
 	is_bleeding_out = false
 	bleed_out_remaining_seconds = 0.0
 	player.exit_bleeding_out_state()
+	_emit_life_snapshot_changed()
 
 
 func enter_downed() -> void:
 	current_mode = LifeMode.DOWNED
 	is_dead = false
 	is_bleeding_out = true
+	_emit_life_snapshot_changed()
 
 
 func enter_dead() -> void:
@@ -114,6 +128,26 @@ func enter_dead() -> void:
 	is_dead = true
 	is_bleeding_out = false
 	bleed_out_remaining_seconds = 0.0
+	_emit_life_snapshot_changed()
+
+
+func get_life_snapshot() -> Dictionary:
+	return {
+		"life_state": get_life_state_key(),
+		"health": health_component.current_health,
+		"max_health": health_component.max_health,
+		"is_bleeding_out": is_bleeding_out,
+		"is_dead": is_dead,
+		"bleed_out_remaining_seconds": bleed_out_remaining_seconds,
+	}
+
+
+func get_life_state_key() -> String:
+	return LIFE_MODE_KEYS.get(current_mode, "unknown")
+
+
+func _emit_life_snapshot_changed() -> void:
+	life_snapshot_changed.emit(get_life_snapshot())
 
 
 func _on_health_died(damage_request: Variant) -> void:

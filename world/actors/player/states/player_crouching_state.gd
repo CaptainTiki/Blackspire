@@ -1,4 +1,4 @@
-extends PlayerState
+extends "res://world/actors/player/player_base_state.gd"
 class_name PlayerCrouchingState
 
 

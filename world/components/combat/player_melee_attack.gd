@@ -22,6 +22,7 @@ const WEAPON_HITBOX_LAYER := 0b001000
 
 var _is_attacking := false
 var _hit_targets: Array[Node] = []
+var _attack_sequence := 0
 
 
 func _ready() -> void:
@@ -57,30 +58,61 @@ func play_attack_presentation() -> void:
 		return
 
 	_is_attacking = true
+	_attack_sequence += 1
+	var attack_sequence := _attack_sequence
 	animation_player.play("attack")
 	attack_presentation_started.emit(player_components.player)
 	await animation_player.animation_finished
+	if attack_sequence != _attack_sequence:
+		return
 	_is_attacking = false
+
+
+func cancel_attack() -> void:
+	if not _is_attacking:
+		hitbox.monitoring = false
+		return
+
+	_attack_sequence += 1
+	_is_attacking = false
+	_hit_targets.clear()
+	hitbox.monitoring = false
+	animation_player.stop()
+	attack_finished.emit(player_components.player)
+
+
+func is_attacking() -> bool:
+	return _is_attacking
 
 
 func _run_attack() -> void:
 	_is_attacking = true
+	_attack_sequence += 1
+	var attack_sequence := _attack_sequence
 	_hit_targets.clear()
 	primary_action_started.emit(player_components.player)
 	animation_player.play("attack")
 	attack_presentation_started.emit(player_components.player)
 
 	await get_tree().create_timer(active_delay).timeout
+	if attack_sequence != _attack_sequence:
+		return
 	hitbox.monitoring = true
 	await get_tree().physics_frame
+	if attack_sequence != _attack_sequence:
+		return
 
 	for area in hitbox.get_overlapping_areas():
 		_try_damage_area(area)
 
 	await get_tree().create_timer(active_duration).timeout
+	if attack_sequence != _attack_sequence:
+		return
 	hitbox.monitoring = false
 
 	await animation_player.animation_finished
+	if attack_sequence != _attack_sequence:
+		return
 	_is_attacking = false
 	attack_finished.emit(player_components.player)
 

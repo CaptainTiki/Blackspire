@@ -4,5 +4,6 @@ class_name PlayerState
 var player_controller : PlayerController
 
 func _ready() -> void:
-	if %StateMachine and %StateMachine is PlayerStateMachine:
-		player_controller = %StateMachine.player_controller
+	var state_machine := get_node_or_null("%StateMachine")
+	if state_machine:
+		player_controller = state_machine.get("player_controller")

@@ -638,10 +638,23 @@ event = &"onReady"
 delay_in_seconds = "0.0"
 metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
 
-[node name="StateMachine" type="Node" parent="." unique_id=2104204779 node_paths=PackedStringArray("player_controller")]
+[node name="PlayerStateDebugLabel" type="Label3D" parent="." unique_id=1191451088]
+billboard = 1
+no_depth_test = true
+fixed_size = true
+pixel_size = 0.004
+offset = Vector2(0, -20)
+modulate = Color(0.72, 0.92, 1, 1)
+text = "Movement: -"
+font_size = 22
+position = Vector3(0, 2.2, 0)
+
+[node name="StateMachine" type="Node" parent="." unique_id=2104204779 node_paths=PackedStringArray("player_controller", "debug_label")]
 unique_name_in_owner = true
 script = ExtResource("20_gl3xj")
+debug = true
 player_controller = NodePath("..")
+debug_label = NodePath("../PlayerStateDebugLabel")
 
 [node name="Root" type="Node" parent="StateMachine" unique_id=167950421]
 

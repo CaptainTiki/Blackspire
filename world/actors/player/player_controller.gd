@@ -11,15 +11,21 @@ const DROP_DOWN_OFFSET := 0.35
 
 # --- Movement Settings ---
 @export var walk_speed: float = 5.0
-@export var sprint_speed: float = 8.0
+@export var sprint_speed_multiplier: float = 1.35
+@export var crouch_speed_multiplier: float = 0.65
 @export var jump_velocity: float = 4.5
 @export var acceleration: float = 28.0
 @export var deceleration: float = 24.0
+@export var sprint_windup_rate: float = 6.0
+@export var speed_drop_rate: float = 18.0
+@export var sprint_turn_acceleration_multiplier: float = 0.72
+@export var attack_movement_multiplier: float = 0.78
+@export var air_acceleration_multiplier: float = 0.65
 
 # --- Stance Camera ---
 @export var eye_height: float = 1.30
 @export var crouch_eye_height: float = 0.78
-@export var stance_camera_lerp_speed: float = 12.0
+@export var stance_camera_lerp_speed: float = 7.0
 
 # --- Camera ---
 @onready var camera: Camera3D = $CameraRig/Camera3D
@@ -40,6 +46,7 @@ const DROP_DOWN_OFFSET := 0.35
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var current_speed: float = 0.0
+var _target_speed: float = 0.0
 var _input_dir := Vector2.ZERO
 var _can_act := true
 var _gameplay_input_enabled := true
@@ -49,6 +56,8 @@ var _standing_camera_rotation := Vector3.ZERO
 var _uses_replicated_transform := false
 var _target_eye_height: float = 0.0
 var _is_crouching := false
+var _is_sprinting := false
+var _jump_launch_requested := false
 
 func _ready() -> void:
 	add_to_group("players")
@@ -63,7 +72,8 @@ func _ready() -> void:
 	else:
 		player_look.capture_mouse()
 	
-	current_speed = walk_speed
+	current_speed = _get_movement_speed(false)
+	_target_speed = current_speed
 	_target_eye_height = eye_height
 	_apply_camera_height()
 	_set_standing_collision_enabled(true)
@@ -77,16 +87,30 @@ func _apply_camera_height() -> void:
 
 
 func run() -> void:
-	current_speed = walk_speed + equipment.get_move_speed_modifier()
+	_is_sprinting = false
+	_target_speed = _get_movement_speed(false)
 
 
 func sprint() -> void:
-	current_speed = sprint_speed + equipment.get_move_speed_modifier()
+	_is_sprinting = true
+	_target_speed = _get_movement_speed(true)
 
 
 func jump() -> void:
 	if is_on_floor():
 		velocity.y = jump_velocity
+
+
+func request_jump_launch() -> void:
+	_jump_launch_requested = true
+
+
+func consume_jump_launch_request() -> bool:
+	if not _jump_launch_requested:
+		return false
+
+	_jump_launch_requested = false
+	return true
 
 
 func can_primary_attack() -> bool:
@@ -132,6 +156,7 @@ func extract_interaction() -> void:
 func crouch() -> void:
 	_is_crouching = true
 	_target_eye_height = crouch_eye_height
+	_target_speed = _get_movement_speed(_is_sprinting or (input_reader and input_reader.is_sprint_pressed()))
 	_set_standing_collision_enabled(false)
 
 
@@ -142,6 +167,10 @@ func stand() -> void:
 	_is_crouching = false
 	_target_eye_height = eye_height
 	_set_standing_collision_enabled(true)
+	if input_reader and input_reader.is_sprint_pressed():
+		sprint()
+	else:
+		run()
 
 
 func can_stand() -> bool:
@@ -295,6 +324,13 @@ func get_network_transform_state() -> Dictionary:
 	}
 
 
+func get_life_snapshot(session_player_id: int = -1) -> Dictionary:
+	var snapshot: Dictionary = life_state.get_life_snapshot()
+	if session_player_id >= 0:
+		snapshot["session_player_id"] = session_player_id
+	return snapshot
+
+
 func apply_network_transform_state(position: Vector3, body_yaw: float, camera_pitch: float) -> void:
 	global_position = position
 	rotation.y = body_yaw
@@ -310,12 +346,14 @@ func is_bleeding_out_or_dead() -> bool:
 func enter_bleeding_out_state() -> void:
 	_can_act = false
 	velocity = Vector3.ZERO
+	cancel_primary_attack()
 	_play_collapse_pose()
 
 
 func enter_dead_state() -> void:
 	_can_act = false
 	velocity = Vector3.ZERO
+	cancel_primary_attack()
 	_play_collapse_pose()
 
 
@@ -328,6 +366,7 @@ func exit_bleeding_out_state() -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_movement_input()
+	_update_current_speed(delta)
 
 	if not can_act():
 		_process_disabled_movement(delta)
@@ -338,12 +377,14 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	var direction := get_movement_direction()
+	var move_speed := current_speed * _get_action_movement_multiplier()
 
 	current_speed = maxf(current_speed, 0.0)
 
-	if direction:
-		velocity.x = move_toward(velocity.x, direction.x * current_speed, acceleration * delta)
-		velocity.z = move_toward(velocity.z, direction.z * current_speed, acceleration * delta)
+	if direction.length() > 0.001:
+		var active_acceleration := _get_active_acceleration(direction)
+		velocity.x = move_toward(velocity.x, direction.x * move_speed, active_acceleration * delta)
+		velocity.z = move_toward(velocity.z, direction.z * move_speed, active_acceleration * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0, deceleration * delta)
 		velocity.z = move_toward(velocity.z, 0, deceleration * delta)
@@ -360,7 +401,56 @@ func _update_movement_input() -> void:
 
 
 func get_movement_direction() -> Vector3:
-	return (transform.basis * Vector3(_input_dir.x, 0, _input_dir.y)).normalized()
+	return transform.basis * Vector3(_input_dir.x, 0, _input_dir.y)
+
+
+func cancel_primary_attack() -> void:
+	if melee_attack:
+		melee_attack.cancel_attack()
+
+
+func _get_movement_speed(is_sprinting: bool) -> float:
+	var modifier: float = equipment.get_move_speed_modifier() if equipment else 0.0
+	var modified_walk_speed := maxf(walk_speed + modifier, 0.0)
+	var speed_multiplier := 1.0
+	if is_sprinting:
+		speed_multiplier *= sprint_speed_multiplier
+	if _is_crouching:
+		speed_multiplier *= crouch_speed_multiplier
+
+	return modified_walk_speed * speed_multiplier
+
+
+func _update_current_speed(delta: float) -> void:
+	var rate := sprint_windup_rate if _target_speed > current_speed else speed_drop_rate
+	current_speed = move_toward(current_speed, _target_speed, rate * delta)
+
+
+func _get_active_acceleration(direction: Vector3) -> float:
+	var active_acceleration := acceleration
+	if not is_on_floor():
+		active_acceleration *= air_acceleration_multiplier
+
+	if not _is_sprinting:
+		return active_acceleration
+
+	var horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
+	if horizontal_velocity.length() < 0.1:
+		return active_acceleration
+
+	var current_direction := horizontal_velocity.normalized()
+	var desired_direction := direction.normalized()
+	if current_direction.dot(desired_direction) > 0.92:
+		return active_acceleration
+
+	return active_acceleration * sprint_turn_acceleration_multiplier
+
+
+func _get_action_movement_multiplier() -> float:
+	if melee_attack and melee_attack.is_attacking():
+		return attack_movement_multiplier
+
+	return 1.0
 
 
 func _process_disabled_movement(delta: float) -> void:

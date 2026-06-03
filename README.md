@@ -4,7 +4,7 @@
 
 ## Current Build
 
-`v0.0.0050` - Multiplayer proof complete; shifting into the Multiplayer Playthrough Slice.
+`v0.0.0052` - Movement Feel pass complete; player controller tuning continues inside the Multiplayer Playthrough Slice.
 
 ## Current Direction
 
@@ -22,6 +22,8 @@ The next milestone is no longer "prove networking." It is:
 **Make the first five multiplayer minutes fun enough to put in front of players.**
 
 That means stepping back from deeper temporary-network patching and rebuilding the player, enemies, and first authored combat rooms around state-machine-driven gameplay, readable feel, and clean multiplayer-aware event hooks.
+
+The current player baseline now includes analog controller movement magnitude, sprint and crouch speed multipliers, sprint wind-up and turn weight, attack movement drag, deliberate crouch camera movement, an active state debug label, real jump-state launch handling, melee cancel on Downed/Dead, and a first player life snapshot shape for future host-authoritative health/life replication.
 
 ## Active Plan
 

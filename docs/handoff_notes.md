@@ -1,12 +1,12 @@
 # Handoff Notes
 
-**Last Updated:** 2026-06-02
+**Last Updated:** 2026-06-03
 
 At the start of a new session, read this file first.
 
 ## Current Build
 
-`v0.0.0051` - Player StateMachine refactor checkpoint.
+`v0.0.0052` - Movement Feel pass.
 
 ## Current Direction
 
@@ -117,7 +117,8 @@ Known gaps to revisit after the gameplay rebuild:
 
 The chart owns active states and transitions. Mirrored state scripts own entry
 points and per-state processing, and call `PlayerController` verbs such as
-`run()`, `sprint()`, `jump()`, `crouch()`, and `stand()`.
+`run()`, `sprint()`, `jump()`, `request_jump_launch()`, `crouch()`, and
+`stand()`.
 
 `PlayerController` remains the shared `CharacterBody3D` motor and gameplay verb
 surface. It no longer owns raw look/capture math. `Components/PlayerLook` owns
@@ -126,12 +127,21 @@ the per-player input source.
 
 Posture now has one story: `StandingCollision`, `CrouchCollision`, and
 `CrouchCheck`. There is no remaining capsule-height resizing path in the
-controller.
+controller. Crouch uses deliberate camera interpolation and a movement
+multiplier instead of a fixed crouch speed, so crouch-sprint is possible while
+remaining slower than upright movement.
 
-Manual runtime testing after the refactor confirmed movement, sprint, crouch,
-jump, primary attack, interact pickup, urn breaking, and extraction back to hub.
+The current movement-feel pass preserves analog controller stick magnitude,
+adds sprint wind-up, sprint turn weight, air acceleration weight, and attack
+movement drag. `JumpingState` now owns jump launch consumption instead of being
+a placeholder, while fall-off-ledge transitions enter Airborne without applying
+a jump impulse.
+
 Interaction input now routes through the player `Action` branch; the scanner owns
 focus/target classification and execution verbs, but no longer polls input.
+Melee attacks cancel on Downed/Dead, the player has an active state debug label,
+and `PlayerLifeState` exposes a first snapshot shape for future replicated
+health/life state.
 
 ## Key Files And Systems
 
