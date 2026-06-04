@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://b3qhcxxhe1l54"]
+
+[ext_resource type="Script" uid="uid://b3xpxo4adj2vn" path="res://world/entities/pedestal/pedestal_dispenser.gd" id="1_xxm1c"]
+[ext_resource type="Resource" uid="uid://doofy8ls2mtv7" path="res://data/weapons/rusted_sword.tres" id="2_ovnoe"]
+[ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="3_kdnar"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_base"]
+top_radius = 0.9
+bottom_radius = 1.0
+height = 0.3
+radial_segments = 16
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stone"]
+albedo_color = Color(0.45, 0.42, 0.38, 1)
+roughness = 0.9
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_column"]
+top_radius = 0.25
+bottom_radius = 0.3
+height = 1.0
+radial_segments = 12
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_top"]
+top_radius = 0.7
+bottom_radius = 0.7
+height = 0.15
+radial_segments = 16
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
+albedo_color = Color(0.3, 0.3, 0.32, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_collision"]
+size = Vector3(1.4, 1.6, 1.4)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_top"]
+height = 0.2
+radius = 0.75
+
+[node name="Pedestal" type="StaticBody3D" unique_id=1201364665]
+collision_layer = 3
+collision_mask = 48
+script = ExtResource("1_xxm1c")
+item_definition = ExtResource("2_ovnoe")
+stock = 4
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=827538413]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+mesh = SubResource("CylinderMesh_base")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="Column" type="MeshInstance3D" parent="." unique_id=2111315078]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("CylinderMesh_column")
+surface_material_override/0 = SubResource("StandardMaterial3D_stone")
+
+[node name="TopPlatform" type="MeshInstance3D" parent="." unique_id=633952486]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+mesh = SubResource("CylinderMesh_top")
+surface_material_override/0 = SubResource("StandardMaterial3D_metal")
+
+[node name="ItemDisplay" type="Node3D" parent="." unique_id=939737849]
+transform = Transform3D(1.0000869, 0, 0, 0, -4.37145e-08, -1.0000136, 0, 1.0000712, -4.371198e-08, 0, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=298859326]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BoxShape3D_collision")
+
+[node name="TopCollision" type="CollisionShape3D" parent="." unique_id=1424487168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
+shape = SubResource("CylinderShape3D_top")
+
+[node name="Components" type="Node3D" parent="." unique_id=191255195]
+
+[node name="Interactable" type="Node" parent="Components" unique_id=1845086943]
+script = ExtResource("3_kdnar")
+prompt = "Take Rusted Sword"

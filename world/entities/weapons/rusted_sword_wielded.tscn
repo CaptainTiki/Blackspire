@@ -1,0 +1,36 @@
+[gd_scene load_steps=8 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword_blade"]
+albedo_color = Color(0.72, 0.76, 0.78, 1)
+metallic = 0.4
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_sword_blade"]
+material = SubResource("StandardMaterial3D_sword_blade")
+size = Vector3(0.08, 0.7, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword_hilt"]
+albedo_color = Color(0.22, 0.15, 0.08, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sword_hilt"]
+material = SubResource("StandardMaterial3D_sword_hilt")
+size = Vector3(0.28, 0.06, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sword_hitbox"]
+size = Vector3(0.9, 0.9, 1.4)
+
+[node name="RustedSwordWielded" type="Node3D"]
+
+[node name="Blade" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
+mesh = SubResource("BoxMesh_sword_blade")
+
+[node name="Hilt" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("BoxMesh_sword_hilt")
+
+[node name="SwordHitbox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.15, -0.55)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SwordHitbox"]
+shape = SubResource("BoxShape3D_sword_hitbox")

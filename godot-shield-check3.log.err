@@ -1,0 +1,196 @@
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_spawn_01.tscn:84 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_combat_small_01.tscn:99 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/crypt_hall_long.tscn:371 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_combat_cross_01.tscn:118 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_treasure_01.tscn:127 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_boss_01.tscn:113 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_exit_01.tscn:138 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Cannot open file 'res://world/entities/pedestal/pedestal.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1430)
+ERROR: Failed loading resource: res://world/entities/pedestal/pedestal.tscn.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/entities/pedestal.tres:8 - Parse Error: [ext_resource] referenced non-existent resource at: res://world/entities/pedestal/pedestal.tscn.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/entities/pedestal.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire.fgd.tres:25 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/entities/pedestal.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire.fgd.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: res://trenchbroom/blackspire_map_settings.tres:10 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire.fgd.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+ERROR: Failed loading resource: res://trenchbroom/blackspire_map_settings.tres.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: res://world/rooms/generated/room_arena_01.tscn:109 - Parse Error: [ext_resource] referenced non-existent resource at: res://trenchbroom/blackspire_map_settings.tres.
+   at: _printerr (scene/resources/resource_format_text.cpp:40)
+WARNING: res://world/actors/player/Player.tscn:10 - ext_resource, invalid UID: uid://b10ck5h13ld02 - using text path instead: res://world/components/combat/player_block.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://world/actors/player/Player.tscn:11 - ext_resource, invalid UID: uid://b10ck5t4t3s01 - using text path instead: res://world/actors/player/states/player_blocking_state.gd
+   at: load (scene/resources/resource_format_text.cpp:500)

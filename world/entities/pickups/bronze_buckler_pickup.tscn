@@ -1,0 +1,59 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://world/entities/pickups/equipment_pickup.gd" id="1_equipment_pickup"]
+[ext_resource type="Resource" path="res://data/weapons/bronze_buckler.tres" id="2_buckler"]
+[ext_resource type="Script" path="res://world/components/interactable/interactable.gd" id="3_interactable"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bronze"]
+albedo_color = Color(0.6, 0.45, 0.2, 1)
+metallic = 0.7
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shield"]
+material = SubResource("StandardMaterial3D_bronze")
+top_radius = 0.28
+bottom_radius = 0.28
+height = 0.06
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grip"]
+albedo_color = Color(0.25, 0.2, 0.15, 1)
+metallic = 0.2
+roughness = 0.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_grip"]
+material = SubResource("StandardMaterial3D_grip")
+top_radius = 0.04
+bottom_radius = 0.04
+height = 0.15
+radial_segments = 12
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_collision"]
+height = 0.5
+radius = 0.35
+
+[node name="BronzeBucklerPickup" type="RigidBody3D"]
+collision_layer = 3
+collision_mask = 49
+freeze = true
+mass = 1.2
+script = ExtResource("1_equipment_pickup")
+equipment_definition = ExtResource("2_buckler")
+
+[node name="Shield" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 0, 0.05, 0)
+mesh = SubResource("CylinderMesh_shield")
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 0, 0.05, -0.12)
+mesh = SubResource("CylinderMesh_grip")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 0, 0.05, 0)
+shape = SubResource("CylinderShape3D_collision")
+
+[node name="Components" type="Node3D" parent="."]
+
+[node name="Interactable" type="Node" parent="Components"]
+script = ExtResource("3_interactable")
+prompt = "Equip Bronze Buckler"

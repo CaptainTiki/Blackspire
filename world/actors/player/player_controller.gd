@@ -3,6 +3,7 @@ class_name PlayerController
 
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
 const PlayerInputScript := preload("res://world/components/player/player_input.gd")
+const PlayerBlockScript := preload("res://world/components/combat/player_block.gd")
 
 const DROP_IMPULSE := 3.25
 const DROP_UP_IMPULSE := 1.4
@@ -20,6 +21,7 @@ const DROP_DOWN_OFFSET := 0.35
 @export var speed_drop_rate: float = 18.0
 @export var sprint_turn_acceleration_multiplier: float = 0.72
 @export var attack_movement_multiplier: float = 0.78
+@export var block_movement_multiplier: float = 0.65
 @export var air_acceleration_multiplier: float = 0.65
 
 # --- Stance Camera ---
@@ -42,6 +44,7 @@ const DROP_DOWN_OFFSET := 0.35
 @onready var interaction_scanner: InteractionScanner = $Components/InteractionScanner
 @onready var player_look: Node = $Components/PlayerLook
 @onready var melee_attack: PlayerMeleeAttack = $Components/PlayerMeleeAttack
+@onready var block: PlayerBlock = $Components/PlayerBlock
 
 # --- Internal ---
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -71,6 +74,8 @@ func _ready() -> void:
 		push_error("PlayerController is missing PlayerLook component!")
 	else:
 		player_look.capture_mouse()
+	if not block:
+		push_error("PlayerController is missing PlayerBlock component!")
 	
 	current_speed = _get_movement_speed(false)
 	_target_speed = current_speed
@@ -272,6 +277,8 @@ func apply_damage(damage_request: Variant) -> void:
 		return
 
 	var mitigated_amount: int = equipment.mitigate_physical_damage(damage_request.amount)
+	if block and block.is_blocking():
+		mitigated_amount = block.apply_block_mitigation(mitigated_amount)
 	var mitigated_request := DamageRequestScript.new(
 			damage_request.source,
 			mitigated_amount,
@@ -347,6 +354,7 @@ func enter_bleeding_out_state() -> void:
 	_can_act = false
 	velocity = Vector3.ZERO
 	cancel_primary_attack()
+	cancel_block()
 	_play_collapse_pose()
 
 
@@ -354,6 +362,7 @@ func enter_dead_state() -> void:
 	_can_act = false
 	velocity = Vector3.ZERO
 	cancel_primary_attack()
+	cancel_block()
 	_play_collapse_pose()
 
 
@@ -408,6 +417,31 @@ func cancel_primary_attack() -> void:
 	if melee_attack:
 		melee_attack.cancel_attack()
 
+func can_block() -> bool:
+	if not block:
+		return false
+	return block.can_block()
+
+func start_block() -> bool:
+	print("blocking")
+	if not block:
+		return false
+	return block.start_block()
+
+func stop_block() -> void:
+	print("stopblock")
+	if block:
+		block.stop_block()
+
+func cancel_block() -> void:
+	if block:
+		block.cancel_block()
+
+func is_blocking() -> bool:
+	if block:
+		return block.is_blocking()
+	return false
+
 
 func _get_movement_speed(is_sprinting: bool) -> float:
 	var modifier: float = equipment.get_move_speed_modifier() if equipment else 0.0
@@ -447,6 +481,8 @@ func _get_active_acceleration(direction: Vector3) -> float:
 
 
 func _get_action_movement_multiplier() -> float:
+	if is_blocking():
+		return block_movement_multiplier
 	if melee_attack and melee_attack.is_attacking():
 		return attack_movement_multiplier
 

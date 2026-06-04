@@ -70,7 +70,7 @@ var _just_pressed: Dictionary[StringName, bool] = {}     # action_name -> true f
 const GAMEPLAY_ACTIONS: Array[StringName] = [
 	&"move_left", &"move_right", &"move_forward", &"move_backward",
 	&"sprint", &"jump", &"crouch",
-	&"interact", &"primary_action",
+	&"interact", &"primary_action", &"secondary_action",
 	&"toggle_equipment",
 	&"inventory_pick_place", &"inventory_cancel_drag",
 	&"hotbar_slot_1", &"hotbar_slot_2", &"hotbar_slot_3", &"hotbar_slot_4",
@@ -182,9 +182,8 @@ func _handle_joypad_motion(motion: InputEventJoypadMotion) -> void:
 			_update_action_from_analog(&"primary_action", value)
 
 		JOY_AXIS_TRIGGER_LEFT:
-			# Left trigger (LT) currently has no discrete action binding.
-			# Easy to add later (e.g. secondary_action or block/aim).
-			pass
+			# Left trigger (LT) bound to secondary_action (block / offhand).
+			_update_action_from_analog(&"secondary_action", value)
 
 
 func _handle_digital_event(event: InputEvent) -> void:
@@ -312,6 +311,12 @@ func is_interact_just_pressed() -> bool:
 
 func is_primary_action_just_pressed() -> bool:
 	return is_action_just_pressed(&"primary_action")
+
+func is_secondary_action_pressed() -> bool:
+	return is_action_pressed(&"secondary_action")
+
+func is_secondary_action_just_pressed() -> bool:
+	return is_action_just_pressed(&"secondary_action")
 
 func is_toggle_equipment_just_pressed() -> bool:
 	return is_action_just_pressed(&"toggle_equipment")

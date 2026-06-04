@@ -33,6 +33,7 @@ editing body details directly:
 - `set_controller_look_enabled()` enables/disables `PlayerLook`.
 - `get_life_snapshot(session_player_id)` returns the current player health/life snapshot shape.
 - `cancel_primary_attack()` stops active melee attacks when Life enters Downed or Dead.
+- `start_block()` / `stop_block()` / `is_blocking()` / `can_block()` for the secondary defensive action (routes to PlayerBlock component for mitigation + pose).
 
 `PlayerController._physics_process()` remains the shared motor: it reads cached
 movement input, preserves analog stick magnitude, applies gravity, ramps toward
@@ -87,6 +88,7 @@ Action:
 
 - `Ready`
 - `PrimaryAttack`
+- `Blocking` (hold secondary_action / left trigger; primary item = 25% dmg reduction + pose; secondary item = BLOCK stat frac or 0.5 default)
 - `Interact`
 - `Revive`
 - `Extract`

@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="4_health"]
 [ext_resource type="Script" uid="uid://21j40pjto1k4" path="res://world/components/combat/player_melee_attack.gd" id="5_melee_attack"]
 [ext_resource type="Script" uid="uid://c5wo7tdddt4iq" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
+[ext_resource type="Script" uid="uid://b10ck5h13ld02" path="res://world/components/combat/player_block.gd" id="99_player_block"]
+[ext_resource type="Script" uid="uid://b10ck5t4t3s01" path="res://world/actors/player/states/player_blocking_state.gd" id="99_blocking_state"]
 [ext_resource type="Script" uid="uid://de8irhle2fe2o" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
 [ext_resource type="Script" uid="uid://d0evnabg4cufv" path="res://world/components/player/player_life_state.gd" id="8_life_state"]
 [ext_resource type="Script" uid="uid://c5wd0jqd4rq6q" path="res://world/components/player/player_hud.gd" id="9_hud"]
@@ -176,23 +178,8 @@ collide_with_areas = true
 [node name="SwordPivot" type="Node3D" parent="CameraRig/Camera3D/WeaponRoot" unique_id=1670787752]
 transform = Transform3D(0.90044713, 0.43908277, 0, -0.37081876, 0.77491957, 0.51786375, 0.22735094, -0.4751073, 0.84465724, 0.42, -0.36, -0.72)
 
-[node name="Blade" type="MeshInstance3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=1234842442]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0)
-mesh = SubResource("BoxMesh_sword_blade")
-
-[node name="Hilt" type="MeshInstance3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=1658998886]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-mesh = SubResource("BoxMesh_sword_hilt")
-
-[node name="SwordHitbox" type="Area3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot" unique_id=456433239]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.15, -0.55)
-collision_layer = 8
-collision_mask = 4
-monitoring = false
-monitorable = false
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CameraRig/Camera3D/WeaponRoot/SwordPivot/SwordHitbox" unique_id=2110592727]
-shape = SubResource("BoxShape3D_sword_hitbox")
+[node name="ShieldPivot" type="Node3D" parent="CameraRig/Camera3D/WeaponRoot" unique_id=991234568]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, -0.4, -0.35, -0.6)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="CameraRig/Camera3D/WeaponRoot" unique_id=1178412266]
 libraries/ = SubResource("AnimationLibrary_sword")
@@ -237,6 +224,10 @@ player_components = NodePath("..")
 
 [node name="PlayerMeleeAttack" type="Node" parent="Components" unique_id=1113097335 node_paths=PackedStringArray("player_components")]
 script = ExtResource("5_melee_attack")
+player_components = NodePath("..")
+
+[node name="PlayerBlock" type="Node" parent="Components" unique_id=991234567 node_paths=PackedStringArray("player_components")]
+script = ExtResource("99_player_block")
 player_components = NodePath("..")
 
 [node name="HealthComponent" type="Node" parent="Components" unique_id=685829878]
@@ -572,6 +563,13 @@ event = &"onPrimaryAttack"
 delay_in_seconds = "0.0"
 metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
 
+[node name="OnBlock" type="Node" parent="StateChart/Root/Action/Ready" unique_id=991001002]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Blocking")
+event = &"onBlock"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
 [node name="OnInteract" type="Node" parent="StateChart/Root/Action/Ready" unique_id=1229263915]
 script = ExtResource("19_akwv5")
 to = NodePath("../../Interact")
@@ -598,6 +596,17 @@ script = ExtResource("18_k7toq")
 metadata/_custom_type_script = "uid://cytafq8i1y8qm"
 
 [node name="OnReady" type="Node" parent="StateChart/Root/Action/PrimaryAttack" unique_id=165484971]
+script = ExtResource("19_akwv5")
+to = NodePath("../../Ready")
+event = &"onReady"
+delay_in_seconds = "0.0"
+metadata/_custom_type_script = "uid://cf1nsco3w0mf6"
+
+[node name="Blocking" type="Node" parent="StateChart/Root/Action" unique_id=991001003]
+script = ExtResource("18_k7toq")
+metadata/_custom_type_script = "uid://cytafq8i1y8qm"
+
+[node name="OnReady" type="Node" parent="StateChart/Root/Action/Blocking" unique_id=991001004]
 script = ExtResource("19_akwv5")
 to = NodePath("../../Ready")
 event = &"onReady"
@@ -710,6 +719,9 @@ script = ExtResource("35_ready")
 [node name="PrimaryAttackState" type="Node" parent="StateMachine/Root/ActionState" unique_id=1366683583]
 script = ExtResource("36_primary_attack")
 
+[node name="BlockingState" type="Node" parent="StateMachine/Root/ActionState" unique_id=991001005]
+script = ExtResource("99_blocking_state")
+
 [node name="InteractState" type="Node" parent="StateMachine/Root/ActionState" unique_id=2031857507]
 script = ExtResource("37_interact")
 
@@ -739,6 +751,9 @@ script = ExtResource("39_extract")
 [connection signal="state_physics_processing" from="StateChart/Root/Movement/Airborne/Jumping" to="StateMachine/Root/MovementState/AirborneState/JumpingState" method="_on_jumping_state_physics_processing"]
 [connection signal="state_physics_processing" from="StateChart/Root/Action/Ready" to="StateMachine/Root/ActionState/ReadyState" method="_on_ready_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/Action/PrimaryAttack" to="StateMachine/Root/ActionState/PrimaryAttackState" method="_on_primary_attack_state_entered"]
+[connection signal="state_entered" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_entered"]
+[connection signal="state_physics_processing" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_physics_processing"]
+[connection signal="state_exited" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_exited"]
 [connection signal="state_entered" from="StateChart/Root/Action/Interact" to="StateMachine/Root/ActionState/InteractState" method="_on_interact_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Action/Revive" to="StateMachine/Root/ActionState/ReviveState" method="_on_revive_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Action/Extract" to="StateMachine/Root/ActionState/ExtractState" method="_on_extract_state_entered"]

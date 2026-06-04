@@ -1,0 +1,10 @@
+SCRIPT ERROR: Parse Error: The variable type is being inferred from a Variant value, so it will be typed as Variant. (Warning treated as error.)
+   at: GDScript::reload (res://world/entities/pedestal/pedestal.gd:73)
+SCRIPT ERROR: Parse Error: The variable type is being inferred from a Variant value, so it will be typed as Variant. (Warning treated as error.)
+   at: GDScript::reload (res://world/entities/pedestal/pedestal.gd:136)
+ERROR: Failed to load script "res://world/entities/pedestal/pedestal.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+WARNING: res://world/actors/player/Player.tscn:10 - ext_resource, invalid UID: uid://b10ck5h13ld02 - using text path instead: res://world/components/combat/player_block.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://world/actors/player/Player.tscn:11 - ext_resource, invalid UID: uid://b10ck5t4t3s01 - using text path instead: res://world/actors/player/states/player_blocking_state.gd
+   at: load (scene/resources/resource_format_text.cpp:500)

@@ -10,6 +10,7 @@ value = 4.0
 [resource]
 script = ExtResource("1_equipment_definition")
 stat_modifiers = Array[Resource]([SubResource("StatModifierDefinition_attack_damage")])
+wielded_scene_path = "res://world/entities/weapons/rusted_sword_wielded.tscn"
 id = &"rusted_sword"
 display_name = "Rusted Sword"
 world_pickup_scene_path = "res://world/entities/pickups/rusted_sword_pickup.tscn"

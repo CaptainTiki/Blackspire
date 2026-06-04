@@ -8,6 +8,7 @@ enum StatType {
 	MOVE_SPEED,
 	BACKPACK_SLOTS,
 	HOTBAR_SLOTS,
+	BLOCK,
 }
 
 @export var stat_type := StatType.ATTACK_DAMAGE

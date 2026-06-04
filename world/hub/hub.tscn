@@ -4,6 +4,9 @@
 [ext_resource type="Script" uid="uid://d21tj3xvj6m3o" path="res://world/hub/hub_deploy_portal.gd" id="2_deploy"]
 [ext_resource type="Script" uid="uid://ckhqc2x7febx7" path="res://world/hub/hub_stash_chest.gd" id="3_stash"]
 [ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="4_interactable"]
+[ext_resource type="PackedScene" uid="uid://b3qhcxxhe1l54" path="res://world/entities/pedestal/pedestal_dispenser.tscn" id="4_pedestal"]
+[ext_resource type="Resource" uid="uid://bpl0ocupby6pi" path="res://data/weapons/bronze_buckler.tres" id="8_buckler"]
+[ext_resource type="PackedScene" path="res://world/entities/pickups/bronze_buckler_pickup.tscn" id="7_6ievk"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.18, 0.18, 0.17, 1)
@@ -159,7 +162,7 @@ script = ExtResource("4_interactable")
 prompt = "Deploy To Run"
 
 [node name="StashChest" type="StaticBody3D" parent="." unique_id=50640349]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -4, 0.4, -0.5)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -4, 0.4, 1.5607686)
 collision_layer = 3
 collision_mask = 48
 script = ExtResource("3_stash")
@@ -185,8 +188,16 @@ outline_size = 6
 script = ExtResource("4_interactable")
 prompt = "Open Stash"
 
+[node name="Pedestal" parent="." unique_id=1372486651 instance=ExtResource("4_pedestal")]
+transform = Transform3D(-0.9961947, 0, 0.08715573, 0, 1, 0, -0.08715573, 0, -0.9961947, -3.856739, 0, -4.241988)
+
+[node name="Pedestal2" parent="." unique_id=1201364665 instance=ExtResource("4_pedestal")]
+transform = Transform3D(-0.9961947, 0, 0.08715573, 0, 1, 0, -0.08715573, 0, -0.9961947, -4.214925, 0, -1.5384766)
+item_definition = ExtResource("8_buckler")
+stock = -1
+
 [node name="SummaryBoard" type="Node3D" parent="." unique_id=1251390607]
-transform = Transform3D(8.742278e-08, 0, -1, 0, 1, 0, 1, 0, 8.742278e-08, 4, 1.35, -1.4)
+transform = Transform3D(8.742278e-08, 0, -1, 0, 1, 0, 1, 0, 8.742278e-08, 5.855568, 1.6486572, -1.4)
 
 [node name="BoardMesh" type="MeshInstance3D" parent="SummaryBoard" unique_id=681978097]
 mesh = SubResource("BoxMesh_board")
@@ -208,3 +219,8 @@ light_energy = 1.2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -3.8)
 light_color = Color(0.2, 0.72, 1, 1)
 light_energy = 1.2
+
+[node name="BronzeBucklerPickup" parent="." unique_id=711667051 instance=ExtResource("7_6ievk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3540081, 0.12499991, -2.1128683)
+pickup_id = &"bronze_buckler"
+display_name = "Bronze Buckler"

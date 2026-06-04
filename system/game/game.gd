@@ -5,12 +5,15 @@ const CrewStashInventoryScript := preload("res://system/crew_stash_inventory.gd"
 const CrewStashUIScript := preload("res://system/ui/crew_stash_ui.gd")
 const DamageRequestScript := preload("res://world/components/combat/damage_request.gd")
 const NetworkSessionScript := preload("res://system/network/network_session.gd")
+const PlayerBlockScript := preload("res://world/components/combat/player_block.gd")
 
 const SESSION_WORLD_HUB := "hub"
 const SESSION_WORLD_RUN := "run"
 const NETWORK_TRANSFORM_SEND_INTERVAL := 0.05
 const NETWORK_ENEMY_SEND_INTERVAL := 0.1
 const PLAYER_ACTION_PRIMARY := "primary_action"
+const PLAYER_ACTION_BLOCK := "block"
+const PLAYER_ACTION_BLOCK_END := "block_end"
 
 ## The central "session" container.
 ## Main creates one of these and tells it what kind of game to run.
@@ -632,6 +635,15 @@ func _bind_player_action_events(slot: PlayerSlot) -> void:
 	if not melee_attack.damage_area_hit.is_connected(hit_callback):
 		melee_attack.damage_area_hit.connect(hit_callback)
 
+	var player_block := slot.player.get_node_or_null("Components/PlayerBlock") as PlayerBlockScript
+	if player_block:
+		var block_start_cb := Callable(self, "_on_player_block_started")
+		if not player_block.block_started.is_connected(block_start_cb):
+			player_block.block_started.connect(block_start_cb)
+		var block_end_cb := Callable(self, "_on_player_block_ended")
+		if not player_block.block_finished.is_connected(block_end_cb):
+			player_block.block_finished.connect(block_end_cb)
+
 
 func _on_player_primary_action_started(player: PlayerController) -> void:
 	var slot := _get_slot_for_player(player)
@@ -652,6 +664,47 @@ func _on_player_primary_action_started(player: PlayerController) -> void:
 		NetworkSessionScript.HOST_PEER_ID,
 		slot.session_player_id,
 		PLAYER_ACTION_PRIMARY
+	)
+
+func _on_player_block_started(player: PlayerController) -> void:
+	var slot := _get_slot_for_player(player)
+	if not slot:
+		push_error("Game: Block started by a player with no slot.")
+		return
+	if not network_session.is_online_session():
+		return
+
+	if network_session.is_host:
+		_broadcast_player_action_event(slot.session_player_id, PLAYER_ACTION_BLOCK)
+		return
+
+	if not network_session.is_connected_to_host():
+		return
+
+	_server_receive_player_action.rpc_id(
+		NetworkSessionScript.HOST_PEER_ID,
+		slot.session_player_id,
+		PLAYER_ACTION_BLOCK
+	)
+
+func _on_player_block_ended(player: PlayerController) -> void:
+	var slot := _get_slot_for_player(player)
+	if not slot:
+		return
+	if not network_session.is_online_session():
+		return
+
+	if network_session.is_host:
+		_broadcast_player_action_event(slot.session_player_id, PLAYER_ACTION_BLOCK_END)
+		return
+
+	if not network_session.is_connected_to_host():
+		return
+
+	_server_receive_player_action.rpc_id(
+		NetworkSessionScript.HOST_PEER_ID,
+		slot.session_player_id,
+		PLAYER_ACTION_BLOCK_END
 	)
 
 
@@ -696,14 +749,27 @@ func _client_apply_player_action_event(session_player_id: int, action_key: Strin
 
 
 func _play_player_action_presentation(slot: PlayerSlot, action_key: String) -> void:
-	if action_key != PLAYER_ACTION_PRIMARY:
-		push_error("Game: Unknown player action key '%s'." % action_key)
-		return
 	if not is_instance_valid(slot.player):
 		return
 
-	var melee_attack := slot.player.get_node("Components/PlayerMeleeAttack") as PlayerMeleeAttack
-	melee_attack.play_attack_presentation()
+	if action_key == PLAYER_ACTION_PRIMARY:
+		var melee_attack := slot.player.get_node("Components/PlayerMeleeAttack") as PlayerMeleeAttack
+		melee_attack.play_attack_presentation()
+		return
+
+	if action_key == PLAYER_ACTION_BLOCK:
+		var pb := slot.player.get_node_or_null("Components/PlayerBlock") as PlayerBlockScript
+		if pb:
+			pb.play_block_presentation()
+		return
+
+	if action_key == PLAYER_ACTION_BLOCK_END:
+		var pb := slot.player.get_node_or_null("Components/PlayerBlock") as PlayerBlockScript
+		if pb:
+			pb.stop_block_presentation()
+		return
+
+	push_error("Game: Unknown player action key '%s'." % action_key)
 
 
 func _on_player_damage_area_hit(player: PlayerController, area: Area3D, damage_amount: int, hit_position: Vector3) -> void:

@@ -15,6 +15,7 @@ enum EquipmentSlot {
 
 @export var equipment_slot := EquipmentSlot.PRIMARY_WEAPON
 @export var stat_modifiers: Array[Resource] = []
+@export var wielded_scene_path: String = ""
 
 
 func _init() -> void:

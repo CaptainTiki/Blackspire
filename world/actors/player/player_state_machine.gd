@@ -26,6 +26,7 @@ const STATE_BRANCH_PATHS := {
 	"Action": [
 		"Root/Action/Ready",
 		"Root/Action/PrimaryAttack",
+		"Root/Action/Blocking",
 		"Root/Action/Interact",
 		"Root/Action/Revive",
 		"Root/Action/Extract",

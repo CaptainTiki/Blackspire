@@ -1,0 +1,4 @@
+WARNING: res://world/actors/player/Player.tscn:10 - ext_resource, invalid UID: uid://b10ck5h13ld02 - using text path instead: res://world/components/combat/player_block.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://world/actors/player/Player.tscn:11 - ext_resource, invalid UID: uid://b10ck5t4t3s01 - using text path instead: res://world/actors/player/states/player_blocking_state.gd
+   at: load (scene/resources/resource_format_text.cpp:500)

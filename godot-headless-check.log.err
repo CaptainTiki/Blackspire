@@ -1,0 +1,14 @@
+SCRIPT ERROR: Parse Error: Cannot infer the type of "b" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://world/components/combat/player_block.gd:101)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "b" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://world/components/combat/player_block.gd:108)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+   at: GDScript::reload (res://world/actors/player/player_controller.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+   at: GDScript::reload (res://world/hub/hub.gd:0)
+ERROR: Failed to load script "res://world/hub/hub.gd" with error "Compilation failed".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+WARNING: res://world/actors/player/Player.tscn:10 - ext_resource, invalid UID: uid://b10ck5h13ld02 - using text path instead: res://world/components/combat/player_block.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://world/actors/player/Player.tscn:11 - ext_resource, invalid UID: uid://b10ck5t4t3s01 - using text path instead: res://world/actors/player/states/player_blocking_state.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
