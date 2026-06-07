@@ -1,8 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://quick_entry"]
+[gd_scene format=3 uid="uid://cskti3vg1xsn4"]
 
-[ext_resource type="Script" path="res://system/quick_entry.gd" id="1"]
+[ext_resource type="Script" uid="uid://crilmsth8xv66" path="res://system/quick_entry.gd" id="1"]
 
-[node name="QuickEntry" type="Node"]
+[node name="QuickEntry" type="Node" unique_id=514322952]
 script = ExtResource("1")
-session_type = 0
-local_player_count = 1

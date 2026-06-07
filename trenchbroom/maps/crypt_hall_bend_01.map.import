@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://krvtu80mcq4d"
+path="res://.godot/imported/crypt_hall_bend_01.map-0c4cfc8a2a67207b9c89a96c30437408.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/crypt_hall_bend_01.map"
+dest_files=["res://.godot/imported/crypt_hall_bend_01.map-0c4cfc8a2a67207b9c89a96c30437408.tres"]
+
+[params]
+

@@ -6,7 +6,6 @@
 [ext_resource type="Script" uid="uid://ch0rsnoaqxvqf" path="res://world/components/interactable/interactable.gd" id="4_interactable"]
 [ext_resource type="PackedScene" uid="uid://b3qhcxxhe1l54" path="res://world/entities/pedestal/pedestal_dispenser.tscn" id="4_pedestal"]
 [ext_resource type="Resource" uid="uid://bpl0ocupby6pi" path="res://data/weapons/bronze_buckler.tres" id="8_buckler"]
-[ext_resource type="PackedScene" path="res://world/entities/pickups/bronze_buckler_pickup.tscn" id="7_6ievk"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.18, 0.18, 0.17, 1)
@@ -219,8 +218,3 @@ light_energy = 1.2
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -3.8)
 light_color = Color(0.2, 0.72, 1, 1)
 light_energy = 1.2
-
-[node name="BronzeBucklerPickup" parent="." unique_id=711667051 instance=ExtResource("7_6ievk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3540081, 0.12499991, -2.1128683)
-pickup_id = &"bronze_buckler"
-display_name = "Bronze Buckler"

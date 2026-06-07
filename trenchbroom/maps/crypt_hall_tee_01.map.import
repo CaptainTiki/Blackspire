@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://diu0jewm88rj1"
+path="res://.godot/imported/crypt_hall_tee_01.map-0feb1ad3f9a5615d33bbd54922985b53.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/crypt_hall_tee_01.map"
+dest_files=["res://.godot/imported/crypt_hall_tee_01.map-0feb1ad3f9a5615d33bbd54922985b53.tres"]
+
+[params]
+

@@ -7,8 +7,6 @@
 [ext_resource type="Script" uid="uid://cxe3b08bnkkcx" path="res://world/components/combat/health_component.gd" id="4_health"]
 [ext_resource type="Script" uid="uid://21j40pjto1k4" path="res://world/components/combat/player_melee_attack.gd" id="5_melee_attack"]
 [ext_resource type="Script" uid="uid://c5wo7tdddt4iq" path="res://world/components/combat/player_hit_feedback.gd" id="6_hit_feedback"]
-[ext_resource type="Script" uid="uid://b10ck5h13ld02" path="res://world/components/combat/player_block.gd" id="99_player_block"]
-[ext_resource type="Script" uid="uid://b10ck5t4t3s01" path="res://world/actors/player/states/player_blocking_state.gd" id="99_blocking_state"]
 [ext_resource type="Script" uid="uid://de8irhle2fe2o" path="res://world/components/player/player_inventory.gd" id="7_inventory"]
 [ext_resource type="Script" uid="uid://d0evnabg4cufv" path="res://world/components/player/player_life_state.gd" id="8_life_state"]
 [ext_resource type="Script" uid="uid://c5wd0jqd4rq6q" path="res://world/components/player/player_hud.gd" id="9_hud"]
@@ -41,6 +39,8 @@
 [ext_resource type="Script" uid="uid://crd6uhr6mlqfu" path="res://world/actors/player/states/player_interact_state.gd" id="37_interact"]
 [ext_resource type="Script" uid="uid://b5g8q1uh0uvpt" path="res://world/actors/player/states/player_revive_state.gd" id="38_revive"]
 [ext_resource type="Script" uid="uid://c8fbomq23x7ms" path="res://world/actors/player/states/player_extract_state.gd" id="39_extract"]
+[ext_resource type="Script" uid="uid://ca8t5a60gkbh4" path="res://world/actors/player/states/player_blocking_state.gd" id="99_blocking_state"]
+[ext_resource type="Script" uid="uid://fr35xm2ftb2p" path="res://world/components/combat/player_block.gd" id="99_player_block"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_83pgd"]
 radius = 0.4
@@ -56,25 +56,6 @@ radius = 0.3
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
 radius = 0.4
 height = 1.45
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword_blade"]
-albedo_color = Color(0.72, 0.76, 0.78, 1)
-metallic = 0.4
-roughness = 0.35
-
-[sub_resource type="BoxMesh" id="BoxMesh_sword_blade"]
-material = SubResource("StandardMaterial3D_sword_blade")
-size = Vector3(0.08, 0.7, 0.04)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword_hilt"]
-albedo_color = Color(0.22, 0.15, 0.08, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_sword_hilt"]
-material = SubResource("StandardMaterial3D_sword_hilt")
-size = Vector3(0.28, 0.06, 0.06)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_sword_hitbox"]
-size = Vector3(0.9, 0.9, 1.4)
 
 [sub_resource type="Animation" id="Animation_sword_reset"]
 length = 0.001
@@ -731,6 +712,10 @@ script = ExtResource("38_revive")
 [node name="ExtractState" type="Node" parent="StateMachine/Root/ActionState" unique_id=1206231616]
 script = ExtResource("39_extract")
 
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=2000006502]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0315707, 0)
+omni_range = 20.0
+
 [connection signal="state_entered" from="StateChart/Root/Life/Deploying" to="StateMachine/Root/LifeState/DeployingState" method="_on_deploying_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Life/Alive" to="StateMachine/Root/LifeState/AliveState" method="_on_alive_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Life/Downed" to="StateMachine/Root/LifeState/DownedState" method="_on_downed_state_entered"]
@@ -752,8 +737,8 @@ script = ExtResource("39_extract")
 [connection signal="state_physics_processing" from="StateChart/Root/Action/Ready" to="StateMachine/Root/ActionState/ReadyState" method="_on_ready_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/Action/PrimaryAttack" to="StateMachine/Root/ActionState/PrimaryAttackState" method="_on_primary_attack_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_entered"]
-[connection signal="state_physics_processing" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_physics_processing"]
 [connection signal="state_exited" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_exited"]
+[connection signal="state_physics_processing" from="StateChart/Root/Action/Blocking" to="StateMachine/Root/ActionState/BlockingState" method="_on_blocking_state_physics_processing"]
 [connection signal="state_entered" from="StateChart/Root/Action/Interact" to="StateMachine/Root/ActionState/InteractState" method="_on_interact_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Action/Revive" to="StateMachine/Root/ActionState/ReviveState" method="_on_revive_state_entered"]
 [connection signal="state_entered" from="StateChart/Root/Action/Extract" to="StateMachine/Root/ActionState/ExtractState" method="_on_extract_state_entered"]

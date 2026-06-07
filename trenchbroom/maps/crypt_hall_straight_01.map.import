@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://bpgd7i42i2f0c"
+path="res://.godot/imported/crypt_hall_straight_01.map-0d1ad9b5c852db7b2cb75fbd43d9265c.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/crypt_hall_straight_01.map"
+dest_files=["res://.godot/imported/crypt_hall_straight_01.map-0d1ad9b5c852db7b2cb75fbd43d9265c.tres"]
+
+[params]
+

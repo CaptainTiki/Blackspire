@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://ca4jpolpnjmms"
+path="res://.godot/imported/proto_room_01.1.map-a671ced63fb26d87cead425fb6d24384.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/autosave/proto_room_01.1.map"
+dest_files=["res://.godot/imported/proto_room_01.1.map-a671ced63fb26d87cead425fb6d24384.tres"]
+
+[params]
+

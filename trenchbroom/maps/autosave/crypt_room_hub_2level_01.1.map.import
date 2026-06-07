@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://46ul8j6lmnak"
+path="res://.godot/imported/crypt_room_hub_2level_01.1.map-d7b6e38b0269cd37fb3f12e42a28edc5.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/autosave/crypt_room_hub_2level_01.1.map"
+dest_files=["res://.godot/imported/crypt_room_hub_2level_01.1.map-d7b6e38b0269cd37fb3f12e42a28edc5.tres"]
+
+[params]
+

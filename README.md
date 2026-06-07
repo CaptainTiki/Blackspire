@@ -4,7 +4,7 @@
 
 ## Current Build
 
-`v0.0.0052` - Movement Feel pass complete; player controller tuning continues inside the Multiplayer Playthrough Slice.
+`v0.0.0053` - Room compositor and standard door vocabulary foundation; proto viewer for walkable room iteration.
 
 ## Current Direction
 

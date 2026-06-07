@@ -13,8 +13,9 @@ Before any non-trivial change, read in this order:
 1. `docs/handoff_notes.md` — current state, durable rules, key files map.
 2. `docs/multiplayer_playthrough_slice_plan.md` — active milestone.
 3. `docs/project_blackspire_architecture.md` — full architectural contract.
-4. `world/actors/player/README.md` and `world/actors/enemies/README.md` for the relevant actor.
-5. `docs/network_known_issues.md` only when touching online sync.
+4. `docs/project_blackspire_prototype_gdd.md` — design intent (read for gameplay/feel work).
+5. `world/actors/player/README.md` and `world/actors/enemies/README.md` for the relevant actor.
+6. `docs/network_known_issues.md` only when touching online sync.
 
 `docs/README.md` is the running changelog (also reflected at the top of root `README.md`). When completing work, both root `README.md` and `docs/README.md` are updated with a new `v0.0.00XX` entry.
 
@@ -78,11 +79,11 @@ There is exactly one active dungeon `Level` at runtime, accessed via `Level.curr
 - `Movement`: Grounded {Idle, Moving {Running, Sprinting}} / Airborne {Jumping}
 - `Posture`: Standing / Crouching (real `StandingCollision` / `CrouchCollision` / `CrouchCheck` colliders — **no capsule resizing**)
 - `Life`: Deploying -> Alive -> Downed -> Dead (Dead is not revivable)
-- `Action`: Ready / PrimaryAttack / Interact / Revive / Extract
+- `Action`: Ready / PrimaryAttack / Blocking / Interact / Revive / Extract
 
 The chart owns active states and legal transitions. Mirrored state scripts under `world/actors/player/states/` own per-state entry/physics and call **intent verbs** on `PlayerController` (`run()`, `sprint()`, `request_jump_launch()`, `jump()`, `crouch()`, `stand()`, `can_stand()`, `cancel_primary_attack()`, etc.). `PlayerController` is the `CharacterBody3D` motor only — it does **not** own look math or input polling.
 
-Per-player components (under `Components/`): `PlayerInput` (device ownership: `device = -1` keyboard+mouse, `>= 0` joypad), `PlayerLook` (mouse capture + mouse/controller look), `InteractionScanner` (focus + execution; does not poll input — the Action branch routes interact intent), `PlayerLifeState`, `PlayerEquipment`, `PlayerInventory`, `PlayerHotbar`, `PlayerMeleeAttack`, `HealthComponent`.
+Per-player components (under `Components/`): `PlayerInput` (device ownership: `device = -1` keyboard+mouse, `>= 0` joypad), `PlayerLook` (mouse capture + mouse/controller look), `InteractionScanner` (focus + execution; does not poll input — the Action branch routes interact intent), `PlayerLifeState`, `PlayerEquipment`, `PlayerInventory`, `PlayerHotbar`, `PlayerMeleeAttack`, `PlayerBlock`, `HealthComponent`.
 
 State scripts mirrored under `world/actors/player/states/` extend `player_base_state.gd` **by path string**, not `class_name`, to dodge global-class load-order failures on `--check-only`. Keep this pattern when adding new player states.
 
@@ -91,7 +92,7 @@ State scripts mirrored under `world/actors/player/states/` extend `player_base_s
 Two enemy systems currently coexist:
 
 - **Legacy (do not extend):** `world/actors/enemies/basic_enemy.gd` + `enemy_behavior.gd` enum brain. Still used by current rooms; left as-is during the rebuild.
-- **New (use for all new enemies):** `Enemy` base (`enemy.gd`) + `StateChart` + mirrored `EnemyStateMachine` (`enemy_state_machine.gd`) + state nodes under `states/`. First concrete impl: `slime.gd` / `slime.tscn`. Full contract in `world/actors/enemies/README.md`.
+- **New (use for all new enemies):** `Enemy` base (`enemy.gd`) + `StateChart` + mirrored `EnemyStateMachine` (`enemy_state_machine.gd`) + state nodes under `states/`. First concrete impl: `slime.gd` / `slime.tscn`. Elite variant: `elite_slime.gd extends slime.gd` — pure stat/visual overrides, calls `super()` after setting stats in `_ready`, then bumps `HealthComponent` pool afterward (children are already ready). Follow this pattern for future elite variants. Full contract in `world/actors/enemies/README.md`.
 
 Contracts every new enemy must honor (see enemy README):
 - `$AnimationPlayer` with clips `idle`, `move`, `windup`, `lunge`, `hurt`, `death`.
@@ -124,6 +125,8 @@ Data-driven via `Resource` files under `data/items/`:
 Runtime: `ItemInstance` references a definition + quantity + unique id. `PlayerInventory.add_item()` / `add_coins()` enforce backpack capacity (all-or-nothing; rejected pickups stay in world). `PlayerEquipment` tracks equipped definitions and totals modifiers. `PlayerHotbar.HotbarBinding` links a hotbar slot to a backpack `ItemInstance` — moving the item between backpack slots preserves the binding because it points at the instance, not a slot index. Equipped bags expand visible hotbar slot count.
 
 Dropping uses each definition's `world_pickup_scene_path`; pickup roots are `RigidBody3D` so dropped items toss into the world.
+
+`Pedestal` (`world/entities/pedestal/pedestal_dispenser.gd`, `class_name Pedestal extends Entity`) is the dispensary interactable: configured with an `ItemDefinition`, optional stock count (-1 = unlimited), and a rotating preview mesh on top. On interact it tosses the pickup scene into the world via physics impulse. Place via a TrenchBroom point entity. Follows the standard Entity + thin `Interactable` child pattern.
 
 ## Interaction
 

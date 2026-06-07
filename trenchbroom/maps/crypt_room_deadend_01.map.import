@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://b8frjkcnparbv"
+path="res://.godot/imported/crypt_room_deadend_01.map-c26a247e8c8b36ec34aa882a67f726f8.tres"
+
+[deps]
+
+source_file="res://trenchbroom/maps/crypt_room_deadend_01.map"
+dest_files=["res://.godot/imported/crypt_room_deadend_01.map-c26a247e8c8b36ec34aa882a67f726f8.tres"]
+
+[params]
+

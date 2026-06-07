@@ -1,12 +1,112 @@
 # Handoff Notes
 
-**Last Updated:** 2026-06-03
+**Last Updated:** 2026-06-07
 
 At the start of a new session, read this file first.
 
 ## Current Build
 
-`v0.0.0052` - Movement Feel pass.
+`v0.0.0053` - Room compositor and standard door vocabulary foundation.
+
+## Room Compositor — Active Work
+
+This is the current focus. We are building a vocabulary of reusable room panels and shapes that generate TrenchBroom `.map` files via PowerShell scripts. The goal is to produce the five silver-standard combat rooms required by the Multiplayer Playthrough Slice without hand-authoring every brush.
+
+### Key Files
+
+| File | Purpose |
+|---|---|
+| `tools/mapgen/lib/Compositor.ps1` | Turtle-walk room compositor. Owns all panel functions and `Build-Room`. |
+| `tools/mapgen/lib/Mapkit.ps1` | Low-level Valve-220 brush primitives (`Box`, `QuadPrism`, `TriPrism`, `Connector`, etc.). Do not edit — these are stable. |
+| `tools/mapgen/Build-Proto.ps1` | The active proto script. Defines panel presets and room specs; outputs `trenchbroom/maps/proto_room_01.map`. |
+| `system/proto_viewer.tscn` | Press F6 in Godot to build the .map at runtime and walk it immediately. No editor bake needed. |
+| `trenchbroom/maps/proto_room_01.map` | Generated output — never edit by hand. |
+
+### Panel System Concepts
+
+- A **room** is a turtle walk: an ordered list of `@{ op="bay"; kind="X" }` and `@{ op="corner"; turn=N }` steps.
+- The turtle walks counter-clockwise, interior on its left. `inward = LeftOf(heading)`.
+- Each panel receives `($origin, $along, $inward, $cfg)` so it works at any heading, including 45° chamfer walls.
+- `Panel-<Kind>` returns `@{ b = <brushes>; e = <entities> }`. Adding a kind = adding one function.
+- Corner pilasters are only placed for 90° turns. 45° turns (for chamfer walls) skip the pilaster.
+- `d=0` is the room-side face of a wall. `d < 0` protrudes INTO the room. `d > 0` goes into the wall material.
+
+### Panel-Size Presets (in Build-Proto.ps1)
+
+```powershell
+$Large    = @{ bay=256; thick=16; height=192; doorW=64;  doorH=64;  pilaster=20 }
+$Standard = @{ bay=128; thick=8;  height=128; doorW=48;  doorH=64;  pilaster=12 }
+```
+
+### Room Specs (in Build-Proto.ps1)
+
+- `Room-LargeOctagon $Large` — 3-bay wide × 4-bay long with 45° chamfered corners. One door on south wall.
+- `Room-StandardSquare $Standard` — 3×3 square with corner pilasters. One framed door on south wall.
+- To switch the active room: change the `$ActiveRoom = ...` line at the bottom of the script.
+
+### Panel Types Implemented
+
+| Kind | Function | Brushes | Notes |
+|---|---|---|---|
+| `wall` | `Panel-Wall` | 1 | Blank solid bay, full height. |
+| `door` | `Panel-Door` | 3 | Plain door: jambs + lintel + room_connector entity. |
+| `doorframed` | `Panel-DoorFramed` | 9 | Ornate door — see below. |
+
+### Panel-DoorFramed — Current Geometry (Standard panel, bay=128)
+
+All constants are hardcoded at the top of the function and are easy to tweak:
+
+```
+$pw=8   pilaster width (u)
+$fp=4   pilaster & rake protrusion (depth into room)
+$ffp=8  capitol & mantle protrusion (fp+4)
+$ch=8   capitol height above door top
+$ph=16  pilaster height above door top
+$cext=4 capitol widens beyond pilaster outer edge each side
+$mh=4   mantle cap height
+$mext=4 mantle widens beyond capitol each side
+$mfp=4  mantle extra protrusion (mantle total = ffp+mfp = 12)
+$pedH=16 pediment rise from pilaster top to apex
+```
+
+Z stack (with doorH=64, bay height=128):
+```
+z=96  outer apex
+z=92  inner apex (rakes meet, 4-unit solid tip above)
+  12  open triangle — negative space, wall visible behind rakes
+z=80  rake base = pilaster top
+  4   pilasters above mantle (visible above entablature)
+z=76  mantle top     (u=24→104, depth=12)
+  4   mantle cap
+z=72  capitol top    (u=28→100, depth=8)
+  8   capitol block
+z=64  door top
+  64  door void
+z=0   floor
+```
+
+Rake geometry: each rake is a `QuadPrism` parallelogram. Outer and inner edges are parallel to the slope (same direction vector), so rake width is consistent along the full length. The outer base u = pilaster outer edge; inner base u = pilaster inner edge. Both outer apex corners share the same point (u=64, z=96). Both inner edges converge at u=64, z=92 — the `innerApexZ` is derived from `pilTop + pedH * (1 - pw/slopeU)`.
+
+### What To Work On Next
+
+The vocabulary is missing panel types that give walls character. Priority order:
+
+1. **`Panel-Niche`** — A shallow recessed alcove in a wall bay (no opening). Purely decorative. Gives long plain walls relief without a door. Simplest possible addition.
+2. **`Panel-Alcove`** — A deeper recess, doorway height, like a dead-end stub. Could later become a loot niche.
+3. **`Panel-WallPilaster`** — A protruding column mid-bay (not a corner). Breaks up long walls.
+4. **More room shapes** — Corridor (1-bay wide × N long), L-bend, T-junction. These fall out of the turtle walk naturally; just need perimeter specs.
+5. **Move frame constants to `$cfg`** — When door styles need to vary per room, promote the `Panel-DoorFramed` constants into the room config hashtable.
+
+### How to Run
+
+```powershell
+# From repo root — regenerates proto_room_01.map
+powershell -File tools/mapgen/Build-Proto.ps1
+
+# Then in Godot: open system/proto_viewer.tscn, press F6
+```
+
+---
 
 ## Current Direction
 
